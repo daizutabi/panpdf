@@ -1,0 +1,48 @@
+site_name: panpdf
+site_url: https://daizutabi.github.io/panpdf/
+site_description: PDF documentation generator
+site_author: daizutabi
+repo_url: https://github.com/daizutabi/panpdf/
+repo_name: daizutabi/panpdf
+edit_uri: edit/main/docs/
+theme:
+  name: material
+  icon:
+      repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  features:
+    - content.tooltips
+    - content.code.annotate
+    - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+plugins:
+  - search:
+markdown_extensions:
+  - pymdownx.magiclink
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+nav:
+  - index.md

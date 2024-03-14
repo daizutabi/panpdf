@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "panpdf"
+description = "PDF documentation generator"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: MkDocs",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Documentation",
+  "Topic :: Software Development :: Documentation",
+]
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = [
+  "aiohttp",
+  "jinja2",
+  "nbformat",
+  "panflute",
+  "pyyaml",
+  "rich",
+  "shellingham",
+  "typer",
+]
+
+[project.urls]
+Documentation = "https://daizutabi.github.io/panpdf"
+Source = "https://github.com/daizutabi/panpdf"
+Issues = "https://github.com/daizutabi/panpdf/issues"
+
+[project.scripts]
+panpdf = "panpdf.main:cli"
+
+[tool.hatch.version]
+path = "src/panpdf/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/docs"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/panpdf"]
+
+[tool.hatch.envs.test]
+dependencies = ["pytest-cov", "pytest-randomly"]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest {args:tests src/panpdf}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--verbose",
+  "--color=yes",
+  "--doctest-modules",
+  "--cov=panpdf",
+  "--cov-report=lcov:lcov.info",
+]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
+
+[tool.coverage.run]
+omit = ["src/panpdf/__about__.py"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]
+
+[tool.hatch.envs.docs]
+dependencies = ["mkdocs-material"]
+python = "3.11"
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict {args}"
+serve = "mkdocs serve --dev-addr localhost:8000 {args}"
+deploy = "mkdocs gh-deploy --force"
+
+[tool.hatch.envs.hatch-static-analysis]
+config-path = "ruff_defaults.toml"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend = "ruff_defaults.toml"
+
+[tool.ruff.lint]
+unfixable = [
+  "F401",   # Don't touch unused imports
+  "RUF100", # Don't touch noqa lines
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
