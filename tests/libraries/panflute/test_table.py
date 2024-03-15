@@ -1,4 +1,5 @@
 import panflute as pf
+from panflute import Caption, Cite, Math, Table
 
 
 def test_table():
@@ -6,9 +7,9 @@ def test_table():
     elems = pf.convert_text(text)
     assert isinstance(elems, list)
     table = elems[0]
-    assert isinstance(table, pf.Table)
+    assert isinstance(table, Table)
     caption = table.caption
-    assert isinstance(caption, pf.Caption)
+    assert isinstance(caption, Caption)
     assert pf.stringify(caption) == "table caption {#id .cls1 .cls2 k1=v1 k2=100}"
     assert table.identifier == ""
     assert table.classes == []
@@ -20,9 +21,9 @@ def test_table_caption_cite():
     elems = pf.convert_text(text)
     assert isinstance(elems, list)
     table = elems[0]
-    assert isinstance(table, pf.Table)
+    assert isinstance(table, Table)
     cite = table.caption.content[0].content[2]  # type:ignore
-    assert isinstance(cite, pf.Cite)
+    assert isinstance(cite, Cite)
 
 
 def test_table_caption_math():
@@ -30,6 +31,6 @@ def test_table_caption_math():
     elems = pf.convert_text(text)
     assert isinstance(elems, list)
     table = elems[0]
-    assert isinstance(table, pf.Table)
+    assert isinstance(table, Table)
     math = table.caption.content[0].content[2]  # type:ignore
-    assert isinstance(math, pf.Math)
+    assert isinstance(math, Math)

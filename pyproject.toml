@@ -58,6 +58,7 @@ python = ["3.10", "3.11", "3.12"]
 
 [tool.pytest.ini_options]
 addopts = [
+  "--exitfirst",
   "--verbose",
   "--color=yes",
   "--doctest-modules",
