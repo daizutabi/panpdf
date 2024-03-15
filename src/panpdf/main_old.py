@@ -11,7 +11,7 @@ from panpdf import utils
 from panpdf.__about__ import __version__
 from panpdf.core import config
 from panpdf.core.converter import Converter
-from panpdf.jupyter.nbformat import get_ids
+from panpdf.jupyter.stores import get_ids
 
 pkg_dir = os.path.dirname(os.path.abspath(__file__))
 

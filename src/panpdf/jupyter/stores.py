@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,30 +18,32 @@ class Store:
         self.path.insert(index, Path(path))
 
     def read(self, abs_path: Path):
-        # self.notebooks[abs_path] = nbformat.read(abs_path, as_version=4)
-        # skip validation
         with open(abs_path, encoding="utf-8") as f:
             self.notebooks[abs_path] = nbformat.reader.reads(f.read())
+
         self.st_mtime[abs_path] = abs_path.stat().st_mtime
 
     def get_notebook(self, path: str | Path | None = None) -> dict:
         if not path:
             if self.current_path is None:
-                raise ValueError("Unknown path.")
+                msg = "Unknown path."
+                raise ValueError(msg)
+
             abs_path = self.current_path
+
         else:
             for parent in self.path:
                 abs_path = (parent / path).absolute()
-                if abs_path in self.notebooks:
+                if abs_path in self.notebooks or abs_path.exists():
                     break
-                elif abs_path.exists():
-                    break
+
             else:
-                raise ValueError(f"Unknown path: {path}")
-        if abs_path not in self.notebooks:
+                msg = f"Unknown path: {path}"
+                raise ValueError(msg)
+
+        if abs_path not in self.notebooks or self.st_mtime[abs_path] < abs_path.stat().st_mtime:
             self.read(abs_path)
-        elif self.st_mtime[abs_path] < abs_path.stat().st_mtime:
-            self.read(abs_path)
+
         self.current_path = abs_path
         return self.notebooks[abs_path]
 
@@ -80,7 +84,9 @@ def get_ids(nb: dict, prefix: str = "") -> list[str]:
         if id_ := cell["metadata"].get("id"):
             if not isinstance(id_, str) or prefix and not id_.startswith(prefix):
                 continue
+
             ids.append(id_)
+
     return ids
 
 
@@ -90,15 +96,18 @@ def get_cell(nb: dict, id_: str) -> dict[str, Any]:
         if "id" not in cell["metadata"] and not done:
             set_id(nb)
             done = True
+
         if cell["metadata"].get("id") == id_:
             return cell
-    raise ValueError(f"Unknown id: {id_}")
+
+    msg = f"Unknown id: {id_}"
+    raise ValueError(msg)
 
 
 def get_source(nb: dict, id_: str) -> str:
-    source = get_cell(nb, id_).get("source", "")
-    if source:
+    if source := get_cell(nb, id_).get("source", ""):
         source = "\n".join(source.split("\n")[1:])
+
     return source
 
 
@@ -114,7 +123,9 @@ def get_data(outputs: list, output_type: str) -> dict[str, str]:
     for output in outputs:
         if output["output_type"] == output_type:
             return output["data"]
-    raise ValueError(f"No output_type: {output_type}")
+
+    msg = f"No output_type: {output_type}"
+    raise ValueError(msg)
 
 
 def get_display_data(outputs: list) -> dict[str, str]:
@@ -131,4 +142,5 @@ def get_data_by_id(outputs: list, id_: str) -> dict[str, str]:
             return get_data(outputs, "display_data")
         except ValueError:
             pass
+
     return get_data(outputs, "execute_result")

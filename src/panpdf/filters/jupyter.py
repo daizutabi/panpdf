@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 from panflute import CodeBlock, Doc, Element, Image, Math, Para, Span, Table
 
 from panpdf.core.filter import Filter
-from panpdf.jupyter.element import convert
-from panpdf.jupyter.nbformat import Store
+from panpdf.jupyter.elements import convert
+from panpdf.jupyter.stores import Store
 
 
 @dataclass
