@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from panflute import CodeBlock, Image, Para
 
 from panpdf.filters.filter import Filter
-from panpdf.jupyter.elements import convert
+from panpdf.jupyter.converters import convert
 from panpdf.jupyter.stores import Store
 
 if TYPE_CHECKING:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import panflute as pf
 import pytest
-from panflute import Figure
+from panflute import Figure, Image
 
 import panpdf
 from panpdf.utils import set_asyncio_event_loop_policy
@@ -30,8 +30,22 @@ def figure_factory():
         text = f"![{caption}]({url}){{#{id_}}}"
         elems = pf.convert_text(text)
         assert isinstance(elems, list)
-        fig = elems[0].content[0]
+        fig = elems[0]
         assert isinstance(fig, Figure)
         return fig
 
     return figure_factory
+
+
+@pytest.fixture(scope="session")
+def image_factory(figure_factory):
+    from panpdf.filters.attribute import set_attributes_figure
+
+    def image_factory(id_, url="", caption="caption") -> Image:
+        fig = figure_factory(id_, url, caption)
+        set_attributes_figure(fig)
+        img = fig.content[0].content[0]
+        assert isinstance(img, Image)
+        return img
+
+    return image_factory
