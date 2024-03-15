@@ -1,7 +1,5 @@
 import panflute as pf
-from panflute import Caption, Figure, Image, Math, Para, Plain, RawInline, Space, Str, Table
-
-from panpdf.filters.attributes import Attributes
+from panflute import Caption, Figure, Image, Para, Plain, Space, Str
 
 
 def test_figure_single():

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from types import UnionType
 
 import panflute as pf
 from panflute import Doc, Element
@@ -6,21 +7,20 @@ from panflute import Doc, Element
 
 @dataclass
 class Filter:
-    """Filter class."""
-
-    types: type[Element] | tuple[type[Element], ...] = ()
+    types: type[Element] | UnionType
     elements: list[Element] = field(default_factory=list, init=False, repr=False)
 
     def _match(self, elem: Element) -> bool:
-        if not self.types or isinstance(elem, self.types):
+        if isinstance(elem, self.types):
             return self.match(elem)
+
         return False
 
-    def match(self, elem: Element) -> bool:
+    def match(self, elem: Element) -> bool:  # noqa: ARG002
         return True
 
     def _prepare(self, doc: Doc):
-        def _append(elem: Element, doc: Doc):
+        def _append(elem: Element, doc: Doc):  # noqa: ARG001
             if self._match(elem):
                 self.elements.append(elem)
 
@@ -35,6 +35,7 @@ class Filter:
     def _action(self, elem: Element, doc: Doc):
         if self._match(elem):
             return self.action(elem, doc)
+
         return None
 
     def action(self, elem: Element, doc: Doc):
@@ -50,6 +51,7 @@ class Filter:
     def run(self, doc: str | Doc | None = None):
         if isinstance(doc, str):
             doc = pf.convert_text(doc, standalone=True)  # type:ignore
+
         return pf.run_filter(self._action, self._prepare, self._finalize, doc=doc)
 
     def set_metadata(self, doc: Doc, doc_from: Doc):

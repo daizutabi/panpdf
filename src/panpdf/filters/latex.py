@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from panflute import Cite, RawInline, Space, Str
 
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 CROSSREF_PATTERN = re.compile(r"^(\\\S+)(\s*)(\[@.+\])(\s*)$")
 

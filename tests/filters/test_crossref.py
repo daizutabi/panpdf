@@ -1,6 +1,6 @@
 import panflute as pf
 
-from panpdf.filters.attributes import Attributes
+from panpdf.filters.attribute import Attribute
 from panpdf.filters.crossref import Crossref
 from panpdf.filters.layout import Layout
 
@@ -37,7 +37,7 @@ def test_run(doc):
 
 
 def test_subcaption():
-    attributes = Attributes()
+    attributes = Attribute()
     layout = Layout()
     crossref = Crossref(language="en")
     text = "![c1](1.png){#fig:1}\n![c2](2.png){#fig:2}\n: c3 {#fig:3}\n\n"

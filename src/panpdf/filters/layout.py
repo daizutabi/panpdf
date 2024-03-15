@@ -29,7 +29,7 @@ from panflute import (
 
 from panpdf import utils
 from panpdf.core.config import CONFIG_DIR, create_standalone
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 
 @dataclass

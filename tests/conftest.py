@@ -1,17 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import panflute as pf
 import pytest
-from panflute import Image
+from panflute import Figure
 
 import panpdf
 from panpdf.utils import set_asyncio_event_loop_policy
-
-if TYPE_CHECKING:
-    from panflute import Image
 
 set_asyncio_event_loop_policy()
 
@@ -29,11 +25,13 @@ def store(notebook_dir):
 
 
 @pytest.fixture(scope="session")
-def image_factory():
-    def image_factory(id_, url="", caption="caption") -> Image:
+def figure_factory():
+    def figure_factory(id_, url="", caption="caption") -> Figure:
         text = f"![{caption}]({url}){{#{id_}}}"
         elems = pf.convert_text(text)
         assert isinstance(elems, list)
-        return elems[0].content[0]
+        fig = elems[0].content[0]
+        assert isinstance(fig, Figure)
+        return fig
 
-    return image_factory
+    return figure_factory

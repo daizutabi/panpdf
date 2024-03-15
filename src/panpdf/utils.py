@@ -20,62 +20,6 @@ def set_asyncio_event_loop_policy():
                 asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 
-def attribute_scanner(elem: Element) -> Generator[tuple[Element, bool], None, None]:
-    in_attr = False
-    for e in elem.content:
-        if in_attr:
-            yield e, True
-            if isinstance(e, pf.Str) and e.text.endswith("}"):
-                in_attr = False
-        elif isinstance(e, pf.Str) and e.text.startswith("{#"):
-            yield e, True
-            in_attr = True
-        else:
-            yield e, False
-
-
-def strip_content(content: list[Element]) -> Generator[Element, None, None]:
-    spaces = [Space(), SoftBreak()]
-    prev = None
-    for i, e in enumerate(content):
-        if prev is None:
-            if e in spaces:
-                continue
-            else:
-                prev = e
-        elif e in spaces and prev in spaces:
-            continue
-        else:
-            yield prev
-            if i == len(content) - 1 and e not in spaces:
-                yield e
-            prev = e
-
-
-def split_attribute(elem: Element) -> tuple[Element, str]:
-    content: list[Element] = []
-    attr: list[Element] = []
-    for e, i in attribute_scanner(elem):
-        if i:
-            attr.append(e)
-        else:
-            content.append(e)
-    content = list(strip_content(content))
-    return type(elem)(*content), pf.stringify(pf.Plain(*attr))
-
-
-def set_attributes(elem: Element, attr: Element) -> Element | None:
-    keys = ["identifier", "classes", "attributes"]
-    if any(getattr(elem, key, None) for key in keys):
-        return None
-    rest, text = split_attribute(attr)
-    para: Para = pf.convert_text(f"`__panpdf__`{text}")[0]  # type: ignore
-    code: Code = para.content[0]  # type: ignore
-    for key in keys:
-        setattr(elem, key, getattr(code, key))
-    return rest
-
-
 def collect(paths: Path | Iterable[Path], suffixes: str | Iterable[str] = ".md") -> Iterator[Path]:
     if isinstance(paths, Path):
         paths = [paths]

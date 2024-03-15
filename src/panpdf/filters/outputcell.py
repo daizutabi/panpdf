@@ -7,7 +7,7 @@ import panflute as pf
 from panflute import CodeBlock, Doc, Element
 
 from panpdf.core.config import CONFIG_DIR
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 path = CONFIG_DIR / "include-in-header.tex"
 IN_HEADER = path.read_text(encoding="utf-8")

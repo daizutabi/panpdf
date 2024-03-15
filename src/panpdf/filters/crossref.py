@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import panflute as pf
 from panflute import Cite, Doc, Element, Header, Image, Span, Table
 
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 
 @dataclass

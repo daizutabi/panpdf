@@ -8,7 +8,7 @@ from aiohttp import ClientError, ClientResponse
 from panflute import Cite
 
 from panpdf.core import asyncget
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

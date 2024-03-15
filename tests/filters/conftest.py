@@ -29,10 +29,10 @@ $$y=f(x)$$ {#eq:markdown}
 
 @pytest.fixture
 def doc(store):
-    from panpdf.filters.attributes import Attributes
+    from panpdf.filters.attribute import Attribute
     from panpdf.filters.jupyter import Jupyter
 
-    attributes = Attributes()
+    attributes = Attribute()
     jupyter = Jupyter(store=store)
     doc = pf.convert_text(TEXT, standalone=True)
     doc = attributes.run(doc)  # type:ignore

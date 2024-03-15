@@ -4,12 +4,12 @@ import panflute as pf
 from panflute import Cite, Doc, Image, Math, Para, RawInline, Space, Span, Str
 
 import panpdf.filters.layout as L  # noqa: N812
-from panpdf.filters.attributes import Attributes
+from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
 
 
 def convert_to_para(text: str) -> Para:
-    return Attributes().run(text).content[0]  # type:ignore
+    return Attribute().run(text).content[0]  # type:ignore
 
 
 def test_convert_math_equation():
@@ -46,7 +46,7 @@ def test_convert_math():
 def test_convert_table():
     text = "|a|a|\n|-|-|\n|1|2|\n: caption {#tbl:id}"
     table = pf.convert_text(text)[0]  # type:ignore
-    Attributes().action(table, None)  # type:ignore
+    Attribute().action(table, None)  # type:ignore
     table = L.convert_table(table)  # type:ignore
     tex = pf.convert_text(table, input_format="panflute", output_format="latex")
     assert "\\caption{\\label{tbl:id}caption}" in tex  # type:ignore

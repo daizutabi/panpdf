@@ -8,9 +8,9 @@ from panflute import Doc
 
 from panpdf import utils
 from panpdf.core.config import defaults_option
-from panpdf.core.filter import Filter
-from panpdf.filters.attributes import Attributes
+from panpdf.filters.attribute import Attribute
 from panpdf.filters.crossref import Crossref
+from panpdf.filters.filter import Filter
 from panpdf.filters.jupyter import Jupyter
 from panpdf.filters.latex import Latex
 from panpdf.filters.layout import Layout
@@ -27,7 +27,7 @@ class Converter:
 
     def __post_init__(self):
         self.filters = {
-            "attributes": Attributes(),
+            "attributes": Attribute(),
             "outputcell": OutputCell(),
             "latex": Latex(),
             "jupyter": Jupyter(),

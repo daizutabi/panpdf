@@ -3,7 +3,7 @@ import inspect
 import panflute as pf
 import pytest
 
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 
 @pytest.fixture
