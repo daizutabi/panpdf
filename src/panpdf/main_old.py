@@ -7,9 +7,8 @@ import nbformat
 import panflute as pf
 from panflute.tools import pandoc_version
 
-from panpdf import utils
+from panpdf import config, utils
 from panpdf.__about__ import __version__
-from panpdf.core import config
 from panpdf.core.converter import Converter
 from panpdf.stores import get_ids
 

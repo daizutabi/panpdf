@@ -2,6 +2,7 @@ import inspect
 
 import panflute as pf
 import pytest
+from panflute import Element
 
 from panpdf.filters.filter import Filter
 
@@ -23,14 +24,14 @@ def doc():
 
 
 def test_filter_types(doc):
-    filter = Filter()  # noqa: A001
-    filter.run(doc)
-    assert len(filter.elements) == 9
+    filter_ = Filter(types=Element)
+    filter_.run(doc)
+    assert len(filter_.elements) == 9
 
-    filter = Filter(types=pf.Str)  # noqa: A001
-    filter.run(doc)
-    assert len(filter.elements) == 2
+    filter_ = Filter(types=pf.Str)
+    filter_.run(doc)
+    assert len(filter_.elements) == 2
 
-    filter = Filter(types=(pf.Code, pf.CodeBlock))  # noqa: A001
-    filter.run(doc)
-    assert len(filter.elements) == 2
+    filter_ = Filter(types=pf.Code | pf.CodeBlock)
+    filter_.run(doc)
+    assert len(filter_.elements) == 2

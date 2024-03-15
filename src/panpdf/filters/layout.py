@@ -31,7 +31,7 @@ from panflute import (
 )
 
 from panpdf import utils
-from panpdf.core.config import CONFIG_DIR, create_standalone
+from panpdf.config import CONFIG_DIR, create_standalone
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:

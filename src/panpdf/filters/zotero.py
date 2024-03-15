@@ -1,28 +1,29 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from aiohttp import ClientError, ClientResponse
+import aiohttp
+from aiohttp import ClientError, ClientResponse, ClientSession
 from panflute import Cite
 
-from panpdf.core import asyncget
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from panflute import Doc, Element
+    from panflute import Doc
 
 
 @dataclass
 class Zotero(Filter):
-    types: type[Element] = Cite
+    types: type[Cite] = Cite
     csl: dict[str, dict] = field(default_factory=dict)
 
     def action(self, elem: Cite, doc: Doc):  # noqa: ARG002
-        for key in get_keys(elem):
+        for key in iter_keys(elem):
             if key not in self.csl:
                 self.csl[key] = {}
 
@@ -30,16 +31,17 @@ class Zotero(Filter):
         if keys := [key for key in self.csl if not self.csl[key]]:
             urls = [get_url(key) for key in keys]
             try:
-                csls = asyncget.get(urls, get_csl)
+                csls = asyncio.run(gather(urls, get_csl))
             except ClientError:
                 pass  # TODO: warning
             else:
                 self.csl.update(dict(zip(keys, csls)))  # noqa: B905
+
         if csls := [csl for csl in self.csl.values() if csl]:
             doc.metadata["references"] = csls
 
 
-def get_keys(cite: Cite) -> Iterator[str]:
+def iter_keys(cite: Cite) -> Iterator[str]:
     for c in cite.citations:
         yield c.id
 
@@ -54,3 +56,17 @@ async def get_csl(response: ClientResponse) -> dict:
 
     text = await response.text()
     return json.loads(text)[0]
+
+
+# Ref: https://gist.github.com/rhoboro/86629f831934827d832841709abfe715
+
+
+async def get(session: ClientSession, url: str, coro):
+    response = await session.get(url)
+    return await coro(response)
+
+
+async def gather(urls: list[str], coro):
+    async with aiohttp.ClientSession() as session:
+        tasks = (asyncio.create_task(get(session, url, coro)) for url in urls)
+        return await asyncio.gather(*tasks)

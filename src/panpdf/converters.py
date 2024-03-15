@@ -7,7 +7,7 @@ import panflute as pf
 from panflute import Doc
 
 from panpdf import utils
-from panpdf.core.config import defaults_option
+from panpdf.config import defaults_option
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.crossref import Crossref
 from panpdf.filters.filter import Filter
@@ -27,15 +27,17 @@ class Converter:
 
     def __post_init__(self):
         self.filters = {
-            "attributes": Attribute(),
+            "attribute": Attribute(),
             "outputcell": OutputCell(),
             "latex": Latex(),
             "jupyter": Jupyter(),
             "layout": Layout(external=self.external),
             "crossref": Crossref(),
         }
+
         if self.citeproc:
             self.filters["zotero"] = Zotero()
+
         if self.notebook_dir:
             jupyter: Jupyter = self.filters["jupyter"]  # type:ignore
             jupyter.store.path = [Path(self.notebook_dir).absolute()]

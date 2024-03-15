@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from panflute import CodeBlock, RawBlock
 
-from panpdf.core.config import CONFIG_DIR
+from panpdf.config import CONFIG_DIR
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
