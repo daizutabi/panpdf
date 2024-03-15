@@ -5,36 +5,38 @@ from panpdf.filters.crossref import Crossref
 from panpdf.filters.layout import Layout
 
 
-def test_crossref_prepare(doc):
+def test_prepare(doc):
     crossref = Crossref()
     crossref._prepare(doc)  # noqa: SLF001
     for id in [  # noqa: A001
         "sec:section",
         "sec:subsection",
-        "fig:matplotlib",
-        "fig:tikz",
+        "fig:pdf",
+        "fig:png",
+        "fig:pgf",
         "tbl:markdown",
-        "tbl:pandas",
         "eq:markdown",
-        "eq:sympy",
     ]:
         assert id in crossref.identifiers
 
 
-def test_crossref_run(doc):
+def test_run(doc):
     crossref = Crossref(language="ja")
+    crossref._prepare(doc)  # noqa: SLF001
     doc = crossref.run(doc)
     tex = pf.convert_text(doc, input_format="panflute", output_format="latex")
     for ref in [
         "\\ref{sec:section}",
-        "図~\\ref{fig:matplotlib}",
+        "図~\\ref{fig:pgf}",
+        "図~\\ref{fig:pdf}",
+        "図~\\ref{fig:png}",
         "表~\\ref{tbl:markdown}",
         "式~\\ref{eq:markdown}",
     ]:
         assert ref in tex  # type:ignore
 
 
-def test_crossref_subcaption():
+def test_subcaption():
     attributes = Attributes()
     layout = Layout()
     crossref = Crossref(language="en")

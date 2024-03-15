@@ -191,14 +191,14 @@ def test_figure_subfigure():
 
 
 def test_figure_latex(store):
-    text = "![pgf](tests/test.ipynb){#fig:matplotlib}"
+    text = "![pgf](pgf.ipynb){#fig:pgf}"
     para = pf.convert_text(text)[0]  # type:ignore
     assert isinstance(para, Para)
     para = Jupyter(store=store).action(para, Doc())[0]  # type:ignore
     assert isinstance(para, Para)
     image = para.content[0]
     assert isinstance(image, Image)
-    assert "panpdf-latex" in image.classes
+    assert "panpdf-pgf" in image.classes
     para = L.convert_para(para)
     tex = pf.convert_text(para, input_format="panflute", output_format="latex")
     assert "\\centering\n%% Creator" in tex  # type:ignore

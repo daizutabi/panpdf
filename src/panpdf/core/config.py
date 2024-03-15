@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 
 import panpdf
 
-RESOURCE_DIR = Path(panpdf.__file__).parent / "configs"
+CONFIG_DIR = Path(panpdf.__file__).parent / "configs"
 
 
 @contextmanager
@@ -38,29 +38,26 @@ def defaults_option(metadata: dict[str, Any]) -> Generator[list[str], None, None
             path.unlink()
 
 
-def read_defaults(resource_dir: bool = False) -> dict[str, Any]:
-    if resource_dir:
-        path = RESOURCE_DIR / "defaults.yaml"
+def read_defaults(config_dir: bool = False) -> dict[str, Any]:
+    if config_dir:
+        path = CONFIG_DIR / "defaults.yaml"
     else:
         path = Path("defaults.yaml")
         if not path.exists():
-            path = RESOURCE_DIR / "defaults.yaml"
+            path = CONFIG_DIR / "defaults.yaml"
     with path.open(encoding="utf8") as f:
         defaults = yaml.safe_load(f)
     if "csl" not in defaults:
         csl_paths = list(Path(".").glob("*.csl"))
-        if csl_paths:
-            csl_path = csl_paths[0]
-        else:
-            csl_path = list(RESOURCE_DIR.glob("*.csl"))[0]
+        csl_path = csl_paths[0] if csl_paths else next(iter(CONFIG_DIR.glob("*.csl")))
         defaults["csl"] = str(csl_path)
     return defaults
 
 
-def read_include(name: str, resource_dir: bool = False) -> str:
-    path = RESOURCE_DIR / f"{name}.tex"
+def read_include(name: str, config_dir: bool = False) -> str:
+    path = CONFIG_DIR / f"{name}.tex"
     text = path.read_text(encoding="utf-8")
-    if resource_dir:
+    if CONFIG_DIR:
         return text
     path = Path(f"{name}.tex")
     if path.exists():
@@ -78,10 +75,10 @@ def create_page_header(metadata: dict[str, Any]) -> str:
     text = f"\\renewcommand{{\\headrulewidth}}{{{headerrulewidth}}}\n"
     text += "\\pagestyle{fancy}\n"
     if security:
-        path = str(RESOURCE_DIR / f"label/{security}.pdf").replace("\\", "/")
+        path = str(CONFIG_DIR / f"label/{security}.pdf").replace("\\", "/")
         text += f"\\rhead{{\\includegraphics[width=2cm]{{{path}}}}}\n"
     if logo:
-        path = str(RESOURCE_DIR / f"label/logotype_{logo}.pdf").replace("\\", "/")
+        path = str(CONFIG_DIR / f"label/logotype_{logo}.pdf").replace("\\", "/")
         text += f"\\lhead{{\\includegraphics[width=2cm]{{{path}}}}}\n"
     return text
 
@@ -133,12 +130,12 @@ def create_standalone() -> str:
         o = variables.get(f"{f}fontoptions", [])
         params["fontoptions"][f] = [o] if isinstance(o, str) else o
 
-    env = Environment(loader=FileSystemLoader(RESOURCE_DIR))
+    env = Environment(loader=FileSystemLoader(CONFIG_DIR))
     template = env.get_template("standalone.jinja2")
     return template.render(params)
 
 
 # Used in main.py
 def read_source(filename: str) -> str:
-    path = RESOURCE_DIR / filename
+    path = CONFIG_DIR / filename
     return path.read_text(encoding="utf-8")

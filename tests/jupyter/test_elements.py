@@ -64,6 +64,16 @@ def test_convert_image_pgf(store: Store, image_factory):
     assert image.classes == ["panpdf-pgf"]
 
 
+def test_convert_image(store: Store, image_factory):
+    from panpdf.jupyter.elements import convert_image
+
+    image = image_factory("fig:pgf", "pgf.ipynb")
+    data = store.get_data("fig:pgf", "pgf.ipynb")
+    image = convert_image(data, image)
+    assert image.url.startswith("%% Creator: Matplotlib")
+    assert image.classes == ["panpdf-pgf"]
+
+
 # def test_convert_image_by_latex(store: Store, image_factory):
 #     id_ = "fig:tikz"
 #     image: Image = image_factory(id_)

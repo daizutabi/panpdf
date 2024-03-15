@@ -1,12 +1,19 @@
+from __future__ import annotations
+
 import json
-from collections.abc import Iterator
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from aiohttp import ClientError, ClientResponse
-from panflute import Cite, Doc, Element
+from panflute import Cite
 
 from panpdf.core import asyncget
 from panpdf.core.filter import Filter
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from panflute import Doc, Element
 
 
 @dataclass
@@ -14,7 +21,7 @@ class Zotero(Filter):
     types: type[Element] = Cite
     csl: dict[str, dict] = field(default_factory=dict)
 
-    def action(self, elem: Cite, doc: Doc):
+    def action(self, elem: Cite, doc: Doc):  # noqa: ARG002
         for key in get_keys(elem):
             if key not in self.csl:
                 self.csl[key] = {}
@@ -42,7 +49,8 @@ def get_url(key: str) -> str:
 
 
 async def get_csl(response: ClientResponse) -> dict:
-    if response.status != 200:
+    if response.status != 200:  # noqa: PLR2004
         return {}
+
     text = await response.text()
     return json.loads(text)[0]

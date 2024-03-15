@@ -1,32 +1,32 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from panflute import CodeBlock, Image
 
-if TYPE_CHECKING:
-    from panflute import Math, Table
 
+def convert(data: str | dict[str, str], elem: Image, language: str = "python") -> Image | CodeBlock:
+    if isinstance(data, str):
+        return convert_image_to_code_block(data, elem, language)
 
-def convert(
-    data: str | dict[str, str], elem: Image | Math, language: str = "python"
-) -> Image | Math | Table | CodeBlock:
-    if isinstance(elem, Image):
-        if isinstance(data, str):
-            return convert_image_to_code_block(data, elem, language)
-
-        return convert_image(data, elem)
-
-    # if isinstance(data, dict):
-    #     return convert_math(data, elem)
-
-    msg = "Unknown parameters"
-    raise ValueError(msg)
+    return convert_image(data, elem)
 
 
 def convert_image_to_code_block(source: str, image: Image, language: str = "python") -> CodeBlock:
     identifier = image.identifier
     return CodeBlock(source, identifier, classes=[language])
+
+
+def convert_image(data: dict[str, str], image: Image) -> Image:
+    mimes = list(data.keys())
+    if "application/pdf" in mimes:
+        return convert_image_pdf(data, image)
+
+    if "image/svg+xml" in mimes:
+        return convert_image_svg(data, image)
+
+    if "text/plain" in mimes:
+        return convert_image_pgf(data, image)
+
+    return convert_image_base64(data, image)
 
 
 def convert_image_base64(data: dict[str, str], image: Image) -> Image:
@@ -58,21 +58,6 @@ def convert_image_pgf(data: dict[str, str], image: Image) -> Image:
     image.url = text.strip()
     image.classes += ["panpdf-pgf"]
     return image
-
-
-def convert_image(data: dict[str, str], image: Image) -> Image:
-    match data:
-        case "application/pdf":
-            return convert_image_pdf(data, image)
-
-        case "image/svg+xml":
-            return convert_image_svg(data, image)
-
-        case "text/plain":
-            return convert_image_pgf(data, image)
-
-        case _:
-            return convert_image_base64(data, image)
 
 
 # TABLE_PATTERN = re.compile(r".*?(<table.+?</table>).*", re.DOTALL)

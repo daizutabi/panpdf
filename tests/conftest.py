@@ -22,6 +22,13 @@ def notebook_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
+def store(notebook_dir):
+    from panpdf.jupyter.stores import Store
+
+    return Store([notebook_dir])
+
+
+@pytest.fixture(scope="session")
 def image_factory():
     def image_factory(id_, url="", caption="caption") -> Image:
         text = f"![{caption}]({url}){{#{id_}}}"

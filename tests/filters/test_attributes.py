@@ -16,7 +16,7 @@ from panflute import (
 from panpdf.filters.attributes import Attributes
 
 
-def test_attributes_math_displaymath():
+def test_math_displaymath():
     text = "$$a = 1$$ {#id .cls1 k1=v1}\n$$b=1$$ {#id2 .cls2}"
     doc = Attributes().run(text)
     para = doc.content[0]  # type:ignore
@@ -34,7 +34,7 @@ def test_attributes_math_displaymath():
     assert span.attributes == {}
 
 
-def test_attributes_math_inlinemath():
+def test_math_inlinemath():
     text = "$a = 1$ {#id .cls1 k1=v1}\n$b=1$ {#id2 .cls2}"
     doc = Attributes().run(text)
     para = doc.content[0]  # type:ignore
@@ -51,7 +51,7 @@ CAPTION = ": caption $y=f(x)$ {#id .cls k1=v1} [@fig:1]."
 
 
 @pytest.mark.parametrize(("a", "b"), [(TABLE, CAPTION), (CAPTION, TABLE)])
-def test_attributes_table(a, b):
+def test_table(a, b):
     text = f"{a}\n\n{b}"
     table = Attributes().run(text).content[0]  # type:ignore
     assert isinstance(table, Table)
@@ -69,7 +69,7 @@ def test_attributes_table(a, b):
     assert "\\(y=f(x)\\)" in tex
 
 
-def test_attributes_para_figure():
+def test_para_figure():
     text = "![caption $\\sqrt{2}$](a.png){#fig:id width=10cm}"
     para = Attributes().run(text).content[0]  # type:ignore
     assert isinstance(para, Para)
@@ -77,7 +77,7 @@ def test_attributes_para_figure():
     assert isinstance(para.content[0], Image)
 
 
-def test_attributes_para_minifigure():
+def test_para_minifigure():
     text = "![caption a](a.png){#fig:a}\n![caption b](b.png){#fig:b}"
     para = Attributes().run(text).content[0]  # type:ignore
     assert isinstance(para, Para)
@@ -87,7 +87,7 @@ def test_attributes_para_minifigure():
     assert isinstance(para.content[2], Image)
 
 
-def test_attributes_para_subfigure():
+def test_para_subfigure():
     text = "![a](a.png){#fig:a}\n![b](b.png){#fig:b}\n: caption\na-b"
     para = Attributes().run(text).content[0]  # type:ignore
     assert isinstance(para, Para)

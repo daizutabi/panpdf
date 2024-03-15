@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 import panflute as pf
@@ -12,20 +14,23 @@ class Crossref(Filter):
     identifiers: list[str] = field(default_factory=list)
     prefix: dict[str, list[Element]] = field(default_factory=dict)
     suffix: dict[str, list[Element]] = field(default_factory=dict)
-    language: str = "ja"
+    language: str = "en"
 
-    def prepare(self, doc: Doc):
+    def prepare(self, doc: Doc):  # noqa: ARG002
         self.set_language(self.language)
         for elem in self.elements:
             if isinstance(elem, Header | Image | Table | Span) and elem.identifier:
                 self.identifiers.append(elem.identifier)
 
-    def action(self, elem: Header | Image | Table | Span | Cite, doc: Doc):
+    def action(self, elem: Header | Image | Table | Span | Cite, doc: Doc):  # noqa: ARG002
         if isinstance(elem, Cite) and elem.citations:
             if (id_ := elem.citations[0].id) in self.identifiers:  # type:ignore
                 return self.create_ref(id_)
+
         elif isinstance(elem, Span):
             return list(elem.content)
+
+        return None
 
     def create_ref(self, id_: str):
         ref = pf.RawInline(f"\\ref{{{id_}}}", format="latex")
@@ -34,8 +39,8 @@ class Crossref(Filter):
             prefix = self.prefix.get(kind, [])
             suffix = self.suffix.get(kind, [])
             return [*prefix, ref, *suffix]
-        else:
-            return [ref]
+
+        return [ref]
 
     def set_language(self, language: str):
         self.language = language

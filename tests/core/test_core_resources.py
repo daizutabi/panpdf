@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 from panpdf.core.config import (
-    RESOURCE_DIR,
+    CONFIG_DIR,
     create_extra_in_header,
     create_standalone,
     defaults_option,
@@ -11,12 +11,12 @@ from panpdf.core.config import (
 )
 
 
-def test_resource_dir():
-    assert RESOURCE_DIR.exists()
+def test_CONFIG_DIR():
+    assert CONFIG_DIR.exists()
 
 
 def test_read_defaults():
-    defaults = read_defaults(resource_dir=True)
+    defaults = read_defaults(CONFIG_DIR=True)
     defaults_ = read_defaults()
     assert defaults == defaults_
     assert isinstance(defaults, dict)
@@ -36,7 +36,7 @@ def test_read_defaults():
 
 
 def test_create_extra_in_header():
-    defaults = read_defaults(resource_dir=True)
+    defaults = read_defaults(CONFIG_DIR=True)
     variables = defaults["variables"]
     assert isinstance(variables, dict)
     names = ["section", "subsection", "subsubsection", "paragraph", "subparagraph"]
