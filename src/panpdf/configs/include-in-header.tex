@@ -1,0 +1,21 @@
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{subcaption}
+\captionsetup[figure]{format=plain, labelformat=simple, labelsep=quad, font=small}
+\captionsetup[table]{format=plain, labelformat=simple, labelsep=quad, font=small}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
+\ifdefined\Shaded
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}%
+{commandchars=\\\{\},fontsize=\small,numbers=left}
+\usepackage{framed}
+\renewenvironment{Shaded}{\begin{quotation}\begin{snugshade}\linespread{0.9}}%
+{\end{snugshade}\end{quotation}}
+\definecolor{shadecolor}{RGB}{240,240,250}
+\fi
+% \def\mathregular#1{#1}  % for Plots.jl
+\jlreqsetup{
+  itemization_labelsep={1em},
+}
+\ltjsetparameter{jacharrange={-2,-3}}
+\AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}

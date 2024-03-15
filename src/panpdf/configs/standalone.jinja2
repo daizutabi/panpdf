@@ -1,0 +1,33 @@
+\documentclass[
+{%- for o in classoption -%}{{ o }},{%- endfor -%}
+class={{ documentclass }}]{standalone}
+\usepackage{unicode-math}
+\defaultfontfeatures{Scale=MatchLowercase}
+\defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+{%- for f in font %}
+\set{{ f }}font[
+{%- for o in fontoptions[f] -%}
+{{ o }}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+]{% raw %}{{% endraw %}{{ font[f] }}{% raw %}}{% endraw %}
+{%- endfor %}
+{%- if luatexjapresetoptions %}
+\usepackage[
+{%- for o in luatexjapresetoptions -%}
+{{ o }}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+]{luatexja-preset}
+{%- endif %}
+{%- if _luatexjapreset %}
+\ltjnewpreset{my-preset}{
+{%- for o in _luatexjapreset -%}
+{{ o }}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+}
+\ltjapplypreset{my-preset}
+{%- endif %}
+\ltjsetparameter{jacharrange={-2,-3}}
+\usepackage{pgfplots}
+\begin{document}
+$body$
+\end{document}
