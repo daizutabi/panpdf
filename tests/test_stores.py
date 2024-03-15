@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from panpdf.jupyter.stores import Store
+    from panpdf.stores import Store
 
 
 def test_get_notebook(store: Store, fmt: str):

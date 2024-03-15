@@ -37,7 +37,7 @@ class Converter:
         if self.citeproc:
             self.filters["zotero"] = Zotero()
         if self.notebook_dir:
-            jupyter: Jupyter = self.filters["jupyter"]  # type: ignore
+            jupyter: Jupyter = self.filters["jupyter"]  # type:ignore
             jupyter.store.path = [Path(self.notebook_dir).absolute()]
 
     def convert_text(

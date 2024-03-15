@@ -91,7 +91,7 @@ def set_attributes(elem: Element, attrs: Iterable[Element]) -> list[Element] | N
         return None
 
     rest, text = split_attribute(attrs)
-    code = pf.convert_text(f"`__panpdf__`{text}")[0].content[0]  # type: ignore
+    code = pf.convert_text(f"`__panpdf__`{text}")[0].content[0]  # type:ignore
 
     for key in keys:
         setattr(elem, key, getattr(code, key))

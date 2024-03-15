@@ -18,6 +18,6 @@ def test_get_keys():
     para = elems[0]
     assert isinstance(para, pf.Para)
     keys_ = [get_keys(c) for c in para.content if isinstance(c, pf.Cite)]
-    keys = list(chain.from_iterable(keys_))  # type: ignore
+    keys = list(chain.from_iterable(keys_))  # type:ignore
     for i in range(1, 6):
         assert f"key{i}" in keys

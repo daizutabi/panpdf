@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Latex(Filter):
-    types: tuple[type[Element], ...] = (RawInline,)
+    types: type[RawInline] = RawInline
 
     def action(self, elem: RawInline, doc: Doc):  # noqa: ARG002
         if elem.format != "tex":

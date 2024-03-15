@@ -164,12 +164,12 @@ def test_set_attributes_figure():
     from panpdf.filters.attribute import set_attributes_figure
 
     text = "![caption $\\sqrt{2}$](a.png){#fig:id .c .d width=10cm}"
-    fig = pf.convert_text(text)[0]  # type: ignore
+    fig = pf.convert_text(text)[0]  # type:ignore
     assert isinstance(fig, Figure)
     set_attributes_figure(fig)
 
     assert fig.identifier == "fig:id"
-    img = fig.content[0].content[0]  # type: ignore
+    img = fig.content[0].content[0]  # type:ignore
     assert isinstance(img, Image)
     assert img.identifier == "fig:id"
 

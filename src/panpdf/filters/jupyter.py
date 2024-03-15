@@ -1,66 +1,78 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from panflute import CodeBlock, Image, Para
+from panflute import Image
 
 from panpdf.filters.filter import Filter
-from panpdf.jupyter.converters import convert
-from panpdf.jupyter.stores import Store
+from panpdf.stores import Store
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
-    from panflute import Doc, Element
+    from panflute import Doc
 
 
 @dataclass
 class Jupyter(Filter):
-    types: tuple[type[Element], ...] = (Para,)
+    types: type[Image] = Image
     store: Store = field(default_factory=Store)
 
-    def action(self, elem: Para, doc: Doc) -> list[Para | CodeBlock]:  # noqa: ARG002
-        return list(image_scanner(self.store, elem))
-
-
-def image_scanner(store: Store, para: Para) -> Iterator[Para | CodeBlock]:
-    collected: list[Element] = []
-
-    for elem in para.content:
-        if isinstance(elem, Image):
-            image = convert_from_store(store, elem)
-
-            if isinstance(image, CodeBlock):
-                if collected:
-                    yield Para(*collected)
-                    collected = []
-
-                yield image
-                continue
-
-        collected.append(elem)
-
-    if collected:
-        yield Para(*collected)
-
-
-def convert_from_store(store: Store, elem: Image) -> Image | CodeBlock:
-    url = elem.url
-    id_ = elem.identifier
-    if id_ and (not url or url.endswith(".ipynb")):
-        if isinstance(elem, Image) and "source" in elem.classes:
-            data = store.get_source(id_, url)
-        else:
+    def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
+        url = image.url
+        id_ = image.identifier
+        if id_ and (not url or url.endswith(".ipynb")):
             try:
-                data = store.get_data(id_, url)
+                data = self.store.get_data(id_, url)
             except ValueError:
-                # TODO: log
-                print(f"[panpdf] Unknown url or id: url='{url}' id='{id_}'")
-                sys.exit(1)
+                msg = f"[panpdf] Unknown url or id: url='{url}' id='{id_}'"
+                raise ValueError(msg) from None
 
-        if data:
-            return convert(data, elem, language=store.get_language())
+            if data:
+                return convert_image(data, image)
 
-    return elem
+        return image
+
+
+def convert_image(data: dict[str, str], image: Image) -> Image:
+    mimes = list(data.keys())
+    if "application/pdf" in mimes:
+        return convert_image_pdf(data, image)
+
+    if "image/svg+xml" in mimes:
+        return convert_image_svg(data, image)
+
+    if "text/plain" in mimes:
+        return convert_image_pgf(data, image)
+
+    return convert_image_base64(data, image)
+
+
+def convert_image_base64(data: dict[str, str], image: Image) -> Image:
+    for mime, text in data.items():
+        if mime.startswith("image/"):
+            image.url = f"data:{mime};base64,{text}"
+            image.classes.append("panpdf-base64")
+            return image
+
+    return image
+
+
+def convert_image_pdf(data: dict[str, str], image: Image) -> Image:
+    image.url = data["application/pdf"]
+    image.classes.append("panpdf-pdf")
+    return image
+
+
+def convert_image_svg(data: dict[str, str], image: Image) -> Image:
+    image.url = data["image/svg+xml"]
+    image.classes.append("panpdf-svg")
+    return image
+
+
+def convert_image_pgf(data: dict[str, str], image: Image) -> Image:
+    if "\\" not in (text := data["text/plain"]):
+        return convert_image_base64(data, image)
+
+    image.url = text.strip()
+    image.classes.append("panpdf-pgf")
+    return image

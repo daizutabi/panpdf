@@ -49,3 +49,9 @@ def test_math_block_para():
     str_ = para.content[2]
     assert isinstance(str_, pf.Str)
     assert str_.text == "{#id"
+
+
+def test_math_latex():
+    text = "ab\n\n$$a = 1$$\n\ncd"
+    tex = pf.convert_text(text, output_format="latex")
+    assert tex == "ab\n\n\\[a = 1\\]\n\ncd"

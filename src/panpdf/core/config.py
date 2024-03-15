@@ -130,7 +130,7 @@ def create_standalone() -> str:
         o = variables.get(f"{f}fontoptions", [])
         params["fontoptions"][f] = [o] if isinstance(o, str) else o
 
-    env = Environment(loader=FileSystemLoader(CONFIG_DIR))
+    env = Environment(loader=FileSystemLoader(CONFIG_DIR), autoescape=True)
     template = env.get_template("standalone.jinja2")
     return template.render(params)
 

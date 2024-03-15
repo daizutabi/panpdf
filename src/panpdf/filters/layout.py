@@ -11,14 +11,17 @@ from functools import partial
 from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, STDOUT
+from typing import TYPE_CHECKING
 
 from panflute import (
     Code,
     Doc,
     Element,
+    Figure,
     Image,
     Math,
     Para,
+    Plain,
     RawInline,
     SoftBreak,
     Space,
@@ -31,10 +34,13 @@ from panpdf import utils
 from panpdf.core.config import CONFIG_DIR, create_standalone
 from panpdf.filters.filter import Filter
 
+if TYPE_CHECKING:
+    from types import UnionType
+
 
 @dataclass
 class Layout(Filter):
-    types: tuple[type[Element], ...] = (Para, Table, Math)
+    types: UnionType = Math | Table | Figure
     external: bool = False
 
     def prepare(self, doc: Doc):  # noqa: ARG002
@@ -53,22 +59,22 @@ class Layout(Filter):
             if path_lualatex.exists():
                 for file in path_lualatex.iterdir():
                     file.unlink()
+
                 path_lualatex.rmdir()
 
             if path_standalone.exists():
                 path_standalone.unlink()
 
         atexit.register(delete)
-        return delete
 
-    def action(self, elem: Math | Table | Para, doc: Doc):  # noqa: ARG002
+    def action(self, elem: Math | Table | Figure, doc: Doc):  # noqa: ARG002
         if isinstance(elem, Math):
             return convert_math(elem)
 
         if isinstance(elem, Table):
             return convert_table(elem)
 
-        return convert_para(elem, external=self.external)
+        return convert_figure(elem, external=self.external)
 
 
 def convert_math(math: Math) -> Math | RawInline:
@@ -91,28 +97,15 @@ def convert_table(table: Table) -> Table:
     return table
 
 
-def split_images_caption(para: Para) -> tuple[list[Image], list[Element] | None]:
-    images: list[Image] = []
-    is_float = False
+def convert_figure(figure: Figure, *, external: bool = False) -> Figure:
+    plain = figure.content[0]
+    if not isinstance(plain, Plain):
+        return figure
 
-    for k, elem in enumerate(para.content):
-        if isinstance(elem, Image):
-            images.append(elem)
-            is_float = True
+    images = [image for image in plain.content if isinstance(image, Image)]
 
-        elif is_float and elem == Str(":") and elem.next == Space():
-            return images, list(para.content[k + 2 :])  # type:ignore
-
-        elif not isinstance(elem, SoftBreak):
-            is_float = False
-
-    return images, None
-
-
-def convert_para(para: Para, *, external: bool = False) -> Para:
-    images, caption = split_images_caption(para)
     if not images:
-        return para
+        return figure
 
     for image in images:
         n = len(images)
@@ -123,14 +116,14 @@ def convert_para(para: Para, *, external: bool = False) -> Para:
         return create_para_figure(images, create_figure_content)
 
     if caption:
-        func = partial(minipage, name="subfigure")  # type: ignore
+        func = partial(minipage, name="subfigure")  # type:ignore
         suffix = create_suffix(caption)
         return create_para_figure(images, func, [suffix])
 
     return create_para_figure(images, minipage)
 
 
-def set_width(image: Image, n: int):
+def set_width(image: Image, n: int) -> None:
     width = image.attributes.get("width", "")
     if not width and n > 1:
         image.attributes["width"] = f"{int(100/n)}%"
@@ -144,12 +137,12 @@ def get_width(image: Image, name: str = "width") -> str:
     return width
 
 
-def set_url(image: Image, *, multicolumn: bool, external: bool = False):
+def set_url(image: Image, *, multicolumn: bool, external: bool = False) -> None:
     if "panpdf-pgf" in image.classes:
         if external:
             image.url = create_image_file(image)
         else:
-            return  # TODO: width
+            return
 
     else:
         for cls in ["base64", "svg", "pdf"]:
@@ -210,7 +203,7 @@ def create_image_file(image: Image) -> str:
     root = Path.cwd() / "_images"
     workdir = Path.cwd() / "_lualatex"
 
-    if "panpdf-latex" in image.classes:
+    if "panpdf-pgf" in image.classes:
         return create_image_file_pgf(image, root, workdir)
 
     if "panpdf-pdf" in image.classes:
