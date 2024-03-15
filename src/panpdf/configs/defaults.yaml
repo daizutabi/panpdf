@@ -30,20 +30,6 @@ variables:
     - hanging_punctuation
     - head_space=24.8mm
     - foot_space=24.8mm
-  # mainfont: Libertinus Serif
-  # mainfontoptions:
-  #   - UprightFont=*-Regular
-  #   - ItalicFont=*-Italic
-  #   - BoldFont=*-Semibold
-  #   - BoldItalicFont=*-SemiboldItalic
-  # sansfont: Libertinus Sans
-  # sansfontoptions:
-  #   - UprightFont=*-Regular
-  #   - ItalicFont=*-Italic
-  #   - BoldFont=*-Bold
-  #   - BoldItalicFont=*-Bold
-  #   - Scale=1.08
-  # mathfont: Libertinus Math
   mainfont: TeX Gyre Pagella
   mathfont: TeX Gyre Pagella Math
   sansfont: Fira Sans
@@ -58,12 +44,12 @@ variables:
     - nfssonly
     - jis2004
   _luatexjapreset:
-    - mc-l=HaranoAjiMincho-Light  # 明朝体細字 \mcfamily\ltseries
-    - mc-m=HaranoAjiMincho-Regular  # 明朝体中字 \mcfamily\mdseries
-    - mc-b=HaranoAjiMincho-Bold  # 明朝体太字 \mcfamily\bfseries
-    - gt-m=HaranoAjiGothic-Regular  # ゴシック体中字 \gtfamily\mdseries
-    - gt-b=HaranoAjiGothic-Bold  # ゴシック体太字 \gtfamily\bfseries
-    - gt-eb=HaranoAjiGothic-Heavy # ゴシック体極太字 \gtfamily\ebseries
+    - mc-l=HaranoAjiMincho-Light
+    - mc-m=HaranoAjiMincho-Regular
+    - mc-b=HaranoAjiMincho-Bold
+    - gt-m=HaranoAjiGothic-Regular
+    - gt-b=HaranoAjiGothic-Bold
+    - gt-eb=HaranoAjiGothic-Heavy
   _sectionfont: \Large\sffamily\gtfamily\mdseries
   _sectionoption: lines=2.3,before_lines=0,after_lines=0
   _subsectionfont: \large\sffamily\gtfamily\mdseries

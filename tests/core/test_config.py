@@ -11,12 +11,12 @@ from panpdf.core.config import (
 )
 
 
-def test_CONFIG_DIR():
+def test_config_dir():
     assert CONFIG_DIR.exists()
 
 
 def test_read_defaults():
-    defaults = read_defaults(CONFIG_DIR=True)
+    defaults = read_defaults(config_dir=True)
     defaults_ = read_defaults()
     assert defaults == defaults_
     assert isinstance(defaults, dict)
@@ -36,7 +36,7 @@ def test_read_defaults():
 
 
 def test_create_extra_in_header():
-    defaults = read_defaults(CONFIG_DIR=True)
+    defaults = read_defaults(config_dir=True)
     variables = defaults["variables"]
     assert isinstance(variables, dict)
     names = ["section", "subsection", "subsubsection", "paragraph", "subparagraph"]
