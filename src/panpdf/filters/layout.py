@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import atexit
 import base64
-import io
 import os
 import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
-from functools import partial
-from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, STDOUT
 from typing import TYPE_CHECKING
@@ -17,23 +14,18 @@ from typing import TYPE_CHECKING
 import panflute as pf
 from panflute import (
     Caption,
-    Code,
     Doc,
     Element,
     Figure,
     Image,
     Math,
-    Para,
     Plain,
     RawInline,
-    SoftBreak,
-    Space,
     Span,
     Str,
     Table,
 )
 
-from panpdf import utils
 from panpdf.config import CONFIG_DIR, create_standalone
 from panpdf.filters.filter import Filter
 

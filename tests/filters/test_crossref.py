@@ -1,51 +1,45 @@
+import inspect
+
 import panflute as pf
-
-from panpdf.filters.attribute import Attribute
-from panpdf.filters.crossref import Crossref
-from panpdf.filters.layout import Layout
+import pytest
+from panflute import Doc
 
 
-def test_prepare(doc):
-    crossref = Crossref()
-    crossref._prepare(doc)  # noqa: SLF001
-    for id in [  # noqa: A001
-        "sec:section",
-        "sec:subsection",
-        "fig:pdf",
-        "fig:png",
-        "fig:pgf",
-        "tbl:markdown",
-        "eq:markdown",
-    ]:
-        assert id in crossref.identifiers
+@pytest.mark.parametrize("lang", ["ja", "en"])
+def test_run_ja(lang):
+    from panpdf.filters.crossref import Crossref
 
-
-def test_run(doc):
-    crossref = Crossref(language="ja")
-    crossref._prepare(doc)  # noqa: SLF001
+    text = """
+    [@sec:section] [@sec:subsection]
+    [@fig:pgf] [@fig:png] [@fig:pdf]
+    [@tbl:markdown]
+    [@eq:markdown]
+    [@abc]
+    """
+    doc = pf.convert_text(inspect.cleandoc(text), standalone=True)
+    assert isinstance(doc, Doc)
+    crossref = Crossref(language=lang)
     doc = crossref.run(doc)
     tex = pf.convert_text(doc, input_format="panflute", output_format="latex")
-    for ref in [
-        "\\ref{sec:section}",
-        "図~\\ref{fig:pgf}",
-        "図~\\ref{fig:pdf}",
-        "図~\\ref{fig:png}",
-        "表~\\ref{tbl:markdown}",
-        "式~\\ref{eq:markdown}",
-    ]:
-        assert ref in tex  # type:ignore
-
-
-def test_subcaption():
-    attributes = Attribute()
-    layout = Layout()
-    crossref = Crossref(language="en")
-    text = "![c1](1.png){#fig:1}\n![c2](2.png){#fig:2}\n: c3 {#fig:3}\n\n"
-    text += "[@fig:1], [@fig:2], [@fig:3]"
-    doc = pf.convert_text(text, standalone=True)
-    doc = attributes.run(doc)  # type:ignore
-    doc = layout.run(doc)  # type:ignore
-    doc = crossref.run(doc)
-    tex = pf.convert_text(doc, input_format="panflute", output_format="latex")
-    text = "Fig.~\\ref{fig:1}, Fig.~\\ref{fig:2}, Fig.~\\ref{fig:3}"
-    assert text in tex  # type:ignore
+    if lang == "ja":
+        for ref in [
+            "\\ref{sec:section}",
+            "図~\\ref{fig:pgf}",
+            "図~\\ref{fig:pdf}",
+            "図~\\ref{fig:png}",
+            "表~\\ref{tbl:markdown}",
+            "式~\\ref{eq:markdown}",
+            "{[}@abc{]}",
+        ]:
+            assert ref in tex  # type:ignore
+    else:
+        for ref in [
+            "\\ref{sec:section}",
+            "Fig.~\\ref{fig:pgf}",
+            "Fig.~\\ref{fig:pdf}",
+            "Fig.~\\ref{fig:png}",
+            "Table~\\ref{tbl:markdown}",
+            "Eq.~\\ref{eq:markdown}",
+            "{[}@abc{]}",
+        ]:
+            assert ref in tex  # type:ignore
