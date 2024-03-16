@@ -1,5 +1,5 @@
 import panflute as pf
-from panflute import Caption, Figure, Image, Para, Plain, Space, Str
+from panflute import Caption, Figure, Image, Para, Plain, RawInline, Space, Str
 
 
 def test_figure_single():
@@ -36,6 +36,13 @@ def test_figure_single():
     assert tex == "\n".join(lines)
 
 
+def test_figure_width():
+    text = "![A](a.png){#fig:id width=1cm}"
+    tex = pf.convert_text(text, output_format="latex")
+    assert isinstance(tex, str)
+    assert "[width=1cm,height=\\textheight]" in tex
+
+
 def test_figure_multi():
     text = "a\n\n![A](a.png){#fig:a .c k=v} ![A](a.png){#fig:a .c k=v}\n\nb"
     elems = pf.convert_text(text)
@@ -66,6 +73,23 @@ def test_figure_class():
         "\\begin{figure}",
         "\\centering",
         "\\includegraphics[width=\\textwidth,height=2.66667in]{example.png}",
+        "\\caption{The Caption}\\label{figure1}",
+        "\\end{figure}",
+    ]
+    assert tex == "\n".join(lines)
+
+
+def test_image_class():
+    x = RawInline("abc\ndef", format="latex")
+    y = RawInline("ghi", format="latex")
+    caption = Caption(Plain(Str("The"), Space, Str("Caption")))
+    figure = Figure(Plain(x, y), caption=caption, identifier="figure1")
+    tex = pf.convert_text(figure, input_format="panflute", output_format="latex")
+    lines = [
+        "\\begin{figure}",
+        "\\centering",
+        "abc",
+        "defghi",
         "\\caption{The Caption}\\label{figure1}",
         "\\end{figure}",
     ]

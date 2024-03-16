@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from panflute import Doc, Image, Para, Space, Str
-from panflute.elements import CodeBlock
+from panflute import Doc, Image
 
 from panpdf.filters.jupyter import Jupyter
 

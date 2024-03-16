@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import atexit
 import base64
+import io
 import os
 import shutil
 import subprocess
@@ -13,7 +14,9 @@ from pathlib import Path
 from subprocess import PIPE, STDOUT
 from typing import TYPE_CHECKING
 
+import panflute as pf
 from panflute import (
+    Caption,
     Code,
     Doc,
     Element,
@@ -35,6 +38,7 @@ from panpdf.config import CONFIG_DIR, create_standalone
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from types import UnionType
 
 
@@ -43,31 +47,32 @@ class Layout(Filter):
     types: UnionType = Math | Table | Figure
     external: bool = False
 
-    def prepare(self, doc: Doc):  # noqa: ARG002
-        path_images = Path.cwd() / "_images"
-        path_images.mkdir(exist_ok=True)
+    def __post_init__(self) -> None:
+        self.path_images = Path.cwd() / "_images"  # Path("_images") ?
+        self.path_lualatex = Path.cwd() / "_lualatex"  # Path("_lualatex") ?
+        self.path_standalone = Path("standalone.tex")
 
-        path_lualatex = Path.cwd() / "_lualatex"
-        path_lualatex.mkdir(exist_ok=True)
+    def prepare(self, doc: Doc) -> None:  # noqa: ARG002
+        self.path_images.mkdir(exist_ok=True)
+        self.path_lualatex.mkdir(exist_ok=True)
 
-        path_standalone = Path("standalone.tex")
         if self.external:
             text = create_standalone()
-            path_standalone.write_text(text, encoding="utf8")
+            self.path_standalone.write_text(text, encoding="utf8")
 
-        def delete():
-            if path_lualatex.exists():
-                for file in path_lualatex.iterdir():
-                    file.unlink()
+        atexit.register(self.delete)
 
-                path_lualatex.rmdir()
+    def delete(self):
+        if self.path_lualatex.exists():
+            for file in self.path_lualatex.iterdir():
+                file.unlink()
 
-            if path_standalone.exists():
-                path_standalone.unlink()
+            self.path_lualatex.rmdir()
 
-        atexit.register(delete)
+        if self.path_standalone.exists():
+            self.path_standalone.unlink()
 
-    def action(self, elem: Math | Table | Figure, doc: Doc):  # noqa: ARG002
+    def action(self, elem: Math | Table | Figure, doc: Doc) -> Math | RawInline | Table | Figure:  # noqa: ARG002
         if isinstance(elem, Math):
             return convert_math(elem)
 
@@ -97,106 +102,35 @@ def convert_table(table: Table) -> Table:
     return table
 
 
-def convert_figure(figure: Figure, *, external: bool = False) -> Figure:
+def get_images(figure: Figure) -> list[Image]:
     plain = figure.content[0]
     if not isinstance(plain, Plain):
+        return []
+
+    return [image for image in plain.content if isinstance(image, Image)]
+
+
+def convert_figure(figure: Figure, *, external: bool = False) -> Figure:
+    if not (images := get_images(figure)):
         return figure
 
-    images = [image for image in plain.content if isinstance(image, Image)]
+    images = [convert_image(image, external=external) for image in images]
 
-    if not images:
-        return figure
+    figure.content = [Plain(*images)]
 
-    for image in images:
-        n = len(images)
-        set_width(image, n)
-        set_url(image, multicolumn=n > 1, external=external)
-
-    if len(images) == 1:
-        return create_para_figure(images, create_figure_content)
-
-    if caption:
-        func = partial(minipage, name="subfigure")  # type:ignore
-        suffix = create_suffix(caption)
-        return create_para_figure(images, func, [suffix])
-
-    return create_para_figure(images, minipage)
+    return create_figure(figure)
 
 
-def set_width(image: Image, n: int) -> None:
-    width = image.attributes.get("width", "")
-    if not width and n > 1:
-        image.attributes["width"] = f"{int(100/n)}%"
+def convert_image(image: Image, *, external: bool) -> Image:
+    if "panpdf-pgf" in image.classes and not external:
+        return image
 
-
-def get_width(image: Image, name: str = "width") -> str:
-    width = image.attributes.get(name, "")
-    if isinstance(width, str) and width.endswith("%"):
-        width = f"{int(width[:-1])/100}\\columnwidth"
-
-    return width
-
-
-def set_url(image: Image, *, multicolumn: bool, external: bool = False) -> None:
-    if "panpdf-pgf" in image.classes:
-        if external:
+    for fmt in ["pgf", "pdf", "base64", "svg"]:
+        if f"panpdf-{fmt}" in image.classes:
             image.url = create_image_file(image)
-        else:
-            return
+            break
 
-    else:
-        for cls in ["base64", "svg", "pdf"]:
-            if f"panpdf-{cls}" in image.classes:
-                image.url = create_image_file(image)
-                break
-
-    options = ""
-    if not multicolumn and (width := get_width(image)):
-        options = f"[width={width}]"
-
-    image.url = f"\\includegraphics{options}{{{image.url}}}%"  # Don't delete '%'
-
-
-def create_para_figure(images: list[Image], func, suffix=None) -> Para:
-    begin = RawInline("\\begin{figure}\n\\centering\n", format="latex")
-    contents = [func(image) for image in images]
-    content = list(chain.from_iterable(contents))
-    end = RawInline("\\end{figure}\n", format="latex")
-    return Para(begin, *content, *(suffix or []), end)
-
-
-def R(text):  # noqa: N802
-    return RawInline(text, format="latex")
-
-
-def create_caption(id_: str, caption: list[Element]) -> Span:
-    label = R(f"}}\\label{{{id_}}}\n")
-    return Span(R("\\caption{"), *caption, label, identifier=id_)
-
-
-def create_figure_content(image: Image) -> list[Element]:
-    body = R(f"\\centering\n{image.url}\n")
-    caption = create_caption(image.identifier, list(image.content))
-    return [body, caption]
-
-
-def minipage(image, name="minipage") -> list[Element]:
-    width = get_width(image)
-    begin = RawInline(f"\\begin{{{name}}}[t]{{{width}}}\n", format="latex")
-    content = create_figure_content(image)
-    end = RawInline(f"\\end{{{name}}}%\n", format="latex")
-    elems = [begin, *content, end]
-
-    if hspace := get_width(image, "hspace"):
-        elems += [RawInline(f"\\hspace{{{hspace}}}%\n", format="latex")]
-
-    return elems
-
-
-def create_suffix(caption: list[Element]) -> Span:
-    code = Code("")
-    span = utils.set_attributes(code, Span(*caption))
-    return create_caption(code.identifier, list(span.content))  # type:ignore
+    return image
 
 
 def create_image_file(image: Image) -> str:
@@ -227,32 +161,29 @@ def create_image_file_pgf(image: Image, root: Path, workdir: Path) -> str:
 
     text = path.read_text(encoding="utf-8").replace("$body$", image.url)
     cmds = ["ptex2pdf", "-u", "-l"] if "uplatex" in text.split()[0] else ["lualatex"]
-    text_old = ""
+    cmds.extend(["--halt-on-error", str(name)])
 
-    if path_tex.exists() and path_pdf.exists():
-        text_old = path_tex.read_text(encoding="utf8")
+    if path_tex.exists() and path_pdf.exists() and text == path_tex.read_text(encoding="utf8"):
+        return path_pdf.as_posix()
 
     # spinner = halo.Halo(f"Creating {path_pdf.name}")
     # spinner.start()
-    if text != text_old:
-        curdir = os.getcwd()
-        os.chdir(workdir)
-        name.write_text(text, encoding="utf8")
-        r = subprocess.run(
-            [*cmds, "--halt-on-error", str(name)], stdout=PIPE, stderr=STDOUT, check=False
-        )
-        if r.returncode:
-            # spinner.fail()
-            sys.exit()
-        else:
-            # spinner.succeed()
-            shutil.move(name, path_tex)
-            shutil.move(str(name).replace(".tex", ".pdf"), path_pdf)
-        os.chdir(curdir)
+    curdir = os.getcwd()
+    os.chdir(workdir)
+
+    name.write_text(text, encoding="utf8")
+    r = subprocess.run(cmds, stdout=PIPE, stderr=STDOUT, check=False)
+
+    if r.returncode:
+        # spinner.fail()
+        sys.exit()
     else:
-        pass
         # spinner.succeed()
-    return str(path_pdf).replace("\\", "/")
+        shutil.move(name, path_tex)
+        shutil.move(str(name).replace(".tex", ".pdf"), path_pdf)
+
+    os.chdir(curdir)
+    return path_pdf.as_posix()
 
 
 def create_image_file_base64(image: Image, root: Path) -> str:
@@ -262,7 +193,7 @@ def create_image_file_base64(image: Image, root: Path) -> str:
     path = root / f"{id_}.{ext}"
     data = base64.b64decode(text)
     path.write_bytes(data)
-    return str(path).replace("\\", "/")
+    return path.as_posix()
 
 
 def create_image_file_pdf(image: Image, root: Path) -> str:
@@ -270,7 +201,7 @@ def create_image_file_pdf(image: Image, root: Path) -> str:
     path = root / f"{id_}.pdf"
     data = base64.b64decode(image.url)
     path.write_bytes(data)
-    return str(path).replace("\\", "/")
+    return path.as_posix()
 
 
 def create_image_file_svg(image: Image, root: Path) -> str:  # noqa: ARG001
@@ -280,3 +211,67 @@ def create_image_file_svg(image: Image, root: Path) -> str:  # noqa: ARG001
     # write_to = str(root / f"{id}.pdf")
     # cairosvg.svg2pdf(file_obj=file_obj, write_to=write_to)
     # return write_to.replace("\\", "/")
+
+
+def create_figure_from_image(image: Image) -> Figure:
+    if "panpdf-pgf" in image.classes and not image.url.endswith(".pdf"):
+        plain = Plain(RawInline(image.url, format="latex"))
+    else:
+        plain = Plain(image)
+
+    caption = Caption(Plain(*image.content))
+    identifier = image.identifier
+    return Figure(plain, caption=caption, identifier=identifier)
+
+
+def iter_subfigure_elements(image: Image, env: str, width: str) -> Iterator[Element]:
+    fig = create_figure_from_image(image)
+    fig.caption = Caption(Plain(Str("XXX")))
+
+    tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
+    if not isinstance(tex, str):
+        return
+
+    head, tail = tex.split("\\caption{XXX}")
+    head = head.replace("\\begin{figure}", f"\\begin{{{env}}}{{{width}}}")
+    tail = tail.replace("\\end{figure}", f"\\end{{{env}}}")
+
+    yield RawInline(f"{head}\\caption{{", format="latex")
+    yield from image.content
+    yield RawInline(f"}}{tail}", format="latex")
+
+
+def create_figure(figure: Figure) -> Figure:
+    images = get_images(figure)
+    n = len(images)
+
+    if n == 1:
+        return create_figure_from_image(images[0])
+
+    if caption := figure.caption:
+        env = "subfigure"
+    else:
+        env = "minipage"
+        caption = Caption()
+
+    elems = []
+    for image in images:
+        width = get_width(image, "cwidth") or f"{0.95 / n}\\columnwidth"
+        elems.extend(iter_subfigure_elements(image, env, width))
+
+        if hspace := get_width(image, "hspace"):
+            elems.append(RawInline(f"\n\\hspace{{{hspace}}}%", format="latex"))
+
+        elems.append(RawInline("\n", format="latex"))
+
+    identifier = figure.identifier
+    return Figure(Plain(*elems), caption=caption, identifier=identifier)
+
+
+def get_width(image: Image, name: str) -> str:
+    width = image.attributes.get(name, "")
+
+    if isinstance(width, str) and width.endswith("%"):
+        width = f"{int(width[:-1])/100}\\columnwidth"
+
+    return width
