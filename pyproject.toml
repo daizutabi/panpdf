@@ -24,7 +24,7 @@ dependencies = [
   "aiohttp",
   "jinja2",
   "nbformat",
-  "panflute",
+  "panflute >= 2.3.0",
   "pyyaml",
   "rich",
   "shellingham",
@@ -37,7 +37,7 @@ Source = "https://github.com/daizutabi/panpdf"
 Issues = "https://github.com/daizutabi/panpdf/issues"
 
 [project.scripts]
-panpdf = "panpdf.main:cli"
+panpdf = "panpdf.main:main"
 
 [tool.hatch.version]
 path = "src/panpdf/__about__.py"
@@ -90,6 +90,9 @@ config-path = "ruff_defaults.toml"
 line-length = 100
 target-version = "py312"
 extend = "ruff_defaults.toml"
+
+[tool.ruff.extend-per-file-ignores]
+"main.py" = ["ARG001", "UP007"]
 
 [tool.ruff.lint]
 unfixable = [

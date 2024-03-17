@@ -9,7 +9,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import PIPE, STDOUT
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import panflute as pf
 from panflute import (
@@ -34,10 +34,10 @@ if TYPE_CHECKING:
     from types import UnionType
 
 
-@dataclass
+@dataclass(repr=False)
 class Layout(Filter):
-    types: UnionType = Math | Table | Figure
-    external: bool = False
+    types: ClassVar[UnionType] = Math | Table | Figure
+    standalone: bool = False
 
     def __post_init__(self) -> None:
         self.path_images = Path.cwd() / "_images"  # Path("_images") ?
@@ -48,13 +48,16 @@ class Layout(Filter):
         self.path_images.mkdir(exist_ok=True)
         self.path_lualatex.mkdir(exist_ok=True)
 
-        if self.external:
+        if self.standalone:
             text = create_standalone()
             self.path_standalone.write_text(text, encoding="utf8")
 
         atexit.register(self.delete)
 
     def delete(self):
+        if self.path_images.exists() and not list(self.path_images.iterdir()):
+            self.path_images.rmdir()
+
         if self.path_lualatex.exists():
             for file in self.path_lualatex.iterdir():
                 file.unlink()
@@ -71,7 +74,7 @@ class Layout(Filter):
         if isinstance(elem, Table):
             return convert_table(elem)
 
-        return convert_figure(elem, external=self.external)
+        return convert_figure(elem, standalone=self.standalone)
 
 
 def convert_math(math: Math) -> Math | RawInline:
@@ -102,19 +105,19 @@ def get_images(figure: Figure) -> list[Image]:
     return [image for image in plain.content if isinstance(image, Image)]
 
 
-def convert_figure(figure: Figure, *, external: bool = False) -> Figure:
+def convert_figure(figure: Figure, *, standalone: bool = False) -> Figure:
     if not (images := get_images(figure)):
         return figure
 
-    images = [convert_image(image, external=external) for image in images]
+    images = [convert_image(image, standalone=standalone) for image in images]
 
     figure.content = [Plain(*images)]
 
     return create_figure(figure)
 
 
-def convert_image(image: Image, *, external: bool) -> Image:
-    if "panpdf-pgf" in image.classes and not external:
+def convert_image(image: Image, *, standalone: bool) -> Image:
+    if "panpdf-pgf" in image.classes and not standalone:
         return image
 
     for fmt in ["pgf", "pdf", "base64", "svg"]:

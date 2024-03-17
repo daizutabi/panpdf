@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import panflute as pf
 from panflute import Caption, Figure, Image, Math, Para, Plain, SoftBreak, Space, Span, Str, Table
@@ -15,9 +15,9 @@ if TYPE_CHECKING:
     from panflute import Doc, Element
 
 
-@dataclass
+@dataclass(repr=False)
 class Attribute(Filter):
-    types: UnionType = Table | Figure | Para
+    types: ClassVar[UnionType] = Table | Figure | Para
 
     def action(self, elem: Table | Figure | Para, doc: Doc | None) -> Table | Figure | Para:  # noqa: ARG002
         if isinstance(elem, Table):

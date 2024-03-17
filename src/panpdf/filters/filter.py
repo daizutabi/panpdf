@@ -1,14 +1,22 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from types import UnionType
+from typing import TYPE_CHECKING
 
 import panflute as pf
 from panflute import Doc, Element
+
+if TYPE_CHECKING:
+    from types import UnionType
 
 
 @dataclass
 class Filter:
     types: type[Element] | UnionType
     elements: list[Element] = field(default_factory=list, init=False, repr=False)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"
 
     def _match(self, elem: Element) -> bool:
         if isinstance(elem, self.types):
@@ -26,6 +34,7 @@ class Filter:
 
         self.elements = []
         doc.walk(_append)
+
         if self.elements:
             self.prepare(doc)
 
@@ -48,11 +57,11 @@ class Filter:
     def finalize(self, doc: Doc):
         pass
 
-    def run(self, doc: str | Doc | None = None):
+    def run(self, doc: str | Doc | None = None) -> Doc:
         if isinstance(doc, str):
             doc = pf.convert_text(doc, standalone=True)  # type:ignore
 
-        return pf.run_filter(self._action, self._prepare, self._finalize, doc=doc)
+        return pf.run_filter(self._action, self._prepare, self._finalize, doc=doc)  # type: ignore
 
     def set_metadata(self, doc: Doc, doc_from: Doc):
         pass

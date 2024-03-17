@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from panflute import Image
 
@@ -12,9 +12,9 @@ if TYPE_CHECKING:
     from panflute import Doc
 
 
-@dataclass
+@dataclass(repr=False)
 class Jupyter(Filter):
-    types: type[Image] = Image
+    types: ClassVar[type[Image]] = Image
     store: Store = field(default_factory=Store)
 
     def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002

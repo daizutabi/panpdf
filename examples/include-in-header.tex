@@ -1,0 +1,31 @@
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{subcaption}
+\captionsetup[figure]{format=plain, labelformat=simple, labelsep=quad, font=small}
+\captionsetup[table]{format=plain, labelformat=simple, labelsep=quad, font=small}
+\usepackage{mathtools}
+\ifdefined\Shaded
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}%
+{commandchars=\\\{\},fontsize=\small,numbers=left}
+\usepackage{framed}
+\renewenvironment{Shaded}{\begin{quotation}\begin{snugshade}\linespread{0.9}}%
+{\end{snugshade}\end{quotation}}
+\definecolor{shadecolor}{RGB}{240,240,250}
+\fi
+\jlreqsetup{
+  itemization_labelsep={1em},
+}
+\ltjsetparameter{jacharrange={-2,-3}}
+\ModifyHeading{section}{font=\Large\sffamily\gtfamily\mdseries,lines=2.3,before_lines=0,after_lines=0}
+\ModifyHeading{subsection}{font=\large\sffamily\gtfamily\mdseries,lines=1.8,before_lines=0,after_lines=0}
+\ModifyHeading{subsubsection}{font=\normalsize\sffamily\gtfamily\mdseries,lines=1.3,before_lines=0,after_lines=0}
+\ModifyHeading{paragraph}{font=\normalsize\sffamily\gtfamily\mdseries}
+\ModifyHeading{subparagraph}{font=\normalsize\sffamily\gtfamily\mdseries}
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\pagestyle{fancy}
+\rhead{RIGHT}
+\lhead{LEFT}
+\AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}
+% \rhead{\includegraphics[width=2cm]{}}
+% \lhead{\includegraphics[width=2cm]{}}

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import panflute as pf
-from panflute import Cite, Doc, Figure, Image, Math, Para, Plain, RawInline, Space, Span, Str, Table
+from panflute import Doc, Figure, Math, Para, Plain, RawInline, Table
 
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
@@ -92,7 +92,7 @@ def test_convert_image(store, fmt, tmp_path):
     images = get_images(fig)
     image = images[0]
     image = Jupyter(store=store).action(images[0], Doc())
-    image = convert_image(image, external=False)
+    image = convert_image(image, standalone=False)
     if fmt == "pgf":
         assert image.url.startswith("%%")
     else:
@@ -103,14 +103,14 @@ def test_convert_image_external(store, tmp_path):
     from panpdf.filters.layout import convert_image, get_images
 
     os.chdir(tmp_path)
-    Layout(external=True).prepare(Doc())
+    Layout(standalone=True).prepare(Doc())
 
     text = "![A](pgf.ipynb){#fig:pgf}"
     fig = _get_figure(text)
     images = get_images(fig)
     image = images[0]
     image = Jupyter(store=store).action(images[0], Doc())
-    image = convert_image(image, external=True)
+    image = convert_image(image, standalone=True)
     assert Path(image.url).exists()
 
 
@@ -144,11 +144,11 @@ def test_convert_figure_single(store, fmt, tmp_path):
     from panpdf.filters.layout import convert_figure
 
     os.chdir(tmp_path)
-    Layout(external=True).prepare(Doc())
+    Layout(standalone=True).prepare(Doc())
 
     text = f"![A]({fmt}.ipynb){{#fig:{fmt} width=1cm}}"
     fig = _convert_store(text, store)
-    fig = convert_figure(fig, external=False)
+    fig = convert_figure(fig, standalone=False)
     x = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
     if fmt == "pgf":
@@ -167,13 +167,13 @@ def test_convert_figure_minipage(store, fmt, tmp_path):
     from panpdf.filters.layout import convert_figure
 
     os.chdir(tmp_path)
-    Layout(external=True).prepare(Doc())
+    Layout(standalone=True).prepare(Doc())
 
     text = f"![A $x$]({fmt}.ipynb){{#fig:{fmt} hspace=1mm}}\n"
     text += f"![B]({fmt}.ipynb){{#fig:{fmt} cwidth=3cm}}"
 
     fig = _convert_store(text, store)
-    fig = convert_figure(fig, external=False)
+    fig = convert_figure(fig, standalone=False)
     x = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
     assert "\\hspace{1mm}%\n\\begin{minipage}{3cm}" in x
@@ -187,14 +187,14 @@ def test_convert_figure_subfigure(store, fmt, tmp_path):
     from panpdf.filters.layout import convert_figure
 
     os.chdir(tmp_path)
-    Layout(external=True).prepare(Doc())
+    Layout(standalone=True).prepare(Doc())
 
     text = f"![A $x$]({fmt}.ipynb){{#fig:{fmt} hspace=1mm}}\n"
     text += f"![B]({fmt}.ipynb){{#fig:{fmt} cwidth=3cm}}\n"
     text += ": x $m$ {#fig:X}"
 
     fig = _convert_store(text, store)
-    fig = convert_figure(fig, external=False)
+    fig = convert_figure(fig, standalone=False)
     x = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
     assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in x

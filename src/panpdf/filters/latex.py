@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from panflute import Cite, RawInline, Space, Str
 
@@ -14,9 +14,9 @@ if TYPE_CHECKING:
     from panflute import Doc, Element
 
 
-@dataclass
+@dataclass(repr=False)
 class Latex(Filter):
-    types: type[RawInline] = RawInline
+    types: ClassVar[type[RawInline]] = RawInline
 
     def action(self, elem: RawInline, doc: Doc):  # noqa: ARG002
         if elem.format != "tex":

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from panflute import CodeBlock, RawBlock
 
@@ -18,9 +18,9 @@ pattern = r"(\\definecolor\{shadecolor\}\{.*?\}\{.*?\})"
 DEFAULT_SHADE = m.group(1) if (m := re.search(pattern, IN_HEADER)) else ""
 
 
-@dataclass
+@dataclass(repr=False)
 class OutputCell(Filter):
-    types: type[CodeBlock] = CodeBlock
+    types: ClassVar[type[CodeBlock]] = CodeBlock
 
     def action(self, elem: CodeBlock, doc: Doc):  # noqa: ARG002
         if elem.classes != ["output"]:

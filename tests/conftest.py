@@ -14,7 +14,7 @@ set_asyncio_event_loop_policy()
 
 @pytest.fixture(scope="session")
 def notebook_dir() -> Path:
-    return Path(panpdf.__file__).parent.parent.parent / "tests/notebooks"
+    return Path(panpdf.__file__).parent.parent.parent / "notebooks"
 
 
 @pytest.fixture(scope="session")

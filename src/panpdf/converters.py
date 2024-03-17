@@ -16,12 +16,42 @@ from panpdf.filters.latex import Latex
 from panpdf.filters.layout import Layout
 from panpdf.filters.outputcell import OutputCell
 from panpdf.filters.zotero import Zotero
+from panpdf.stores import Store
+
+
+def create_filters(
+    notebooks_dir: Path | None,
+    *,
+    standalone: bool = False,
+    citeproc: bool = False,
+) -> list[Filter]:
+    filters = [Attribute(), OutputCell(), Latex()]
+
+    if notebooks_dir:
+        jupyter = Jupyter(Store([notebooks_dir.absolute()]))
+        filters.append(jupyter)
+
+    filters.extend((Layout(standalone), Crossref()))
+
+    if citeproc:
+        filters.append(Zotero())
+
+    return filters
+
+
+def action(doc: Doc, filters: list[Filter], *, figure_only: bool = False) -> Doc:
+    for filter_ in filters:
+        doc = filter_.run(doc)
+        if figure_only and isinstance(filter_, Layout):
+            break
+
+    return doc
 
 
 @dataclass
 class Converter:
     citeproc: bool = False
-    notebook_dir: str | None = None
+    notebooks_dir: str | None = None
     external: bool = False
     filters: dict[str, Filter] = field(init=False)
 
@@ -31,16 +61,16 @@ class Converter:
             "outputcell": OutputCell(),
             "latex": Latex(),
             "jupyter": Jupyter(),
-            "layout": Layout(external=self.external),
+            "layout": Layout(standalone=self.external),
             "crossref": Crossref(),
         }
 
         if self.citeproc:
             self.filters["zotero"] = Zotero()
 
-        if self.notebook_dir:
+        if self.notebooks_dir:
             jupyter: Jupyter = self.filters["jupyter"]  # type:ignore
-            jupyter.store.path = [Path(self.notebook_dir).absolute()]
+            jupyter.store.path = [Path(self.notebooks_dir).absolute()]
 
     def convert_text(
         self,
@@ -61,6 +91,7 @@ class Converter:
                 output_format="panflute",
                 standalone=True,
             )
+
         for filter_ in self.filters.values():
             doc = filter_.run(doc)  # type:ignore
             if external_only and isinstance(filter_, Layout):
@@ -111,8 +142,10 @@ class Converter:
             standalone=True,
             external_only=external_only,
         )
+
         if output_format == "panflute" or dry_run:
             return doc
+
         if isinstance(output, str) and output.startswith("."):
             output = doc.get_metadata().get("title", "a") + output  # type:ignore
 
@@ -143,6 +176,8 @@ class Converter:
             else:
                 if spinner:
                     spinner.succeed()
+
         if not output:
             return text
+
         return None

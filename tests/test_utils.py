@@ -17,9 +17,9 @@ def test_join_files(tmpdir):
 
 def test_collect():
     path = Path(utils.__file__).parent.parent
-    paths = list(utils.collect(Path(utils.__file__), ".py"))
+    paths = list(utils.collect([Path(utils.__file__)], (".py",)))
     assert len(paths) == 1
-    paths = list(utils.collect([path], ".py"))
+    paths = list(utils.collect([path], (".py",)))
     assert len(paths) > 10
 
 

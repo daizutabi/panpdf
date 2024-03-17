@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import aiohttp
 from aiohttp import ClientError, ClientResponse, ClientSession
@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     from panflute import Doc
 
 
-@dataclass
+@dataclass(repr=False)
 class Zotero(Filter):
-    types: type[Cite] = Cite
+    types: ClassVar[type[Cite]] = Cite
     csl: dict[str, dict] = field(default_factory=dict)
 
     def action(self, elem: Cite, doc: Doc):  # noqa: ARG002

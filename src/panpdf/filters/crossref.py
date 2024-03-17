@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from panflute import Cite, RawInline, Span, Str
+from panflute import Cite, Doc, RawInline, Span, Str
 
 from panpdf.filters.filter import Filter
+from panpdf.utils import get_metadata
 
 if TYPE_CHECKING:
     from types import UnionType
@@ -16,15 +17,21 @@ if TYPE_CHECKING:
 CROSSREF_PATTERN = re.compile("^(sec|fig|tbl|eq):.+$")
 
 
-@dataclass
+@dataclass(repr=False)
 class Crossref(Filter):
-    types: UnionType = Span | Cite
+    types: ClassVar[UnionType] = Span | Cite
     prefix: dict[str, list[Element]] = field(default_factory=dict)
     suffix: dict[str, list[Element]] = field(default_factory=dict)
-    language: str = "en"
 
-    def __post_init__(self):
-        self.set_language(self.language)
+    def prepare(self, doc: Doc):
+        name = get_metadata(doc, "figure-ref-name") or "Fig."
+        self.set_prefix("fig", name)
+
+        name = get_metadata(doc, "table-ref-name") or "Table"
+        self.set_prefix("tbl", name)
+
+        name = get_metadata(doc, "equation-ref-name") or "Eq."
+        self.set_prefix("eq", name)
 
     def action(self, elem: Span | Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002
         if isinstance(elem, Span):
@@ -43,18 +50,6 @@ class Crossref(Filter):
         prefix = self.prefix.get(kind, [])
         suffix = self.suffix.get(kind, [])
         return [*prefix, ref, *suffix]
-
-    def set_language(self, language: str):
-        self.language = language
-        if self.language.lower().startswith("ja"):
-            self.set_prefix("fig", "図")
-            self.set_prefix("tbl", "表")
-            self.set_prefix("eq", "式")
-
-        else:
-            self.set_prefix("fig", "Fig.")
-            self.set_prefix("tbl", "Table")
-            self.set_prefix("eq", "Eq.")
 
     def set_prefix(self, kind: str, prefix: str):
         self.prefix[kind] = [Str(prefix), RawInline("~", format="latex")]
