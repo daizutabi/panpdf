@@ -19,14 +19,14 @@ class Latex(Filter):
     types: ClassVar[type[RawInline]] = RawInline
 
     def action(self, elem: RawInline, doc: Doc):  # noqa: ARG002
-        if elem.format != "tex":
+        if elem.format != "tex":  # NOT 'latex'
             return elem
 
         if not (m := CROSSREF_PATTERN.match(elem.text)):
             return elem
 
         cmd, spacer, ref, suffix = m.groups()
-        elems: list[Element] = [RawInline(cmd, format="tex")]
+        elems: list[Element] = [RawInline(cmd, format="tex")]  # NOT 'latex'
 
         if spacer:
             elems.append(Space())

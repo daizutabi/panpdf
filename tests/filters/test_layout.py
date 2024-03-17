@@ -177,7 +177,8 @@ def test_convert_figure_minipage(store, fmt, tmp_path):
     x = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
     assert "\\hspace{1mm}%\n\\begin{minipage}{3cm}" in x
-    assert "\\caption{}" in x
+    assert "height" not in x
+    assert "\\caption{}" not in x
 
 
 def test_convert_figure_subfigure(store, fmt, tmp_path):

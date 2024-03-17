@@ -41,11 +41,18 @@ def cli(
             show_default=False,
         ),
     ] = None,
+    data_dir: Annotated[
+        Optional[Path],
+        Option(
+            metavar="DIRECTORY",
+            help="Specify the user data directory to search for pandoc data files.",
+        ),
+    ] = None,
     notebooks_dir: Annotated[
         Path,
         Option(
             metavar="DIRECTORY",
-            help="Specify the the notebooks directory to search for figures.",
+            help="Specify the notebooks directory to search for figures.",
         ),
     ] = Path("../notebooks"),
     defaults: Annotated[
@@ -164,7 +171,6 @@ def cli(
         SpinnerColumn(),
         *Progress.get_default_columns(),
         TimeElapsedColumn(),
-        transient=False,
     ) as progress:
         progress.add_task(f'[green]Producing "{output}"', total=None)
 
@@ -178,22 +184,6 @@ def cli(
 
     if not output:
         typer.echo(tex)
-
-    # text = utils.join_files(files)
-    # typer.echo(text)
-
-    # typer.echo(files)
-    # typer.echo(output_dir)
-    # typer.echo(data_dir)
-    # typer.echo(notebooks_dir)
-
-    # if output_format == "pdf":
-    #     standalone = True
-
-    # if paths:
-    #     text = utils.join_files(paths)
-    # elif not text:
-    #     return None
 
 
 def prompt() -> str:
@@ -227,3 +217,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# def convert_notebook(path: str):
+#     nb = nbformat.read(path, as_version=4)
+#     ids = get_ids(nb, "fig")
+#     notebook_dir, path = os.path.split(path)
+#     if not notebook_dir:
+#         notebook_dir = "."
+#     imgs = [f"![a]({path}){{#{id_}}}\n\n" for id_ in ids]
+#     text = "".join(imgs)
+#     converter = Converter(False, notebook_dir, True)
+#     converter.convert_text(text, standalone=True, external_only=True)

@@ -149,6 +149,17 @@ def create_image_file(image: Image) -> str:
 
 
 def create_image_file_pgf(image: Image, root: Path, workdir: Path) -> str:
+    doc = image.doc
+    if not isinstance(doc, Doc):
+        msg = "Doc not found."
+        raise TypeError(msg)
+
+    content = doc.content
+    doc.content = [Plain(RawInline(image.url, format="latex"))]
+    tex = pf.convert_text(doc, input_format="panflute", output_format="latex", standalone=True)
+    print(tex)
+    sys.exit()
+
     id_ = image.identifier.replace("fig:", "")
     name = Path(f"{id_}.tex")
     path_tex = root / name
