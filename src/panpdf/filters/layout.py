@@ -67,7 +67,11 @@ class Layout(Filter):
         if self.path_standalone.exists():
             self.path_standalone.unlink()
 
-    def action(self, elem: Math | Table | Figure, doc: Doc) -> Math | RawInline | Table | Figure:  # noqa: ARG002
+    def action(
+        self,
+        elem: Math | Table | Figure,
+        doc: Doc,  # noqa: ARG002
+    ) -> Math | RawInline | Table | Figure | Plain:
         if isinstance(elem, Math):
             return convert_math(elem)
 
@@ -105,7 +109,7 @@ def get_images(figure: Figure) -> list[Image]:
     return [image for image in plain.content if isinstance(image, Image)]
 
 
-def convert_figure(figure: Figure, *, standalone: bool = False) -> Figure:
+def convert_figure(figure: Figure, *, standalone: bool = False) -> Figure | Plain:
     if not (images := get_images(figure)):
         return figure
 
@@ -227,6 +231,7 @@ def iter_subfigure_elements(image: Image, env: str, width: str) -> Iterator[Elem
     if not isinstance(tex, str):
         return
 
+    tex = tex.replace(",height=\\textheight", "")
     head, tail = tex.split("\\caption{XXX}")
     head = head.replace("\\begin{figure}", f"\\begin{{{env}}}{{{width}}}")
     tail = tail.replace("\\end{figure}", f"\\end{{{env}}}")
@@ -236,7 +241,7 @@ def iter_subfigure_elements(image: Image, env: str, width: str) -> Iterator[Elem
     yield RawInline(f"}}{tail}", format="latex")
 
 
-def create_figure(figure: Figure) -> Figure:
+def create_figure(figure: Figure) -> Figure | Plain:
     images = get_images(figure)
     n = len(images)
 
@@ -259,8 +264,12 @@ def create_figure(figure: Figure) -> Figure:
 
         elems.append(RawInline("\n", format="latex"))
 
-    identifier = figure.identifier
-    return Figure(Plain(*elems), caption=caption, identifier=identifier)
+    if identifier := figure.identifier:
+        return Figure(Plain(*elems), caption=caption, identifier=identifier)
+
+    begin = RawInline("\\begin{figure}\n\\centering\n", format="latex")
+    end = RawInline("\\end{figure}\n", format="latex")
+    return Plain(begin, *elems, end)
 
 
 def get_width(image: Image, name: str) -> str:
