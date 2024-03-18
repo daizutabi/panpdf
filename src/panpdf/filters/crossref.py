@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar
 
-from panflute import Cite, Doc, RawInline, Span, Str
+from panflute import Cite, Doc, Math, RawInline, Span, Str
 
 from panpdf.filters.filter import Filter
 from panpdf.utils import get_metadata
@@ -33,9 +33,11 @@ class Crossref(Filter):
         name = get_metadata(doc, "equation-ref-name") or "Eq."
         self.set_prefix("eq", name)
 
-    def action(self, elem: Span | Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002
+    def action(self, elem: Span | Cite, doc: Doc) -> list[Element] | Span | None:  # noqa: ARG002
         if isinstance(elem, Span):
-            return list(elem.content)
+            if isinstance(elem.content[0], Math):
+                return list(elem.content)
+            return elem
 
         if isinstance(elem, Cite) and elem.citations:
             id_ = elem.citations[0].id  # type:ignore

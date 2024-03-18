@@ -35,7 +35,7 @@ class Zotero(Filter):
             except ClientError:
                 pass  # TODO: warning
             else:
-                self.csl.update(dict(zip(keys, csls)))  # noqa: B905
+                self.csl.update(dict(zip(keys, csls, strict=True)))
 
         if csls := [csl for csl in self.csl.values() if csl]:
             doc.metadata["references"] = csls

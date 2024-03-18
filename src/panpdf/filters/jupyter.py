@@ -9,6 +9,8 @@ from panpdf.filters.filter import Filter
 from panpdf.stores import Store
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from panflute import Doc
 
 
@@ -16,19 +18,20 @@ if TYPE_CHECKING:
 class Jupyter(Filter):
     types: ClassVar[type[Image]] = Image
     store: Store = field(default_factory=Store)
+    convert: Callable[[dict[str, str], Image], Image] | None = None
 
     def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
         url = image.url
-        id_ = image.identifier
-        if id_ and (not url or url.endswith(".ipynb")):
+        identifier = image.identifier
+        if identifier and (not url or url.endswith(".ipynb")):
             try:
-                data = self.store.get_data(id_, url)
+                data = self.store.get_data(url, identifier)
             except ValueError:
-                msg = f"[panpdf] Unknown url or id: url='{url}' id='{id_}'"
+                msg = f"[panpdf] Unknown url or id: url='{url}' id='{identifier}'"
                 raise ValueError(msg) from None
 
-            if data:
-                return convert_image(data, image)
+            if data and self.convert:
+                return self.convert(data, image)
 
         return image
 
@@ -76,3 +79,30 @@ def convert_image_pgf(data: dict[str, str], image: Image) -> Image:
     image.url = text.strip()
     image.classes.append("panpdf-pgf")
     return image
+
+
+# def create_image_file_base64(image: Image, root: Path) -> str:
+#     ext = image.url.split("/")[1].split(";")[0]
+#     text = image.url[image.url.index("base64,") + 7 :]
+#     id_ = image.identifier.replace("fig:", "")
+#     path = root / f"{id_}.{ext}"
+#     data = base64.b64decode(text)
+#     path.write_bytes(data)
+#     return path.as_posix()
+
+
+# def create_image_file_pdf(image: Image, root: Path) -> str:
+#     id_ = image.identifier.replace("fig:", "")
+#     path = root / f"{id_}.pdf"
+#     data = base64.b64decode(image.url)
+#     path.write_bytes(data)
+#     return path.as_posix()
+
+
+# def create_image_file_svg(image: Image, root: Path) -> str:  # noqa: ARG001
+#     raise NotImplementedError
+#     # file_obj = io.StringIO(image.url)
+#     # id = image.identifier.replace("fig:", "")
+#     # write_to = str(root / f"{id}.pdf")
+#     # cairosvg.svg2pdf(file_obj=file_obj, write_to=write_to)
+#     # return write_to.replace("\\", "/")

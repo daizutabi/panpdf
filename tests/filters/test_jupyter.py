@@ -70,9 +70,12 @@ def test_image_pgf(store, image_factory, fmt):
     match fmt:
         case "pgf":
             assert image.url.startswith("%% Creator: Matplotlib")
+
         case "png":
             assert image.url.startswith("data:image/png;base64,iVBOR")
+
         case "pdf":
             assert image.url.startswith("JVBERi0xLjQKJazcIKu6C")
+
         case "svg":
             assert image.url.startswith('<?xml version="1.0"')

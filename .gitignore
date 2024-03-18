@@ -8,3 +8,4 @@ build/
 dist/
 lcov.info
 sdist/
+*.pdf
