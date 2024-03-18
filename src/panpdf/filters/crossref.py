@@ -40,15 +40,15 @@ class Crossref(Filter):
             return elem
 
         if isinstance(elem, Cite) and elem.citations:
-            id_ = elem.citations[0].id  # type:ignore
-            if CROSSREF_PATTERN.match(id_):
-                return self.create_ref(id_)
+            identifier = elem.citations[0].id  # type:ignore
+            if CROSSREF_PATTERN.match(identifier):
+                return self.create_ref(identifier)
 
         return None
 
-    def create_ref(self, id_: str) -> list[Element]:
-        ref = RawInline(f"\\ref{{{id_}}}", format="latex")
-        kind = id_.split(":")[0]
+    def create_ref(self, identifier: str) -> list[Element]:
+        ref = RawInline(f"\\ref{{{identifier}}}", format="latex")
+        kind = identifier.split(":")[0]
         prefix = self.prefix.get(kind, [])
         suffix = self.suffix.get(kind, [])
         return [*prefix, ref, *suffix]

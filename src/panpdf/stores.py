@@ -70,6 +70,12 @@ class Store:
         if output := get_data_by_type(outputs, "display_data"):
             output[mime] = data
 
+    def delete_data(self, url: str, identifier: str, mime: str) -> None:
+        outputs = self.get_outputs(url, identifier)
+        output = get_data_by_type(outputs, "display_data")
+        if output and mime in output:
+            del output[mime]
+
     def save_notebook(self, url: str) -> None:
         self._write(self._get_abs_path(url))
 

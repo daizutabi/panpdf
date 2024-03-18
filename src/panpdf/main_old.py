@@ -131,7 +131,7 @@ def convert_notebook(path: str):
     notebook_dir, path = os.path.split(path)
     if not notebook_dir:
         notebook_dir = "."
-    imgs = [f"![a]({path}){{#{id_}}}\n\n" for id_ in ids]
+    imgs = [f"![a]({path}){{#{identifier}}}\n\n" for identifier in ids]
     text = "".join(imgs)
     converter = Converter(False, notebook_dir, True)
     converter.convert_text(text, standalone=True, external_only=True)

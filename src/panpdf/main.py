@@ -1,3 +1,5 @@
+import os
+from collections.abc import Iterable, Iterator
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
@@ -8,9 +10,9 @@ from panflute import Doc
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 from typer import Argument, Option
 
-from panpdf import utils
 from panpdf.__about__ import __version__
 from panpdf.converters import action, create_filters
+from panpdf.panflute import convert_text, get_metadata
 
 
 class OutputFormat(str, Enum):
@@ -119,41 +121,27 @@ def cli(
     if version:
         show_version(pandoc_path)
 
-    if not files:
-        text = prompt()
+    text = get_text(files)
 
-    else:
-        files = list(utils.collect(file for file in files))
-        text = utils.join_files(files)
-
-    if not text:
-        typer.secho("No input text. Aborted.", fg="red")
+    if not defaults.exists():
+        typer.secho(f"Defaults file not found: {defaults}.", fg="red")
         raise typer.Exit
 
-    extra_args = []
-
-    if defaults.exists():
-        extra_args.extend(["--defaults", defaults.as_posix()])
+    extra_args = ["--defaults", defaults.as_posix()]
 
     doc: Doc = pf.convert_text(
         text,
         standalone=True,
-        pandoc_path=pandoc_path,
         extra_args=extra_args,
+        pandoc_path=pandoc_path,
     )  # type:ignore
 
     if output and str(output).startswith("."):
-        title = utils.get_metadata(doc, "title") or "a"
+        title = get_metadata(doc, "title") or "a"
         output = Path(f"{title}{output}")
 
     if output_format == OutputFormat.auto:
-        if not output or output.suffix == ".tex":
-            output_format = OutputFormat.latex
-        elif output.suffix == ".pdf":
-            output_format = OutputFormat.pdf
-        else:
-            typer.secho(f"Unknown output format: {output.suffix}", fg="red")
-            raise typer.Exit
+        output_format = get_output_format(output)
 
     if output_format == OutputFormat.pdf:
         standalone = True
@@ -167,23 +155,51 @@ def cli(
     if output:
         extra_args.extend(["--output", output.as_posix()])
 
-    with Progress(
-        SpinnerColumn(),
-        *Progress.get_default_columns(),
-        TimeElapsedColumn(),
-    ) as progress:
-        progress.add_task(f'[green]Producing "{output}"', total=None)
-
-        tex = pf.convert_text(
-            doc,
-            input_format="panflute",
-            output_format=output_format.value,
-            standalone=standalone,
-            extra_args=extra_args,
-        )
+    tex = convert_text(
+        doc,
+        output_format=output_format.value,
+        standalone=standalone,
+        extra_args=extra_args,
+        pandoc_path=pandoc_path,
+    )
 
     if not output:
         typer.echo(tex)
+
+
+def get_text(files: list[Path] | None) -> str:
+    if files:
+        it = (file.read_text(encoding="utf8") for file in collect(files))
+        return "\n\n".join(it)
+
+    if text := prompt():
+        return text
+
+    typer.secho("No input text. Aborted.", fg="red")
+    raise typer.Exit
+
+
+def collect(files: Iterable[Path]) -> Iterator[Path]:
+    for file in files:
+        if file.is_dir():
+            for dirpath, _dirnames, filenames in os.walk(file):
+                for filename in filenames:
+                    if filename.endswith(".md"):
+                        yield Path(dirpath) / filename
+
+        elif file.suffix == ".md":
+            yield file
+
+
+def get_output_format(output: Path | None) -> OutputFormat:
+    if not output or output.suffix == ".tex":
+        return OutputFormat.latex
+
+    if output.suffix == ".pdf":
+        return OutputFormat.pdf
+
+    typer.secho(f"Unknown output format: {output.suffix}", fg="red")
+    raise typer.Exit
 
 
 def prompt() -> str:
@@ -224,7 +240,7 @@ if __name__ == "__main__":
 #     notebook_dir, path = os.path.split(path)
 #     if not notebook_dir:
 #         notebook_dir = "."
-#     imgs = [f"![a]({path}){{#{id_}}}\n\n" for id_ in ids]
+#     imgs = [f"![a]({path}){{#{identifier}}}\n\n" for identifier in ids]
 #     text = "".join(imgs)
 #     converter = Converter(False, notebook_dir, True)
 #     converter.convert_text(text, standalone=True, external_only=True)

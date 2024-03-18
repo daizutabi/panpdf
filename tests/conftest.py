@@ -7,9 +7,10 @@ import pytest
 from panflute import Figure, Image
 
 import panpdf
-from panpdf.utils import set_asyncio_event_loop_policy
 
-set_asyncio_event_loop_policy()
+# from panpdf.utils import set_asyncio_event_loop_policy
+
+# set_asyncio_event_loop_policy()
 
 
 @pytest.fixture(scope="session")
@@ -26,8 +27,8 @@ def store(notebook_dir):
 
 @pytest.fixture(scope="session")
 def figure_factory():
-    def figure_factory(id_, url="", caption="caption") -> Figure:
-        text = f"![{caption}]({url}){{#{id_}}}"
+    def figure_factory(url, identifier, caption="caption") -> Figure:
+        text = f"![{caption}]({url}){{#{identifier}}}"
         elems = pf.convert_text(text)
         assert isinstance(elems, list)
         fig = elems[0]
@@ -41,8 +42,8 @@ def figure_factory():
 def image_factory(figure_factory):
     from panpdf.filters.attribute import set_attributes_figure
 
-    def image_factory(id_, url="", caption="caption") -> Image:
-        fig = figure_factory(id_, url, caption)
+    def image_factory(url, identifier, caption="caption") -> Image:
+        fig = figure_factory(url, identifier, caption)
         set_attributes_figure(fig)
         img = fig.content[0].content[0]
         assert isinstance(img, Image)

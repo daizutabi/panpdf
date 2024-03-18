@@ -82,10 +82,10 @@ class Layout(Filter):
 
 
 def convert_math(math: Math) -> Math | RawInline:
-    if (span := math.parent) and isinstance(span, Span) and (id_ := span.identifier):
+    if (span := math.parent) and isinstance(span, Span) and (identifier := span.identifier):
         env = "equation" if "\\\\" not in math.text else "eqnarray"
         text = f"\\begin{{{env}}}\n{math.text}"
-        text += f"\\label{{{id_}}}\n"
+        text += f"\\label{{{identifier}}}\n"
         text += f"\\end{{{env}}}\n"
         return RawInline(text, format="latex")
 
@@ -160,10 +160,10 @@ def create_image_file_pgf(image: Image, root: Path, workdir: Path) -> str:
     print(tex)
     sys.exit()
 
-    id_ = image.identifier.replace("fig:", "")
-    name = Path(f"{id_}.tex")
+    identifier = image.identifier.replace("fig:", "")
+    name = Path(f"{identifier}.tex")
     path_tex = root / name
-    path_pdf = root / f"{id_}.pdf"
+    path_pdf = root / f"{identifier}.pdf"
     path = Path("standalone.tex")
 
     if not path.exists():
@@ -199,16 +199,16 @@ def create_image_file_pgf(image: Image, root: Path, workdir: Path) -> str:
 def create_image_file_base64(image: Image, root: Path) -> str:
     ext = image.url.split("/")[1].split(";")[0]
     text = image.url[image.url.index("base64,") + 7 :]
-    id_ = image.identifier.replace("fig:", "")
-    path = root / f"{id_}.{ext}"
+    identifier = image.identifier.replace("fig:", "")
+    path = root / f"{identifier}.{ext}"
     data = base64.b64decode(text)
     path.write_bytes(data)
     return path.as_posix()
 
 
 def create_image_file_pdf(image: Image, root: Path) -> str:
-    id_ = image.identifier.replace("fig:", "")
-    path = root / f"{id_}.pdf"
+    identifier = image.identifier.replace("fig:", "")
+    path = root / f"{identifier}.pdf"
     data = base64.b64decode(image.url)
     path.write_bytes(data)
     return path.as_posix()

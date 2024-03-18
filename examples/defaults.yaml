@@ -9,10 +9,10 @@ pdf-engine-opts:
   - -halt-on-error
   - -shell-escape
 
-csl: ieee.csl
-include-in-header: include-in-header.tex
-include-before-body: include-before-body.tex
-include-after-body: include-after-body.tex
+csl: ${.}/ieee.csl
+include-in-header: ${.}/include-in-header.tex
+include-before-body: ${.}/include-before-body.tex
+include-after-body: ${.}/include-after-body.tex
 
 metadata:
   toc-title: 目次
