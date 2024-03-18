@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 from panflute import CodeBlock, RawBlock
 
-from panpdf.config import CONFIG_DIR
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
     from panflute import Doc
 
-path = CONFIG_DIR / "include-in-header.tex"
-IN_HEADER = path.read_text(encoding="utf-8")
-pattern = r"(\\definecolor\{shadecolor\}\{.*?\}\{.*?\})"
-DEFAULT_SHADE = m.group(1) if (m := re.search(pattern, IN_HEADER)) else ""
+# path = CONFIG_DIR / "include-in-header.tex"
+# IN_HEADER = path.read_text(encoding="utf-8")
+# pattern = r"(\\definecolor\{shadecolor\}\{.*?\}\{.*?\})"
+# DEFAULT_SHADE = m.group(1) if (m := re.search(pattern, IN_HEADER)) else ""
 
 
 @dataclass(repr=False)
@@ -28,9 +26,7 @@ class OutputCell(Filter):
 
         elem.classes = ["text"]
         pre = "\\vspace{-0.5\\baselineskip}\\definecolor{shadecolor}{rgb}{1,1,0.9}%"
-        elems = [RawBlock(pre, format="latex"), elem]
+        return [RawBlock(pre, format="latex"), elem]
 
-        if DEFAULT_SHADE:
-            elems += [RawBlock(DEFAULT_SHADE, format="latex")]
-
-        return elems
+        # if DEFAULT_SHADE:
+        #     elems += [RawBlock(DEFAULT_SHADE, format="latex")]

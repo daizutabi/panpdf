@@ -1,58 +1,54 @@
-import os
-from pathlib import Path
-
 import panflute as pf
-from panflute import Doc, Figure, Math, Para, Plain, RawInline, Table
+from panflute import Doc, Figure, Para, RawInline, Span, Table
 
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
-from panpdf.filters.layout import Layout
 
 
-def _convert(text: str):
+def _prepare(text: str):
     return Attribute().run(text).content[0]  # type:ignore
 
 
-def test_convert_math_equation():
-    from panpdf.filters.layout import convert_math
+def test_convert_span_equation():
+    from panpdf.filters.layout import convert_span
 
     text = "$$x=1$$ {#id}"
-    math = _convert(text).content[0].content[0]  # type:ignore
-    assert isinstance(math, Math)
-    m = convert_math(math)
-    assert isinstance(m, RawInline)
+    span = _prepare(text).content[0]  # type:ignore
+    assert isinstance(span, Span)
+    r = convert_span(span)
+    assert isinstance(r, RawInline)
     text = "\\begin{equation}\nx=1\\label{id}\n\\end{equation}\n"
-    assert m.text == text
-    assert m.format == "latex"
+    assert r.text == text
+    assert r.format == "latex"
 
 
-def test_convert_math_eqnarray():
-    from panpdf.filters.layout import convert_math
+def test_convert_span_eqnarray():
+    from panpdf.filters.layout import convert_span
 
     text = "$$x=1\\\\\ny=2$$ {#id}"
-    math = _convert(text).content[0].content[0]  # type:ignore
-    assert isinstance(math, Math)
-    m = convert_math(math)
+    span = _prepare(text).content[0]  # type:ignore
+    assert isinstance(span, Span)
+    m = convert_span(span)
     assert isinstance(m, RawInline)
     text = "\\begin{eqnarray}\nx=1\\\\\ny=2\\label{id}\n\\end{eqnarray}\n"
     assert m.text == text
     assert m.format == "latex"
 
 
-def test_convert_math():
-    from panpdf.filters.layout import convert_math
+def test_convert_span():
+    from panpdf.filters.layout import convert_span
 
-    math = _convert("$$x=1$$").content[0].content[0]  # type:ignore
-    assert isinstance(math, Math)
-    m = convert_math(math)
-    assert isinstance(m, Math)
+    span = _prepare("$$x=1$$").content[0]  # type:ignore
+    assert isinstance(span, Span)
+    s = convert_span(span)
+    assert isinstance(s, Span)
 
 
 def test_convert_table():
     from panpdf.filters.layout import convert_table
 
     text = "|a|a|\n|-|-|\n|1|2|\n: caption {#tbl:id}"
-    table = _convert(text)
+    table = _prepare(text)
     assert isinstance(table, Table)
     Attribute().action(table, None)
     table = convert_table(table)
@@ -78,125 +74,52 @@ def test_get_images():
     assert len(get_images(fig)) == 3
 
 
-def test_convert_image(store, fmt, tmp_path):
+def test_create_figure_from_image(store, defaults, fmt):
     if fmt == "svg":
         return
 
-    from panpdf.filters.layout import convert_image, get_images
-
-    os.chdir(tmp_path)
-    Layout().prepare(Doc())
+    from panpdf.filters.layout import create_figure_from_image, get_images
 
     text = f"![A]({fmt}.ipynb){{#fig:{fmt}}}"
     fig = _get_figure(text)
     images = get_images(fig)
     image = images[0]
-    image = Jupyter(store=store).action(images[0], Doc())
-    image = convert_image(image, standalone=False)
+    image = Jupyter(store=store, defaults=defaults).action(images[0], Doc())
+    fig = create_figure_from_image(image)
+    tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
     if fmt == "pgf":
-        assert image.url.startswith("%%")
+        assert "\\endgroup%\n\\caption{A}" in tex
     else:
-        assert Path(image.url).exists()
+        assert f".{fmt}}}\n" in tex
+    assert tex.endswith(f"\\caption{{A}}\\label{{fig:{fmt}}}\n\\end{{figure}}")
 
 
-def test_convert_image_external(store, tmp_path):
-    from panpdf.filters.layout import convert_image, get_images
-
-    os.chdir(tmp_path)
-    Layout(standalone=True).prepare(Doc())
-
-    text = "![A](pgf.ipynb){#fig:pgf}"
-    fig = _get_figure(text)
-    images = get_images(fig)
-    image = images[0]
-    image = Jupyter(store=store).action(images[0], Doc())
-    image = convert_image(image, standalone=True)
-    assert Path(image.url).exists()
-
-
-def test_add_images():
-    from panpdf.filters.layout import get_images
-
-    text = "![A](pgf.ipynb){#fig:pgf}"
-    fig = _get_figure(text)
-    images = get_images(fig)
-    assert len(images) == 1
-    fig.content = [Plain(*images, *images)]
-    images = get_images(fig)
-    assert len(images) == 2
-
-
-def _convert_store(text: str, store) -> Figure:
-    from panpdf.filters.layout import get_images
-
-    fig = _get_figure(text)
-    jupyter = Jupyter(store=store)
-    for image in get_images(fig):
-        jupyter.action(image, Doc())
-
-    return fig
-
-
-def test_convert_figure_single(store, fmt, tmp_path):
-    if fmt == "svg":
-        return
-
+def test_convert_figure_minipage():
     from panpdf.filters.layout import convert_figure
 
-    os.chdir(tmp_path)
-    Layout(standalone=True).prepare(Doc())
+    text = "![A $x$](a.png){#fig:a hspace=1mm}\n"
+    text += "![B](b.png){#fig:b cwidth=3cm}"
 
-    text = f"![A]({fmt}.ipynb){{#fig:{fmt} width=1cm}}"
-    fig = _convert_store(text, store)
-    fig = convert_figure(fig, standalone=False)
-    x = pf.convert_text(fig, input_format="panflute", output_format="latex")
-    assert isinstance(x, str)
-    if fmt == "pgf":
-        assert x.startswith("\\begin{figure}\n\\centering\n%% Creator")
-        assert x.endswith("\\endgroup%\n\\caption{A}\\label{fig:pgf}\n\\end{figure}")
-    else:
-        assert x.startswith("\\begin{figure}\n\\centering\n\\includegraphics[w")
-        assert f"{fmt}.{fmt}" in x
-        assert x.endswith(f"\\caption{{A}}\\label{{fig:{fmt}}}\n\\end{{figure}}")
+    fig = _get_figure(text)
+    fig = convert_figure(fig)
+    tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\hspace{1mm}%\n\\begin{minipage}{3cm}" in tex
+    assert "height" not in tex
+    assert "\\caption{}" not in tex
 
 
-def test_convert_figure_minipage(store, fmt, tmp_path):
-    if fmt == "svg":
-        return
-
+def test_convert_figure_subfigure():
     from panpdf.filters.layout import convert_figure
 
-    os.chdir(tmp_path)
-    Layout(standalone=True).prepare(Doc())
-
-    text = f"![A $x$]({fmt}.ipynb){{#fig:{fmt} hspace=1mm}}\n"
-    text += f"![B]({fmt}.ipynb){{#fig:{fmt} cwidth=3cm}}"
-
-    fig = _convert_store(text, store)
-    fig = convert_figure(fig, standalone=False)
-    x = pf.convert_text(fig, input_format="panflute", output_format="latex")
-    assert isinstance(x, str)
-    assert "\\hspace{1mm}%\n\\begin{minipage}{3cm}" in x
-    assert "height" not in x
-    assert "\\caption{}" not in x
-
-
-def test_convert_figure_subfigure(store, fmt, tmp_path):
-    if fmt == "svg":
-        return
-
-    from panpdf.filters.layout import convert_figure
-
-    os.chdir(tmp_path)
-    Layout(standalone=True).prepare(Doc())
-
-    text = f"![A $x$]({fmt}.ipynb){{#fig:{fmt} hspace=1mm}}\n"
-    text += f"![B]({fmt}.ipynb){{#fig:{fmt} cwidth=3cm}}\n"
+    text = "![A $x$](a.png){#fig:a hspace=1mm}\n"
+    text += "![B](b.png){#fig:b cwidth=3cm}\n"
     text += ": x $m$ {#fig:X}"
 
-    fig = _convert_store(text, store)
-    fig = convert_figure(fig, standalone=False)
-    x = pf.convert_text(fig, input_format="panflute", output_format="latex")
-    assert isinstance(x, str)
-    assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in x
-    assert "\\caption{x \\(m\\)}\\label{fig:X}" in x
+    fig = _get_figure(text)
+    fig = convert_figure(fig)
+    tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in tex
+    assert "\\caption{x \\(m\\)}\\label{fig:X}" in tex

@@ -4,14 +4,12 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar
 
-from panflute import Cite, Doc, Math, RawInline, Span, Str
+from panflute import Cite, RawInline, Str
 
 from panpdf.filters.filter import Filter
-from panpdf.utils import get_metadata
+from panpdf.panflute import get_metadata
 
 if TYPE_CHECKING:
-    from types import UnionType
-
     from panflute import Doc, Element
 
 CROSSREF_PATTERN = re.compile("^(sec|fig|tbl|eq):.+$")
@@ -19,7 +17,7 @@ CROSSREF_PATTERN = re.compile("^(sec|fig|tbl|eq):.+$")
 
 @dataclass(repr=False)
 class Crossref(Filter):
-    types: ClassVar[UnionType] = Span | Cite
+    types: ClassVar[type[Cite]] = Cite
     prefix: dict[str, list[Element]] = field(default_factory=dict)
     suffix: dict[str, list[Element]] = field(default_factory=dict)
 
@@ -33,13 +31,8 @@ class Crossref(Filter):
         name = get_metadata(doc, "equation-ref-name") or "Eq."
         self.set_prefix("eq", name)
 
-    def action(self, elem: Span | Cite, doc: Doc) -> list[Element] | Span | None:  # noqa: ARG002
-        if isinstance(elem, Span):
-            if isinstance(elem.content[0], Math):
-                return list(elem.content)
-            return elem
-
-        if isinstance(elem, Cite) and elem.citations:
+    def action(self, elem: Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002
+        if elem.citations:
             identifier = elem.citations[0].id  # type:ignore
             if CROSSREF_PATTERN.match(identifier):
                 return self.create_ref(identifier)

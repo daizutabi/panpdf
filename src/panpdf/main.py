@@ -7,12 +7,18 @@ from typing import Annotated, Optional
 import panflute as pf
 import typer
 from panflute import Doc
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 from typer import Argument, Option
 
 from panpdf.__about__ import __version__
-from panpdf.converters import action, create_filters
+from panpdf.filters.attribute import Attribute
+from panpdf.filters.crossref import Crossref
+from panpdf.filters.jupyter import Jupyter
+from panpdf.filters.latex import Latex
+from panpdf.filters.layout import Layout
+from panpdf.filters.outputcell import OutputCell
+from panpdf.filters.zotero import Zotero
 from panpdf.panflute import convert_text, get_metadata
+from panpdf.stores import Store
 
 
 class OutputFormat(str, Enum):
@@ -146,8 +152,22 @@ def cli(
     if output_format == OutputFormat.pdf:
         standalone = True
 
-    filters = create_filters(notebooks_dir, standalone=standalone_figure, citeproc=citeproc)
-    doc = action(doc, filters, figure_only=figure_only)
+    filters = [Attribute(), OutputCell(), Latex()]
+
+    if notebooks_dir.exists():
+        store = Store([notebooks_dir.absolute()])
+        jupyter = Jupyter(defaults, standalone_figure, pandoc_path, store)
+        filters.append(jupyter)
+
+    filters.extend([Layout(), Crossref()])
+
+    if citeproc:
+        filters.append(Zotero())
+
+    for filter_ in filters:
+        doc = filter_.run(doc)
+        if figure_only and isinstance(filter_, Jupyter):
+            raise typer.Exit
 
     if citeproc:
         extra_args.append("--citeproc")
@@ -155,16 +175,17 @@ def cli(
     if output:
         extra_args.extend(["--output", output.as_posix()])
 
-    tex = convert_text(
+    result = convert_text(
         doc,
+        input_format="panflute",
         output_format=output_format.value,
         standalone=standalone,
         extra_args=extra_args,
         pandoc_path=pandoc_path,
     )
 
-    if not output:
-        typer.echo(tex)
+    if not output and isinstance(result, str):
+        typer.echo(result)
 
 
 def get_text(files: list[Path] | None) -> str:
