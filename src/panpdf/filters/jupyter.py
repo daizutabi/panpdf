@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import atexit
 import base64
+import io
 import os
 import tempfile
 from dataclasses import dataclass, field
@@ -21,10 +22,13 @@ PGF_PREFIX = "%% Creator: Matplotlib"
 @dataclass(repr=False)
 class Jupyter(Filter):
     types: ClassVar[type[Image]] = Image
-    defaults: Path
+    defaults: Path | None = None
     standalone: bool = False
     pandoc_path: Path | None = None
     store: Store = field(default_factory=Store)
+
+    def set_notebooks_dir(self, notebooks_dir: list[Path]):
+        self.store.set_notebooks_dir(notebooks_dir)
 
     def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
         url = image.url
@@ -99,9 +103,25 @@ def create_image_file_base64(text: str, suffix: str) -> str:
     return path.as_posix()
 
 
+def create_image_file_svg(xml: str) -> tuple[str, str]:
+    import cairosvg
+
+    fd, filename = tempfile.mkstemp(".pdf")
+    file_obj = io.StringIO(xml)
+    cairosvg.svg2pdf(file_obj=file_obj, write_to=filename)
+
+    path = Path(filename)
+    data = path.read_bytes()
+    text = base64.b64encode(data).decode()
+
+    os.close(fd)
+    atexit.register(path.unlink)
+    return path.as_posix(), text
+
+
 def create_image_file_pgf(
     text: str,
-    defaults: Path,
+    defaults: Path | None = None,
     pandoc_path: Path | None = None,
     description: str = "",
 ) -> tuple[str, str]:
@@ -113,7 +133,7 @@ def create_image_file_pgf(
         doc,
         output_format="pdf",
         standalone=True,
-        extra_args=["--defaults", defaults.as_posix(), "--toc=false", "--output", filename],
+        extra_args=["--defaults", defaults.as_posix(), "--output", filename],
         pandoc_path=pandoc_path,
         description=description,
     )
@@ -127,9 +147,23 @@ def create_image_file_pgf(
     return path.as_posix(), text
 
 
-def create_defaults_for_standalone(path: Path) -> Path:
-    with path.open(encoding="utf8") as f:
-        defaults: dict[str, Any] = yaml.safe_load(f)
+def create_defaults_for_standalone(path: Path | None = None) -> Path:
+    if path:
+        with path.open(encoding="utf8") as f:
+            defaults: dict[str, Any] = yaml.safe_load(f)
+    else:
+        path = Path(".")
+        fd, filename = tempfile.mkstemp(".tex", dir=path.parent, text=True)
+        path_header = Path(filename)
+        header = "\\usepackage{pgf}\\usepackage{lmodern}"
+        path_header.write_text(header, encoding="utf8")
+        os.close(fd)
+        atexit.register(path_header.unlink)
+        defaults = {"include-in-header": path_header.as_posix()}
+
+    for toc in ["table-of-contents", "toc", "toc-depth"]:
+        if toc in defaults:
+            del defaults[toc]
 
     variables: dict[str, Any] = defaults.get("variables", {})
     documentclass = variables.get("documentclass")
@@ -150,13 +184,3 @@ def create_defaults_for_standalone(path: Path) -> Path:
     os.close(fd)
     atexit.register(path.unlink)
     return path
-
-
-def create_image_file_svg(xml: str) -> str:  # noqa: ARG001
-    raise NotImplementedError
-
-    # file_obj = io.StringIO(image.url)
-    # id = image.identifier.replace("fig:", "")
-    # write_to = str(root / f"{id}.pdf")
-    # cairosvg.svg2pdf(file_obj=file_obj, write_to=write_to)
-    # return write_to.replace("\\", "/")

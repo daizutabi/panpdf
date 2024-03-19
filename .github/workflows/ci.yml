@@ -30,6 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install texlive-luatex texlive-latex-recommended
           sudo apt-get install texlive-latex-extra texlive-lang-japanese
+          sudo apt-get libcairo2
           lualatex --version
       - name: Install Pandoc
         run: |
@@ -48,7 +49,7 @@ jobs:
       - name: Check format
         run: hatch fmt --check
       - name: Install dependencies
-        run : pip install --upgrade aiohttp jinja2 nbformat panflute pyyaml rich shellingham typer pytest-cov
+        run : pip install --upgrade aiohttp cairosvg nbformat panflute pyyaml rich shellingham typer pytest-cov
       - name: Install package
         run: pip install -e .
       - name: Run test

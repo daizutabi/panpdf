@@ -75,9 +75,6 @@ def test_get_images():
 
 
 def test_create_figure_from_image(store, defaults, fmt):
-    if fmt == "svg":
-        return
-
     from panpdf.filters.layout import create_figure_from_image, get_images
 
     text = f"![A]({fmt}.ipynb){{#fig:{fmt}}}"
@@ -91,7 +88,8 @@ def test_create_figure_from_image(store, defaults, fmt):
     if fmt == "pgf":
         assert "\\endgroup%\n\\caption{A}" in tex
     else:
-        assert f".{fmt}}}\n" in tex
+        fmt_ = "pdf" if fmt == "svg" else fmt
+        assert f".{fmt_}}}\n" in tex
     assert f"\\caption{{A}}\\label{{fig:{fmt}}}" in tex
 
 
