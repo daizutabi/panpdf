@@ -53,6 +53,9 @@ def test_jupyter_png(store: Store, image_factory, defaults, fmt, standalone):
     if fmt == "svg":
         return
 
+    if fmt == "pgf":
+        store.delete_data(f"{fmt}.ipynb", f"fig:{fmt}", "application/pdf")
+
     jupyter = Jupyter(defaults, standalone=standalone, store=store)
 
     doc = Doc()
