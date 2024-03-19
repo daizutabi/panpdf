@@ -79,7 +79,8 @@ def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str 
         return create_image_file_base64(text, ".pdf")
 
     if text := data.get("image/svg+xml"):
-        return create_image_file_svg(text)
+        url, _ = create_image_file_svg(text)
+        return url
 
     if text_pgf:
         return text_pgf

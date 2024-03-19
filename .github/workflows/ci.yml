@@ -30,7 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install texlive-luatex texlive-latex-recommended
           sudo apt-get install texlive-latex-extra texlive-lang-japanese
-          sudo apt-get libcairo2
+          sudo apt-get install libcairo2
           lualatex --version
       - name: Install Pandoc
         run: |
