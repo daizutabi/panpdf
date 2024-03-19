@@ -12,8 +12,8 @@ import yaml
 from panflute import Doc, Image, Plain, RawInline
 
 from panpdf.filters.filter import Filter
-from panpdf.panflute import convert_text
 from panpdf.stores import Store
+from panpdf.tools import convert_doc
 
 PGF_PREFIX = "%% Creator: Matplotlib"
 
@@ -49,7 +49,12 @@ class Jupyter(Filter):
             image.url = url_or_text
             return image
 
-        image.url, text = create_image_file_pgf(url_or_text, self.defaults, self.pandoc_path)
+        image.url, text = create_image_file_pgf(
+            url_or_text,
+            self.defaults,
+            self.pandoc_path,
+            description=f"Creating an image for {url}#{identifier}",
+        )
         self.store.add_data(url, identifier, "application/pdf", text)
         self.store.save_notebook(url)
         return image
@@ -98,17 +103,19 @@ def create_image_file_pgf(
     text: str,
     defaults: Path,
     pandoc_path: Path | None = None,
+    description: str = "",
 ) -> tuple[str, str]:
     doc = Doc(Plain(RawInline(text, format="latex")))
     defaults = create_defaults_for_standalone(defaults)
     fd, filename = tempfile.mkstemp(".pdf")
 
-    convert_text(
+    convert_doc(
         doc,
         output_format="pdf",
         standalone=True,
-        extra_args=["--defaults", defaults.as_posix(), "--toc=false", "-o", filename],
+        extra_args=["--defaults", defaults.as_posix(), "--toc=false", "--output", filename],
         pandoc_path=pandoc_path,
+        description=description,
     )
 
     path = Path(filename)

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar
 from panflute import Cite, RawInline, Str
 
 from panpdf.filters.filter import Filter
-from panpdf.panflute import get_metadata
+from panpdf.tools import get_metadata
 
 if TYPE_CHECKING:
     from panflute import Doc, Element
