@@ -28,7 +28,7 @@ jobs:
       - name: Install TeXLive
         run: |
           sudo apt-get update
-          sudo apt-get install texlive-plain-generic texlive-luatex texlive-latex-recommended
+          sudo apt-get install texlive-luatex texlive-latex-recommended texlive-latex-extra
           lualatex --version
       - name: Install Pandoc
         run: |

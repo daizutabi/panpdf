@@ -55,6 +55,10 @@ def test_jupyter_png(store: Store, image_factory, defaults, fmt, standalone):
 
     if fmt == "pgf":
         store.delete_data(f"{fmt}.ipynb", f"fig:{fmt}", "application/pdf")
+        data = store.get_data(f"{fmt}.ipynb", f"fig:{fmt}")
+        assert "image/png" in data
+        assert "text/plain" in data
+        assert "application/pdf" not in data
 
     jupyter = Jupyter(defaults, standalone=standalone, store=store)
 
@@ -68,6 +72,20 @@ def test_jupyter_png(store: Store, image_factory, defaults, fmt, standalone):
         fmt_ = fmt.replace("pgf", "pdf")
         assert image.url.endswith(f".{fmt_}")
         assert Path(image.url).exists()
+        assert Path(image.url).stat().st_size
 
     if fmt == "pgf":
+        data = store.get_data(f"{fmt}.ipynb", f"fig:{fmt}")
+        assert "image/png" in data
+        assert "text/plain" in data
+        if standalone:
+            assert "application/pdf" in data
+        else:
+            assert "application/pdf" not in data
+
         store.delete_data(f"{fmt}.ipynb", f"fig:{fmt}", "application/pdf")
+
+        data = store.get_data(f"{fmt}.ipynb", f"fig:{fmt}")
+        assert "image/png" in data
+        assert "text/plain" in data
+        assert "application/pdf" not in data
