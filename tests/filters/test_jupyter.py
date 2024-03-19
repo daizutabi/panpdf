@@ -106,7 +106,7 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
     if fmt == "pgf" and not standalone:
         assert image.url.startswith("%%")
     else:
-        fmt_ = fmt.replace("pgf", "pdf")
+        fmt_ = fmt.replace("pgf", "pdf").replace("svg", "pdf")
         assert image.url.endswith(f".{fmt_}")
         assert Path(image.url).exists()
         assert Path(image.url).stat().st_size
