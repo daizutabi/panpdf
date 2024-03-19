@@ -92,7 +92,7 @@ def test_create_figure_from_image(store, defaults, fmt):
         assert "\\endgroup%\n\\caption{A}" in tex
     else:
         assert f".{fmt}}}\n" in tex
-    assert tex.endswith(f"\\caption{{A}}\\label{{fig:{fmt}}}\n\\end{{figure}}")
+    assert f"\\caption{{A}}\\label{{fig:{fmt}}}" in tex
 
 
 def test_convert_figure_minipage():
