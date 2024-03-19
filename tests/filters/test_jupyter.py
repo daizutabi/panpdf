@@ -49,7 +49,7 @@ def test_create_image_file_pgf(store: Store, defaults):
 
 
 @pytest.mark.parametrize("standalone", [False, True])
-def test_jupyter_png(store: Store, image_factory, defaults, fmt, standalone):
+def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
     if fmt == "svg":
         return
 
