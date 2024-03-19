@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install TeXLive
         run: |
+          sudp apt-get update
           sudo apt-get install texlive-luatex
           lualatex --version
       - name: Install Pandoc
