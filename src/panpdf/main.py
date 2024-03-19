@@ -17,8 +17,8 @@ from panpdf.filters.latex import Latex
 from panpdf.filters.layout import Layout
 from panpdf.filters.outputcell import OutputCell
 from panpdf.filters.zotero import Zotero
-from panpdf.panflute import convert_text, get_metadata
 from panpdf.stores import Store
+from panpdf.tools import convert_doc, get_metadata
 
 
 class OutputFormat(str, Enum):
@@ -115,6 +115,22 @@ def cli(
             help="If specified, use the Pandoc at this path. If None, default to that from PATH.",
         ),
     ] = None,
+    verbose: Annotated[
+        bool,
+        Option(
+            "--verbose",
+            help="Give verbose debugging output.",
+            is_flag=True,
+        ),
+    ] = False,
+    quiet: Annotated[
+        bool,
+        Option(
+            "--quiet",
+            help="Suppress warning messages.",
+            is_flag=True,
+        ),
+    ] = False,
     version: Annotated[
         bool,
         Option(
@@ -138,7 +154,7 @@ def cli(
     doc: Doc = pf.convert_text(
         text,
         standalone=True,
-        extra_args=extra_args,
+        extra_args=extra_args[:],
         pandoc_path=pandoc_path,
     )  # type:ignore
 
@@ -149,8 +165,9 @@ def cli(
     if output_format == OutputFormat.auto:
         output_format = get_output_format(output)
 
-    if output_format == OutputFormat.pdf:
-        standalone = True
+    if output_format == OutputFormat.pdf and not output:
+        typer.secho("No output file. Aborted.", fg="red")
+        raise typer.Exit
 
     filters = [Attribute(), OutputCell(), Latex()]
 
@@ -175,13 +192,14 @@ def cli(
     if output:
         extra_args.extend(["--output", output.as_posix()])
 
-    result = convert_text(
+    result = convert_doc(
         doc,
-        input_format="panflute",
         output_format=output_format.value,
         standalone=standalone,
         extra_args=extra_args,
         pandoc_path=pandoc_path,
+        verbose=verbose,
+        quiet=quiet,
     )
 
     if not output and isinstance(result, str):

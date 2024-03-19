@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import sys
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar
 
@@ -34,7 +33,7 @@ class Zotero(Filter):
             try:
                 csls = asyncio.run(gather(urls, get_csl))
             except ClientError:
-                pass  # TODO: warning
+                pass
             else:
                 self.csl.update(dict(zip(keys, csls, strict=True)))
 
@@ -73,16 +72,16 @@ async def gather(urls: list[str], coro):
         return await asyncio.gather(*tasks)
 
 
-def set_asyncio_event_loop_policy():
-    if not sys.platform.startswith("win"):
-        return
+# def set_asyncio_event_loop_policy():
+#     if not sys.platform.startswith("win"):
+#         return
 
-    import asyncio
+#     import asyncio
 
-    try:
-        from asyncio import WindowsSelectorEventLoopPolicy
-    except ImportError:
-        pass
-    else:
-        if not isinstance(asyncio.get_event_loop_policy(), WindowsSelectorEventLoopPolicy):
-            asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+#     try:
+#         from asyncio import WindowsSelectorEventLoopPolicy
+#     except ImportError:
+#         pass
+#     else:
+#         if not isinstance(asyncio.get_event_loop_policy(), WindowsSelectorEventLoopPolicy):
+#             asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
