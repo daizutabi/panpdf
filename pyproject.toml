@@ -47,7 +47,7 @@ exclude = ["/.github", "/docs"]
 packages = ["src/panpdf"]
 
 [tool.hatch.envs.test]
-dependencies = ["ipykernel", "matplotlib", "pytest-cov", "pytest-randomly"]
+dependencies = ["matplotlib", "pytest-cov", "pytest-randomly", "seaborn"]
 
 [tool.hatch.envs.test.scripts]
 run = "pytest {args:tests src/panpdf}"

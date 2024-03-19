@@ -25,6 +25,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install TeXLive
+        run: |
+          sudo apt-get install texlive-luatex
+          lualatex --version
+      - name: Install Pandoc
+        run: |
+          [[ ${{ matrix.pandoc-version }} == "latest" ]] && url="https://github.com/jgm/pandoc/releases/latest" || url="https://github.com/jgm/pandoc/releases/tag/${{ matrix.pandoc-version }}"
+          url=$(curl -L $url | grep -o 'https://[a-zA-Z/.]*expanded_assets/[0-9.]*')
+          downloadUrl="https://github.com$(curl -L $url | grep -o '/jgm/pandoc/releases/download/.*-amd64\.deb')"
+          wget --no-verbose "$downloadUrl"
+          sudo dpkg -i "${downloadUrl##*/}"
+          pandoc --version
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -37,14 +49,6 @@ jobs:
         run : pip install --upgrade aiohttp jinja2 nbformat panflute pyyaml rich shellingham typer pytest-cov
       - name: Install package
         run: pip install -e .
-      - name: Download Pandoc
-        run: |
-          [[ ${{ matrix.pandoc-version }} == "latest" ]] && url="https://github.com/jgm/pandoc/releases/latest" || url="https://github.com/jgm/pandoc/releases/tag/${{ matrix.pandoc-version }}"
-          url=$(curl -L $url | grep -o 'https://[a-zA-Z/.]*expanded_assets/[0-9.]*')
-          downloadUrl="https://github.com$(curl -L $url | grep -o '/jgm/pandoc/releases/download/.*-amd64\.deb')"
-          wget --no-verbose "$downloadUrl"
-          sudo dpkg -i "${downloadUrl##*/}"
-          pandoc --version
       - name: Run test
         run: pytest
       - name: Upload Codecov Results
