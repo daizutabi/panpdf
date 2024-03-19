@@ -1,12 +1,267 @@
+import os
+from collections.abc import Iterable, Iterator
+from enum import Enum
+from pathlib import Path
+from typing import Annotated, Optional
+
+import panflute as pf
 import typer
+from panflute import Doc
+from typer import Argument, Option
 
-app = typer.Typer()
+from panpdf.__about__ import __version__
+from panpdf.filters.attribute import Attribute
+from panpdf.filters.crossref import Crossref
+from panpdf.filters.jupyter import Jupyter
+from panpdf.filters.latex import Latex
+from panpdf.filters.layout import Layout
+from panpdf.filters.outputcell import OutputCell
+from panpdf.filters.zotero import Zotero
+from panpdf.panflute import convert_text, get_metadata
+from panpdf.stores import Store
 
 
-@app.command()
-def hello(name: str):
-    typer.echo(name)
+class OutputFormat(str, Enum):
+    latex = "latex"
+    pdf = "pdf"
+    auto = "auto"
 
 
-def cli():
-    app()
+def cli(
+    files: Annotated[
+        Optional[list[Path]],
+        Argument(
+            help="Input files or directories.",
+            show_default=False,
+        ),
+    ] = None,
+    *,
+    output_format: Annotated[
+        OutputFormat, Option("--to", "-t", help="Output format.", show_default="auto")  # type: ignore
+    ] = OutputFormat.auto,
+    output: Annotated[
+        Optional[Path],
+        Option(
+            "--output",
+            "-o",
+            metavar="FILE",
+            help="Write output to FILE instead of stdout.",
+            show_default=False,
+        ),
+    ] = None,
+    data_dir: Annotated[
+        Optional[Path],
+        Option(
+            metavar="DIRECTORY",
+            help="Specify the user data directory to search for pandoc data files.",
+        ),
+    ] = None,
+    notebooks_dir: Annotated[
+        Path,
+        Option(
+            metavar="DIRECTORY",
+            help="Specify the notebooks directory to search for figures.",
+        ),
+    ] = Path("../notebooks"),
+    defaults: Annotated[
+        Path,
+        Option(
+            "--defaults",
+            "-d",
+            metavar="FILE",
+            help="Specify a set of default option settings.",
+        ),
+    ] = Path("defaults.yaml"),
+    standalone: Annotated[
+        bool,
+        Option(
+            "--standalone",
+            "-s",
+            help="Produce output with an appropriate header and footer.",
+            is_flag=True,
+        ),
+    ] = False,
+    standalone_figure: Annotated[
+        bool,
+        Option(
+            "--standalone-figure",
+            "-f",
+            help="Produce output with standalone figures.",
+            is_flag=True,
+        ),
+    ] = False,
+    figure_only: Annotated[
+        bool,
+        Option(
+            "--figure-only",
+            "-F",
+            help="Produce standalone figures and exit.",
+            is_flag=True,
+        ),
+    ] = False,
+    citeproc: Annotated[
+        bool,
+        Option(
+            "--citeproc",
+            "-C",
+            help="Process the citations in the file.",
+            is_flag=True,
+        ),
+    ] = False,
+    pandoc_path: Annotated[
+        Optional[Path],
+        Option(
+            metavar="FILE",
+            help="If specified, use the Pandoc at this path. If None, default to that from PATH.",
+        ),
+    ] = None,
+    version: Annotated[
+        bool,
+        Option(
+            "--version",
+            "-v",
+            help="Show version and exit.",
+        ),
+    ] = False,
+):
+    if version:
+        show_version(pandoc_path)
+
+    text = get_text(files)
+
+    if not defaults.exists():
+        typer.secho(f"Defaults file not found: {defaults}.", fg="red")
+        raise typer.Exit
+
+    extra_args = ["--defaults", defaults.as_posix()]
+
+    doc: Doc = pf.convert_text(
+        text,
+        standalone=True,
+        extra_args=extra_args,
+        pandoc_path=pandoc_path,
+    )  # type:ignore
+
+    if output and str(output).startswith("."):
+        title = get_metadata(doc, "title") or "a"
+        output = Path(f"{title}{output}")
+
+    if output_format == OutputFormat.auto:
+        output_format = get_output_format(output)
+
+    if output_format == OutputFormat.pdf:
+        standalone = True
+
+    filters = [Attribute(), OutputCell(), Latex()]
+
+    if notebooks_dir.exists():
+        store = Store([notebooks_dir.absolute()])
+        jupyter = Jupyter(defaults, standalone_figure, pandoc_path, store)
+        filters.append(jupyter)
+
+    filters.extend([Layout(), Crossref()])
+
+    if citeproc:
+        filters.append(Zotero())
+
+    for filter_ in filters:
+        doc = filter_.run(doc)
+        if figure_only and isinstance(filter_, Jupyter):
+            raise typer.Exit
+
+    if citeproc:
+        extra_args.append("--citeproc")
+
+    if output:
+        extra_args.extend(["--output", output.as_posix()])
+
+    result = convert_text(
+        doc,
+        input_format="panflute",
+        output_format=output_format.value,
+        standalone=standalone,
+        extra_args=extra_args,
+        pandoc_path=pandoc_path,
+    )
+
+    if not output and isinstance(result, str):
+        typer.echo(result)
+
+
+def get_text(files: list[Path] | None) -> str:
+    if files:
+        it = (file.read_text(encoding="utf8") for file in collect(files))
+        return "\n\n".join(it)
+
+    if text := prompt():
+        return text
+
+    typer.secho("No input text. Aborted.", fg="red")
+    raise typer.Exit
+
+
+def collect(files: Iterable[Path]) -> Iterator[Path]:
+    for file in files:
+        if file.is_dir():
+            for dirpath, _dirnames, filenames in os.walk(file):
+                for filename in filenames:
+                    if filename.endswith(".md"):
+                        yield Path(dirpath) / filename
+
+        elif file.suffix == ".md":
+            yield file
+
+
+def get_output_format(output: Path | None) -> OutputFormat:
+    if not output or output.suffix == ".tex":
+        return OutputFormat.latex
+
+    if output.suffix == ".pdf":
+        return OutputFormat.pdf
+
+    typer.secho(f"Unknown output format: {output.suffix}", fg="red")
+    raise typer.Exit
+
+
+def prompt() -> str:
+    typer.secho("Enter double blank lines to exit.", fg="green")
+    lines: list[str] = []
+
+    while True:
+        suffix = ": " if not lines or lines[-1] else ". "
+        line = typer.prompt("", type=str, default="", prompt_suffix=suffix, show_default=False)
+        if lines and lines[-1] == "" and line == "":
+            break
+
+        lines.append(line)
+
+    return "\n".join(lines).rstrip()
+
+
+def show_version(pandoc_path: Path | None):
+    output: str = pf.run_pandoc(args=["--version"], pandoc_path=pandoc_path)
+    pandoc_version = output.splitlines()[0].split(" ")[1]
+
+    typer.echo(f"pandoc {pandoc_version}")
+    typer.echo(f"panflute {pf.__version__}")
+    typer.echo(f"panpdf {__version__}")
+    raise typer.Exit
+
+
+def main():
+    typer.run(cli)
+
+
+if __name__ == "__main__":
+    main()
+
+# def convert_notebook(path: str):
+#     nb = nbformat.read(path, as_version=4)
+#     ids = get_ids(nb, "fig")
+#     notebook_dir, path = os.path.split(path)
+#     if not notebook_dir:
+#         notebook_dir = "."
+#     imgs = [f"![a]({path}){{#{identifier}}}\n\n" for identifier in ids]
+#     text = "".join(imgs)
+#     converter = Converter(False, notebook_dir, True)
+#     converter.convert_text(text, standalone=True, external_only=True)

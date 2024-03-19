@@ -1,55 +1,53 @@
+from __future__ import annotations
+
+import re
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, ClassVar
 
-import panflute as pf
-from panflute import Cite, Doc, Element, Header, Image, Span, Table
+from panflute import Cite, RawInline, Str
 
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
+from panpdf.panflute import get_metadata
+
+if TYPE_CHECKING:
+    from panflute import Doc, Element
+
+CROSSREF_PATTERN = re.compile("^(sec|fig|tbl|eq):.+$")
 
 
-@dataclass
+@dataclass(repr=False)
 class Crossref(Filter):
-    types: tuple[type[Element], ...] = (Header, Image, Table, Span, Cite)
-    identifiers: list[str] = field(default_factory=list)
+    types: ClassVar[type[Cite]] = Cite
     prefix: dict[str, list[Element]] = field(default_factory=dict)
     suffix: dict[str, list[Element]] = field(default_factory=dict)
-    language: str = "ja"
 
     def prepare(self, doc: Doc):
-        self.set_language(self.language)
-        for elem in self.elements:
-            if isinstance(elem, Header | Image | Table | Span) and elem.identifier:
-                self.identifiers.append(elem.identifier)
+        name = get_metadata(doc, "figure-ref-name") or "Fig."
+        self.set_prefix("fig", name)
 
-    def action(self, elem: Header | Image | Table | Span | Cite, doc: Doc):
-        if isinstance(elem, Cite) and elem.citations:
-            if (id_ := elem.citations[0].id) in self.identifiers:  # type:ignore
-                return self.create_ref(id_)
-        elif isinstance(elem, Span):
-            return list(elem.content)
+        name = get_metadata(doc, "table-ref-name") or "Table"
+        self.set_prefix("tbl", name)
 
-    def create_ref(self, id_: str):
-        ref = pf.RawInline(f"\\ref{{{id_}}}", format="latex")
-        if ":" in id_:
-            kind = id_.split(":")[0]
-            prefix = self.prefix.get(kind, [])
-            suffix = self.suffix.get(kind, [])
-            return [*prefix, ref, *suffix]
-        else:
-            return [ref]
+        name = get_metadata(doc, "equation-ref-name") or "Eq."
+        self.set_prefix("eq", name)
 
-    def set_language(self, language: str):
-        self.language = language
-        if language.lower().startswith("ja"):
-            self.set_prefix_suffix("fig", "図", "")
-            self.set_prefix_suffix("tbl", "表", "")
-            self.set_prefix_suffix("eq", "式", "")
-        elif language.lower().startswith("en"):
-            self.set_prefix_suffix("fig", "Fig.", "")
-            self.set_prefix_suffix("tbl", "Table", "")
-            self.set_prefix_suffix("eq", "Eq.", "")
+    def action(self, elem: Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002
+        if elem.citations:
+            identifier = elem.citations[0].id  # type:ignore
+            if CROSSREF_PATTERN.match(identifier):
+                return self.create_ref(identifier)
 
-    def set_prefix_suffix(self, kind: str, prefix: str, suffix: str):
-        if prefix:
-            self.prefix[kind] = [pf.Str(prefix), pf.RawInline("~", format="latex")]
-        if suffix:
-            self.suffix[kind] = [pf.Str(suffix)]
+        return None
+
+    def create_ref(self, identifier: str) -> list[Element]:
+        ref = RawInline(f"\\ref{{{identifier}}}", format="latex")
+        kind = identifier.split(":")[0]
+        prefix = self.prefix.get(kind, [])
+        suffix = self.suffix.get(kind, [])
+        return [*prefix, ref, *suffix]
+
+    def set_prefix(self, kind: str, prefix: str):
+        self.prefix[kind] = [Str(prefix), RawInline("~", format="latex")]
+
+    def set_suffix(self, kind: str, suffix: str):
+        self.suffix[kind] = [Str(suffix)]

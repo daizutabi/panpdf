@@ -1,27 +1,39 @@
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, ClassVar
 
-from panflute import Cite, Doc, Element, RawInline, Space, Str
+from panflute import Cite, RawInline, Space, Str
 
-from panpdf.core.filter import Filter
+from panpdf.filters.filter import Filter
 
 CROSSREF_PATTERN = re.compile(r"^(\\\S+)(\s*)(\[@.+\])(\s*)$")
 
+if TYPE_CHECKING:
+    from panflute import Doc, Element
 
-@dataclass
+
+@dataclass(repr=False)
 class Latex(Filter):
-    types: tuple[type[Element], ...] = (RawInline,)
+    types: ClassVar[type[RawInline]] = RawInline
 
-    def action(self, elem: RawInline, doc: Doc):
-        if elem.format != "tex":
+    def action(self, elem: RawInline, doc: Doc):  # noqa: ARG002
+        if elem.format != "tex":  # NOT 'latex'
             return elem
+
         if not (m := CROSSREF_PATTERN.match(elem.text)):
             return elem
+
         cmd, spacer, ref, suffix = m.groups()
-        elems: list[Element] = [RawInline(cmd, format="tex")]
+        elems: list[Element] = [RawInline(cmd, format="tex")]  # NOT 'latex'
+
         if spacer:
             elems.append(Space())
+
         elems.append(Cite(Str(ref)))
+
         if suffix:
             elems.append(Space())
+
         return elems

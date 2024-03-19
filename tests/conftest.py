@@ -1,119 +1,57 @@
-import inspect
+from __future__ import annotations
+
 from pathlib import Path
 
-import nbformat
 import panflute as pf
 import pytest
-from click.testing import CliRunner
+from panflute import Figure, Image
 
 import panpdf
-from panpdf.core.converter import Converter
-from panpdf.filters.attributes import Attributes
-from panpdf.jupyter.nbformat import Store
-from panpdf.utils import set_asyncio_event_loop_policy
 
-set_asyncio_event_loop_policy()
+# from panpdf.utils import set_asyncio_event_loop_policy
+
+# set_asyncio_event_loop_policy()
 
 
 @pytest.fixture(scope="session")
-def root():
-    return Path(panpdf.__file__).parent.parent.parent
+def notebook_dir() -> Path:
+    return Path(panpdf.__file__).parent.parent.parent / "notebooks"
 
 
 @pytest.fixture(scope="session")
-def nb(root):
-    return nbformat.read(root / "tests/test.ipynb", as_version=4)
+def store(notebook_dir):
+    from panpdf.stores import Store
+
+    return Store([notebook_dir])
 
 
 @pytest.fixture(scope="session")
-def store(root):
-    store = Store(path=[root])
-    store.get_notebook("tests/test.ipynb")
-    return store
-
-
-def get_doc(text):
-    text = inspect.cleandoc(text)
-    return pf.convert_text(text, standalone=True)
-
-
-@pytest.fixture(scope="module")
-def doc():
-    text = """# section
-
-    abc
-
-    `a = 1`
-
-    ``` {#block .python .qt a=1}
-    a = 1
-    ```
-    """
-
-    return get_doc(text)
-
-
-@pytest.fixture
-def docdir(tmpdir):
-    text = "# section\n\nテキスト\n"
-    for name in ["a", "b"]:
-        path = Path(tmpdir.join(f"{name}.md"))
-        path.write_text(text, encoding="utf8")
-    subdir = tmpdir.mkdir("c")
-    for name in ["d", "e"]:
-        path = Path(subdir.join(f"{name}.md"))
-        path.write_text(text, encoding="utf8")
-    return Path(tmpdir)
-
-
-@pytest.fixture(scope="session")
-def image_factory():
-    def image_factory(id, url="", caption="caption"):  # noqa: A002
-        text = f"![{caption}]({url}){{#{id}}}"
+def figure_factory():
+    def figure_factory(url, identifier, caption="caption") -> Figure:
+        text = f"![{caption}]({url}){{#{identifier}}}"
         elems = pf.convert_text(text)
-        return elems[0].content[0]  # type: ignore
+        assert isinstance(elems, list)
+        fig = elems[0]
+        assert isinstance(fig, Figure)
+        return fig
+
+    return figure_factory
+
+
+@pytest.fixture(scope="session")
+def image_factory(figure_factory):
+    from panpdf.filters.attribute import set_attributes_figure
+
+    def image_factory(url, identifier, caption="caption") -> Image:
+        fig = figure_factory(url, identifier, caption)
+        set_attributes_figure(fig)
+        img = fig.content[0].content[0]
+        assert isinstance(img, Image)
+        return img
 
     return image_factory
 
 
-@pytest.fixture(scope="session")
-def math_factory():
-    attributes = Attributes()
-
-    def math_factory(id, url="."):  # noqa: A002
-        text = f"$${url}$$ {{#{id}}}"
-        doc = attributes.run(text)
-        return doc.content[0].content[0].content[0]  # type:ignore
-
-    return math_factory
-
-
-@pytest.fixture(scope="session")
-def runner(nb):
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        Path("a.md").write_text("a\nb\nc\n")
-        Path("b.md").write_text("d\ne\nf\n")
-        text = "---\ntitle: internal\nsecurity: internal\n"
-        text += "logo: blue\nheaderrulewidth: 1.0pt\n---\n"
-        Path("internal.md").write_text(text)
-        nbformat.write(nb, "test.ipynb")
-        yield runner
-
-
-@pytest.fixture(scope="session")
-def converter(root):
-    converter = Converter()
-    store: Store = converter.filters["jupyter"].store  # type: ignore
-    store.path = [root]
-    return converter
-
-
-@pytest.fixture(scope="session")
-def convert_text(converter):
-    return converter.convert_text
-
-
-@pytest.fixture(scope="session")
-def convert(converter):
-    return converter.convert
+@pytest.fixture(params=["png", "pgf", "pdf", "svg"])
+def fmt(request):
+    return request.param
