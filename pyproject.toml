@@ -22,12 +22,11 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
   "aiohttp",
-  "jinja2",
+  "ipykernel",
   "nbformat",
   "panflute >= 2.3.0",
   "pyyaml",
   "rich",
-  "shellingham",
   "typer",
 ]
 
