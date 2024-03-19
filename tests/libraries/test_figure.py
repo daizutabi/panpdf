@@ -1,3 +1,5 @@
+import inspect
+
 import panflute as pf
 from panflute import Caption, Figure, Image, Para, Plain, RawInline, Space, Str
 
@@ -136,3 +138,63 @@ def test_image_caption_math():
     assert isinstance(math, pf.Math)
     assert math.text == "x"
     assert math.format == "InlineMath"
+
+
+def test_figure_from_latex():
+    tex = """
+    \\begin{figure}
+    \\includegraphics[width=1cm]{a.png}
+    \\caption{caption}\\label{label}
+    \\end{figure}
+    """
+    tex = inspect.cleandoc(tex)
+    x = pf.convert_text(tex, input_format="latex", output_format="markdown")
+    assert x == '![caption](a.png){#label width="1cm"}'
+    x = pf.convert_text(tex, input_format="latex", output_format="panflute")
+    assert isinstance(x, list)
+    x = pf.convert_text(x[0], input_format="panflute", output_format="markdown")
+    assert x == '![caption](a.png){#label width="1cm"}'
+
+
+def test_figure_from_latex_minipage():
+    tex = """
+    \\begin{figure}
+    \\begin{minipage}
+    \\includegraphics[width=1cm]{a.png}
+    \\caption{a}\\label{a}
+    \\end{minipage}
+    \\begin{minipage}
+    \\includegraphics[width=1cm]{b.png}
+    \\caption{b}\\label{b}
+    \\end{minipage}
+    \\end{figure}
+    """
+    tex = inspect.cleandoc(tex)
+    x = pf.convert_text(tex, input_format="latex", output_format="latex")
+    assert isinstance(x, str)
+    assert "\\begin{minipage}[t]{0.45\\linewidth}" in x
+    assert "\\label{a}" not in x
+    assert "\\end{minipage}\n\\caption{b}\\label{b}" in x
+    x = pf.convert_text(tex, input_format="latex", output_format="panflute")
+    assert isinstance(x, list)
+    assert len(x) == 1
+    fig = x[0]
+    assert isinstance(fig, Figure)
+    assert fig.identifier == "b"
+    assert len(fig.content) == 2
+    for x in fig.content:
+        assert isinstance(x, Plain)
+        assert len(x.content) == 1
+        assert isinstance(x.content[0], Image)
+
+
+def test_figure_from_panflute_subfigure():
+    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm"}))
+    a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
+    ib = Plain(Image(Str("B"), url="b.png"))
+    b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
+    f = Figure(a, b, caption=Caption(Plain(Str("c"))), identifier="c")
+    x = pf.convert_text(f, input_format="panflute", output_format="latex")
+    assert isinstance(x, str)
+    assert "\\includegraphics{b.png}\n\\caption{b}\\label{b}" in x
+    assert "\\end{subfigure}\n\\caption{c}\\label{c}" in x

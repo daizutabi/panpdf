@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -41,6 +42,9 @@ def test_create_defaults_for_standalone(defaults):
 def test_create_image_file_pgf(store: Store, defaults):
     from panpdf.filters.jupyter import create_image_file_pgf
 
+    if not shutil.which("lualatex"):
+        return
+
     data = store.get_data("pgf.ipynb", "fig:pgf")
     text = data["text/plain"]
     url, text = create_image_file_pgf(text, defaults)
@@ -50,6 +54,9 @@ def test_create_image_file_pgf(store: Store, defaults):
 
 @pytest.mark.parametrize("standalone", [False, True])
 def test_jupyter_png(store: Store, image_factory, defaults, fmt, standalone):
+    if not shutil.which("lualatex"):
+        return
+
     if fmt == "svg":
         return
 
