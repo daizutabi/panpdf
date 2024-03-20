@@ -22,3 +22,16 @@ def test_get_keys():
     keys = list(chain.from_iterable(keys_))  # type:ignore
     for i in range(1, 6):
         assert f"key{i}" in keys
+
+
+# def test_get_csl():
+#     import asyncio
+
+#     from panpdf.filters.zotero import gather, get_csl, get_url
+
+#     url = get_url("panflute")
+#     print(url)
+#     assert 0
+#     res = asyncio.run(gather([url], get_csl))
+#     print(res)
+#     assert 0
