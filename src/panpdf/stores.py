@@ -45,6 +45,10 @@ class Store:
         msg = "Unknown path."
         raise ValueError(msg)
 
+    def set_notebooks_dir(self, path: list[Path]) -> None:
+        self.path = path
+        self.notebooks.clear()
+
     def get_notebook(self, url: str) -> dict:
         abs_path = self._get_abs_path(url)
         return self._read(abs_path)
