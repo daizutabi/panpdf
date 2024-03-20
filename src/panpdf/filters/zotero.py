@@ -20,7 +20,9 @@ if TYPE_CHECKING:
 @dataclass(repr=False)
 class Zotero(Filter):
     types: ClassVar[type[Cite]] = Cite
-    csl: dict[str, dict] = field(default_factory=dict)
+    csl: dict[str, dict] = field(default_factory=dict, init=False)
+    host: str = "localhost"
+    port: int = 23119
 
     def action(self, elem: Cite, doc: Doc):  # noqa: ARG002
         for key in iter_keys(elem):
@@ -29,7 +31,7 @@ class Zotero(Filter):
 
     def finalize(self, doc: Doc):
         if keys := [key for key in self.csl if not self.csl[key]]:
-            urls = [get_url(key) for key in keys]
+            urls = [get_url(key, self.host, self.port) for key in keys]
             try:
                 csls = asyncio.run(gather(urls, get_csl))
             except ClientError:
@@ -46,8 +48,8 @@ def iter_keys(cite: Cite) -> Iterator[str]:
         yield c.id
 
 
-def get_url(key: str) -> str:
-    return f"http://localhost:23119/zotxt/items?betterbibtexkey={key}"
+def get_url(key: str, host: str, port: int) -> str:
+    return f"http://{host}:{port}/zotxt/items?betterbibtexkey={key}"
 
 
 async def get_csl(response: ClientResponse) -> dict:

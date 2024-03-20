@@ -131,6 +131,18 @@ def cli(
             is_flag=True,
         ),
     ] = False,
+    host: Annotated[
+        str,
+        Option(
+            help="IP address.",
+        ),
+    ] = "localhost",
+    port: Annotated[
+        int,
+        Option(
+            help="Port.",
+        ),
+    ] = 23119,
     version: Annotated[
         bool,
         Option(
@@ -179,7 +191,7 @@ def cli(
     filters.extend([Layout(), Crossref()])
 
     if citeproc:
-        filters.append(Zotero())
+        filters.append(Zotero(host=host, port=port))
 
     for filter_ in filters:
         doc = filter_.run(doc)
