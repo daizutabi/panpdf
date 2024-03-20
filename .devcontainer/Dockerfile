@@ -23,8 +23,4 @@ ARG pandoc_version=3.1.12.3
 RUN wget https://github.com/jgm/pandoc/releases/download/${pandoc_version}/pandoc-${pandoc_version}-1-amd64.deb && \
     dpkg -i pandoc-${pandoc_version}-1-amd64.deb
 
-USER vscode
-RUN echo 'export PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH' >> ~/.bashrc
-USER root
-
 # RUN wget https://texlive.texjp.org/2023/tlnet/install-tl-unx.tar.gz && \

@@ -27,6 +27,7 @@
         "eamodio.gitlens",
         "esbenp.prettier-vscode",
         "github.vscode-github-actions",
+        "ms-python.vscode-pylance",
         "markis.code-coverage",
         "ms-python.python",
         "ms-python.vscode-pylance",
@@ -47,6 +48,9 @@
   // Uncomment the next line to run commands after the container is created.
   // "postCreateCommand": "pipx install hatch && hatch config set dirs.env.virtual .hatch"
   "postCreateCommand": ".devcontainer/postCreateCommand.sh"
+  // "mounts": [
+  //   "source=hatch-${devcontainerId},target=${containerWorkspaceFolder}/.hatch,type=volume"
+  // ]
 
   // Configure tool-specific properties.
   // "customizations": {},
