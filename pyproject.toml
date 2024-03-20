@@ -24,7 +24,7 @@ dependencies = [
   "aiohttp",
   "ipykernel",
   "nbformat",
-  "panflute >= 2.3.0",
+  "panflute >= 2.3.1",
   "pyyaml",
   "rich",
   "typer",

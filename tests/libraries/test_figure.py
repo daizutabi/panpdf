@@ -161,3 +161,15 @@ def test_figure_from_panflute_subfigure():
     assert isinstance(x, str)
     assert "\\includegraphics{b.png}\n\\caption{b}\\label{b}" in x
     assert "\\end{subfigure}\n\\caption{c}\\label{c}" in x
+
+
+def test_figure_from_panflute_subfigure_none():
+    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm"}))
+    a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
+    ib = Plain(Image(Str("B"), url="b.png"))
+    b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
+    f = Figure(a, b, identifier="c")
+    x = pf.convert_text(f, input_format="panflute", output_format="latex")
+    assert isinstance(x, str)
+    assert "\\includegraphics{b.png}\n\\caption{b}\\label{b}" in x
+    assert "\\end{subfigure}\n\\caption{}\\label{c}" in x

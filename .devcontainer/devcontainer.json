@@ -1,0 +1,60 @@
+{
+  "name": "panpdf - VSCode Dev Container",
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "containerEnv": {
+    "TZ": "Asia/Tokyo"
+  },
+  "runArgs": ["--init"],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // "python.defaultInterpreterPath": ".venv/bin/python"
+        // "editor.renderWhitespace": "all",
+        // "[json][jsonc]": {
+        //   "editor.defaultFormatter": "esbenp.prettier-vscode",
+        //   "editor.formatOnSave": true,
+        //   "editor.codeActionsOnSave": {
+        //     "source.fixAll": true
+        //   }
+        // }
+      },
+      "extensions": [
+        "charliermarsh.ruff",
+        "davidanson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "github.vscode-github-actions",
+        "ms-python.vscode-pylance",
+        "markis.code-coverage",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "tyriar.sort-lines"
+      ]
+    }
+  },
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Uncomment the next line to run commands after the container is created.
+  // "postCreateCommand": "pipx install hatch && hatch config set dirs.env.virtual .hatch"
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh"
+  // "mounts": [
+  //   "source=hatch-${devcontainerId},target=${containerWorkspaceFolder}/.hatch,type=volume"
+  // ]
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+
+  // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "devcontainer"
+}

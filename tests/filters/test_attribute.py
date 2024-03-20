@@ -202,7 +202,7 @@ def test_set_attributes_image():
 
     para = _get_para("![caption a](a.png){#fig:a}\n![caption b](b.png){#fig:b}")
     fig = set_attributes_image(para)
-    assert fig.caption is None
+    assert fig.caption == Caption()
     assert fig.identifier == ""
     assert fig.classes == []
     assert fig.attributes == {}
@@ -235,7 +235,7 @@ def test_set_attributes_image_attr():
 
     para = _get_para("![a](a.png){#fig:a}\n![b](b.png){#fig:b}\n{#fig:ab .c .d}")
     fig = set_attributes_image(para)
-    assert fig.caption is None
+    assert fig.caption == Caption()
     assert fig.identifier == "fig:ab"
     assert fig.classes == ["c", "d"]
     assert fig.attributes == {}

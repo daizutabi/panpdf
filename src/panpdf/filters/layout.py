@@ -72,7 +72,7 @@ def convert_figure(figure: Figure) -> Figure | Plain:
     if n == 1:
         return create_figure_from_image(images[0])
 
-    if caption := figure.caption:
+    if (caption := figure.caption) and caption.content:
         env = "subfigure"
     else:
         env = "minipage"
