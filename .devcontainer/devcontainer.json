@@ -1,5 +1,5 @@
 {
-  "name": "panpdf - VSCode Dev Container",
+  "name": "panpdf",
   "build": {
     "context": "..",
     "dockerfile": "Dockerfile"
