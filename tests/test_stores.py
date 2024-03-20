@@ -20,7 +20,7 @@ def test_get_cell(store: Store, fmt: str):
 def test_get_source(store: Store, fmt: str):
     source = store.get_source(f"{fmt}.ipynb", f"fig:{fmt}")
     assert isinstance(source, str)
-    assert source.rstrip() == "import matplotlib.pyplot as plt\n\nplt.plot([-1, 0, 1])"
+    assert source.rstrip() == "import matplotlib.pyplot as plt\n\nplt.plot([-1, 1], [-1, 1])"
 
 
 def test_get_outputs(store: Store, fmt: str):

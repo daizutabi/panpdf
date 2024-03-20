@@ -63,26 +63,19 @@ def test_create_defaults_for_standalone_none():
         defaults = yaml.safe_load(f)
 
     assert defaults["variables"] == {"documentclass": "standalone"}
-    assert defaults["include-in-header"].endswith(".tex")
+    header = defaults["include-in-header"]
+    assert isinstance(header, str)
+    assert header.endswith(".tex")
 
 
-def test_create_image_file_pgf(store: Store, defaults):
+@pytest.mark.parametrize("use_defaults", [False, True])
+def test_create_image_file_pgf(store: Store, defaults, use_defaults):
     from panpdf.filters.jupyter import create_image_file_pgf
 
     data = store.get_data("pgf.ipynb", "fig:pgf")
     text = data["text/plain"]
+    defaults = defaults if use_defaults else None
     url, text = create_image_file_pgf(text, defaults)
-    assert Path(url).exists()
-    assert Path(url).stat().st_size
-    assert text.startswith("JVBER")
-
-
-def test_create_image_file_pgf_none(store: Store):
-    from panpdf.filters.jupyter import create_image_file_pgf
-
-    data = store.get_data("pgf.ipynb", "fig:pgf")
-    text = data["text/plain"]
-    url, text = create_image_file_pgf(text)
     assert Path(url).exists()
     assert Path(url).stat().st_size
     assert text.startswith("JVBER")
