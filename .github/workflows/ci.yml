@@ -48,10 +48,11 @@ jobs:
         run: pip install --upgrade hatch
       - name: Check format
         run: hatch fmt --check
-      - name: Install dependencies
-        run : pip install --upgrade aiohttp cairosvg nbformat panflute pyyaml rich shellingham typer pytest-cov
-      - name: Install package
-        run: pip install -e .
+      - name: Install Packages
+        run : |
+          pip install --upgrade aiohttp nbformat panflute pyyaml rich typer
+          pip install --upgrade pytest-cov matplotlib cairosvg
+          pip install -e .
       - name: Run test
         run: pytest
       - name: Upload Codecov Results
