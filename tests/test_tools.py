@@ -10,6 +10,18 @@ def test_get_pandoc_path():
     assert PANDOC_PATH[0] is path
 
 
+def test_get_pandoc_version():
+    from panpdf.tools import get_pandoc_version
+
+    assert get_pandoc_version().startswith("3.")
+
+
+def test_get_data_dir():
+    from panpdf.tools import get_data_dir
+
+    assert get_data_dir().name == "pandoc"
+
+
 def test_run():
     from panpdf.tools import run
 

@@ -45,6 +45,45 @@ def get_pandoc_path() -> Path:
     raise OSError(msg)
 
 
+def get_pandoc_version(pandoc_path: Path | None = None) -> str:
+    output: str = pf.run_pandoc(args=["--version"], pandoc_path=pandoc_path)
+    return output.splitlines()[0].split(" ")[1]
+
+
+def get_data_dir(pandoc_path: Path | None = None) -> Path:
+    output: str = pf.run_pandoc(args=["--version"], pandoc_path=pandoc_path)
+
+    for line in output.splitlines():
+        if line.startswith("User data directory:"):
+            return Path(line.split(":")[1].strip())
+
+    raise NotImplementedError
+
+
+def get_defaults_file_path(defaults: Path | None) -> Path | None:
+    if not defaults:
+        return None
+
+    if defaults.exists():
+        return defaults
+
+    path = Path(f"{defaults}.yaml")
+    if path.exists():
+        return path
+
+    data_dir = get_data_dir()
+
+    path = data_dir / "defaults" / defaults
+    if path.exists():
+        return path
+
+    path = data_dir / "defaults" / f"{defaults}.yaml"
+    if path.exists():
+        return path
+
+    return None
+
+
 def convert_doc(
     doc: Doc,
     *,

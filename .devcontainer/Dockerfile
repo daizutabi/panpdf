@@ -23,4 +23,15 @@ ARG pandoc_version=3.1.12.3
 RUN wget https://github.com/jgm/pandoc/releases/download/${pandoc_version}/pandoc-${pandoc_version}-1-amd64.deb && \
     dpkg -i pandoc-${pandoc_version}-1-amd64.deb
 
+ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
+
 # RUN wget https://texlive.texjp.org/2023/tlnet/install-tl-unx.tar.gz && \
+
+# RUN apt-get update && apt-get install -y \
+#   curl \
+#   && rm -rf /var/lib/apt/lists/*
+
+# ENV DOCKER_CLIENT_VERSION=latest
+
+# RUN curl -fsSL https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_CLIENT_VERSION}.tgz \
+#   | tar -xzC /usr/local/bin --strip=1 docker/docker
