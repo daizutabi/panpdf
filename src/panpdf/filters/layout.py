@@ -20,6 +20,7 @@ from panflute import (
 
 from panpdf.filters.filter import Filter
 from panpdf.filters.jupyter import PGF_PREFIX
+from panpdf.tools import add_metadata, create_temp_file
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -33,7 +34,7 @@ class Layout(Filter):
     def action(
         self,
         elem: Span | Table | Figure,
-        doc: Doc,  # noqa: ARG002
+        doc: Doc,
     ) -> Span | RawInline | Table | Figure | Plain:
         if isinstance(elem, Span):
             return convert_span(elem)
@@ -41,7 +42,7 @@ class Layout(Filter):
         if isinstance(elem, Table):
             return convert_table(elem)
 
-        return convert_figure(elem)
+        return convert_figure(elem, doc)
 
 
 def convert_span(span: Span) -> Span | RawInline:
@@ -65,7 +66,7 @@ def convert_table(table: Table) -> Table:
     return table
 
 
-def convert_figure(figure: Figure) -> Figure | Plain:
+def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:
     images = get_images(figure)
     n = len(images)
 
@@ -74,6 +75,8 @@ def convert_figure(figure: Figure) -> Figure | Plain:
 
     if (caption := figure.caption) and caption.content:
         env = "subfigure"
+        path = create_temp_file("\\usepackage{subcaption}", ".tex")
+        add_metadata(doc, "panpdf.include-in-header", path.as_posix())
     else:
         env = "minipage"
         caption = Caption()
