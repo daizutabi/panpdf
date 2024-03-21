@@ -196,7 +196,8 @@ def progress(
         returncode = asyncio.run(coro)
 
         description = "[red bold]Fail" if returncode else "[green bold]Done"
-        progress.update(task, description=description, total=0)
+        progress.update(task, description=description, total=1)
+        progress.advance(task)
 
         return returncode
 
