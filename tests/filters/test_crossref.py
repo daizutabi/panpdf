@@ -9,12 +9,13 @@ def test_run():
 
     text = """
     ---
-    figure-ref-name: XXX
+    reference-figure-name: XXX
     ---
     [@sec:section] [@sec:subsection]
     [@fig:pgf] [@fig:png] [@fig:pdf]
     [@tbl:markdown]
     [@eq:markdown]
+    X [@eq:bare_] X
     [@abc]
     """
     doc = pf.convert_text(inspect.cleandoc(text), standalone=True)
@@ -24,11 +25,13 @@ def test_run():
     tex = pf.convert_text(doc, input_format="panflute", output_format="latex")
     for ref in [
         "\\ref{sec:section}",
+        "\\ref{sec:subsection}",
         "XXX~\\ref{fig:pgf}",
         "XXX~\\ref{fig:pdf}",
         "XXX~\\ref{fig:png}",
         "Table~\\ref{tbl:markdown}",
         "Eq.~\\ref{eq:markdown}",
+        "X \\ref{eq:bare} X",
         "{[}@abc{]}",
     ]:
         assert ref in tex  # type:ignore
