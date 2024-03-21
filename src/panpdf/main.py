@@ -1,4 +1,5 @@
 import os
+import sys
 from collections.abc import Iterable, Iterator
 from enum import Enum
 from pathlib import Path
@@ -62,12 +63,15 @@ def cli(
         ),
     ] = None,
     notebooks_dir: Annotated[
-        Path,
+        Optional[Path],
         Option(
+            "--notebooks-dir",
+            "-n",
             metavar="DIRECTORY",
             help="Specify the notebooks directory to search for figures.",
+            show_default=False,
         ),
-    ] = Path("../notebooks"),
+    ] = None,
     defaults: Annotated[
         Optional[Path],
         Option(
@@ -103,6 +107,7 @@ def cli(
             "-F",
             help="Produce standalone figures and exit.",
             is_flag=True,
+            hidden=True,
         ),
     ] = False,
     citeproc: Annotated[
@@ -119,6 +124,7 @@ def cli(
         Option(
             metavar="FILE",
             help="If specified, use the Pandoc at this path. If None, default to that from PATH.",
+            show_default=False,
         ),
     ] = None,
     verbose: Annotated[
@@ -160,6 +166,11 @@ def cli(
         ),
     ] = False,
 ):
+    """
+    Optionally, you can add extra pandoc options after --.
+
+    Example usage: panpdf -o dest.pdf src.md -- --pdf-engine lualatex
+    """
     if version:
         show_version(pandoc_path)
 
@@ -188,10 +199,10 @@ def cli(
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
 
-    # filters = [Attribute(), OutputCell(), Latex()]
+    # filters = [Attribute(), OutputCell()]
     filters: list[Filter] = [Attribute()]
 
-    if notebooks_dir.exists():
+    if notebooks_dir:
         store = Store([notebooks_dir.absolute()])
         jupyter = Jupyter(defaults_path, standalone_figure, pandoc_path, store)
         filters.append(jupyter)
@@ -206,11 +217,17 @@ def cli(
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
 
+    if include_in_header := get_metadata(doc, "panpdf.include-in-header"):
+        extra_args.extend(["--include-in-header", include_in_header])
+
     if citeproc:
         extra_args.append("--citeproc")
 
     if output:
         extra_args.extend(["--output", output.as_posix()])
+
+    if "--" in sys.argv:
+        extra_args.extend(sys.argv[sys.argv.index("--") + 1 :])
 
     result = convert_doc(
         doc,

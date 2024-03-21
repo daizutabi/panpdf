@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import panflute as pf
 from panflute import Doc, Figure, Para, RawInline, Span, Table
 
@@ -100,7 +102,7 @@ def test_convert_figure_minipage():
     text += "![B](b.png){#fig:b cwidth=3cm}"
 
     fig = _get_figure(text)
-    fig = convert_figure(fig)
+    fig = convert_figure(fig, Doc())
     tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
     assert "\\hspace{1mm}%\n\\begin{minipage}{3cm}" in tex
@@ -110,14 +112,21 @@ def test_convert_figure_minipage():
 
 def test_convert_figure_subfigure():
     from panpdf.filters.layout import convert_figure
+    from panpdf.tools import get_metadata
 
     text = "![A $x$](a.png){#fig:a hspace=1mm}\n"
     text += "![B](b.png){#fig:b cwidth=3cm}\n"
     text += ": x $m$ {#fig:X}"
 
+    doc = Doc()
     fig = _get_figure(text)
-    fig = convert_figure(fig)
+    fig = convert_figure(fig, doc)
     tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
     assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in tex
     assert "\\caption{x \\(m\\)}\\label{fig:X}" in tex
+    assert "panpdf.include-in-header" in doc.metadata
+    path = get_metadata(doc, "panpdf.include-in-header")
+    assert isinstance(path, str)
+    assert path.endswith(".tex")
+    assert Path(path).exists()

@@ -22,13 +22,13 @@ class Crossref(Filter):
     suffix: dict[str, list[Element]] = field(default_factory=dict)
 
     def prepare(self, doc: Doc):
-        name = get_metadata(doc, "figure-ref-name") or "Fig."
+        name = get_metadata(doc, "reference-figure-name") or "Fig."
         self.set_prefix("fig", name)
 
-        name = get_metadata(doc, "table-ref-name") or "Table"
+        name = get_metadata(doc, "reference-table-name") or "Table"
         self.set_prefix("tbl", name)
 
-        name = get_metadata(doc, "equation-ref-name") or "Eq."
+        name = get_metadata(doc, "reference-equation-name") or "Eq."
         self.set_prefix("eq", name)
 
     def action(self, elem: Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002
@@ -40,7 +40,17 @@ class Crossref(Filter):
         return None
 
     def create_ref(self, identifier: str) -> list[Element]:
+        if identifier.endswith("_"):
+            identifier = identifier[:-1]
+            bare = True
+        else:
+            bare = False
+
         ref = RawInline(f"\\ref{{{identifier}}}", format="latex")
+
+        if bare:
+            return [ref]
+
         kind = identifier.split(":")[0]
         prefix = self.prefix.get(kind, [])
         suffix = self.suffix.get(kind, [])

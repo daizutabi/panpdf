@@ -24,10 +24,17 @@ console = Console()
 
 
 def get_metadata(doc: Doc, name: str, default: str | None = None) -> str | None:
-    if title := doc.metadata.content.get(name):
-        return pf.stringify(title)
+    if metadata := doc.metadata.content.get(name):
+        return pf.stringify(metadata)
 
     return default
+
+
+def add_metadata(doc: Doc, name: str, value: str) -> None:
+    if metadata := get_metadata(doc, name):
+        value = f"{metadata}\n{value}"
+
+    doc.metadata[name] = value
 
 
 PANDOC_PATH: list[Path] = []
@@ -82,6 +89,25 @@ def get_defaults_file_path(defaults: Path | None) -> Path | None:
         return path
 
     return None
+
+
+def create_temp_file(
+    text: str | bytes,
+    suffix: str | None = None,
+    dir: str | Path | None = None,  # noqa: A002
+) -> Path:
+    fd, filename = tempfile.mkstemp(suffix=suffix, dir=dir, text=isinstance(text, str))
+
+    path = Path(filename)
+
+    if isinstance(text, str):
+        path.write_text(text, encoding="utf8")
+    else:
+        path.write_bytes(text)
+
+    os.close(fd)
+    atexit.register(path.unlink)
+    return path
 
 
 def convert_doc(
@@ -170,7 +196,8 @@ def progress(
         returncode = asyncio.run(coro)
 
         description = "[red bold]Fail" if returncode else "[green bold]Done"
-        progress.update(task, description=description)
+        progress.update(task, description=description, total=1)
+        progress.advance(task)
 
         return returncode
 
