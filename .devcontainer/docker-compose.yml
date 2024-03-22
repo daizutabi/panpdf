@@ -1,0 +1,20 @@
+services:
+  panpdf:
+    build: .
+    image: daizutabi/panpdf:latest
+    container_name: panpdf
+    command: sleep infinity
+    working_dir: /workspace
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/workspace
+    depends_on:
+      - texlive
+  texlive:
+    image: texlive/texlive:latest
+    container_name: texlive
+    command: sleep infinity
+    working_dir: /workspace
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/workspace
