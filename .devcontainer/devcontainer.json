@@ -1,20 +1,13 @@
 {
   "name": "panpdf",
-  // "build": {
-  //   "context": "..",
-  //   "dockerfile": "Dockerfile"
-  // },
-  "remoteEnv": {
-    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
   },
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "panpdf",
-  "workspaceFolder": "/workspace",
-  // "overrideCommand": true,
-  // "containerEnv": {
-  //   "TZ": "Asia/Tokyo"
-  // },
-  // "runArgs": ["--init"],
+  "containerEnv": {
+    "TZ": "Asia/Tokyo"
+  },
+  "runArgs": ["--init"],
   "customizations": {
     "vscode": {
       "settings": {
@@ -47,18 +40,16 @@
   },
 
   // Features to add to the dev container. More info: https://containers.dev/features.
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker": {}
-  },
+  // "features": {},
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
 
   // Uncomment the next line to run commands after the container is created.
   // "postCreateCommand": "pipx install hatch && hatch config set dirs.env.virtual .hatch"
-  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh"
   // "mounts": [
-  //   "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  //   "source=hatch-${devcontainerId},target=${containerWorkspaceFolder}/.hatch,type=volume"
   // ]
 
   // Configure tool-specific properties.
@@ -66,5 +57,4 @@
 
   // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
   // "remoteUser": "devcontainer"
-  "shutdownAction": "stopCompose"
 }
