@@ -12,11 +12,15 @@
   },
   "remoteUser": "panpdf",
   "containerEnv": {
-    "TZ": "Asia/Tokyo"
+    "TZ": "Asia/Tokyo",
+    "STARSHIP_CONFIG": "/home/panpdf/.local_config/starship.toml"
   },
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/usr/local/py-utils/bin"
   },
+  "mounts": [
+    "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
+  ],
   "customizations": {
     "vscode": {
       "settings": {
@@ -34,8 +38,4 @@
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
-
-  // "mounts": [
-  //   "source=hatch-${devcontainerId},target=${containerWorkspaceFolder}/.hatch,type=volume"
-  // ]
 }
