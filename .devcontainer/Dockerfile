@@ -1,10 +1,5 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     texlive-xetex texlive-luatex texlive-latex-recommended texlive-fonts-recommended \
-#     texlive-latex-extra texlive-lang-japanese texlive-fonts-extra \
-#     libcairo2 pipx
-
 RUN apt-get update && apt-get install -y --no-install-recommends libcairo2 pipx
 
 WORKDIR /tmp
@@ -28,14 +23,3 @@ ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
 USER vscode
 RUN pipx install hatch
 USER root
-
-# RUN wget https://texlive.texjp.org/2023/tlnet/install-tl-unx.tar.gz && \
-
-# RUN apt-get update && apt-get install -y \
-#   curl \
-#   && rm -rf /var/lib/apt/lists/*
-
-# ENV DOCKER_CLIENT_VERSION=latest
-
-# RUN curl -fsSL https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_CLIENT_VERSION}.tgz \
-#   | tar -xzC /usr/local/bin --strip=1 docker/docker
