@@ -25,6 +25,10 @@ RUN wget https://github.com/jgm/pandoc/releases/download/${pandoc_version}/pando
 
 ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
 
+USER vscode
+RUN pipx install hatch
+USER root
+
 # RUN wget https://texlive.texjp.org/2023/tlnet/install-tl-unx.tar.gz && \
 
 # RUN apt-get update && apt-get install -y \
