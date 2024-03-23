@@ -67,34 +67,6 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
     raise NotImplementedError
 
 
-def get_file_path(defaults: Path | None, dir: str) -> Path | None:  # noqa: A002
-    if not defaults:
-        return None
-
-    if defaults.exists():
-        return defaults
-
-    path = Path(f"{defaults}.yaml")
-    if path.exists():
-        return path
-
-    data_dir = get_data_dir()
-
-    path = data_dir / dir / defaults
-    if path.exists():
-        return path
-
-    path = data_dir / dir / f"{defaults}.yaml"
-    if path.exists():
-        return path
-
-    return None
-
-
-def get_defaults_file_path(defaults: Path | None) -> Path | None:
-    return get_file_path(defaults, "defaults")
-
-
 def create_temp_file(
     text: str | bytes,
     suffix: str | None = None,
@@ -110,8 +82,36 @@ def create_temp_file(
         path.write_bytes(text)
 
     os.close(fd)
-    atexit.register(path.unlink)
+    atexit.register(lambda: path.unlink(missing_ok=True))
     return path
+
+
+def get_file_path(name: Path | str | None, dir: str) -> Path | None:  # noqa: A002
+    if not name:
+        return None
+
+    if (path := Path(name)).exists():
+        return path
+
+    path = Path(f"{name}.yaml")
+    if path.exists():
+        return path
+
+    data_dir = get_data_dir()
+
+    path = data_dir / dir / name
+    if path.exists():
+        return path
+
+    path = data_dir / dir / f"{name}.yaml"
+    if path.exists():
+        return path
+
+    return None
+
+
+def get_defaults_file_path(defaults: Path | None) -> Path | None:
+    return get_file_path(defaults, "defaults")
 
 
 def convert_doc(

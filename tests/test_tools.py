@@ -1,5 +1,11 @@
 import asyncio
+import atexit
+import os
+import shutil
+import tempfile
+import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 import panflute as pf
 import pytest
@@ -59,20 +65,60 @@ def test_get_data_dir():
     assert get_data_dir().name == "pandoc"
 
 
+@pytest.mark.parametrize("text", ["abcあα", b"abc"])
+def test_create_temp_file(text):
+    from panpdf.tools import create_temp_file
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        path = create_temp_file(text, suffix=".txt", dir=tmpdir)
+        assert path.exists()
+        assert path.suffix == ".txt"
+        if isinstance(text, str):
+            assert path.read_text() == text
+        else:
+            assert path.read_bytes() == text
+
+
 def test_get_file_path():
     from panpdf.tools import get_file_path
 
     assert get_file_path(None, "") is None
     path = Path(__file__)
-    assert get_file_path(path, "") is path
+    assert get_file_path(path, "") == path
+    assert get_file_path(__file__, "") == path
 
 
-# def test_get_file_data_dir():
-#     from panpdf.tools import get_data_dir, get_defaults_file_path
+def mock_get_data_dir():
+    tmpdir = Path(tempfile.mkdtemp())
+    os.mkdir(tmpdir / "defaults")
 
-#     data_dir = get_data_dir()
-#     with tempfile.mkdtemp(dir=data_dir) as fd:
-#         pass
+    atexit.register(lambda: shutil.rmtree(tmpdir))
+    return lambda: tmpdir
+
+
+@pytest.mark.parametrize("suffix", [None, ".yaml"])
+@patch("panpdf.tools.get_data_dir", mock_get_data_dir())
+def test_get_file_data_dir(suffix):
+    from panpdf.tools import create_temp_file, get_data_dir, get_file_path
+
+    dirname = "defaults"
+    dir_ = get_data_dir() / dirname
+    text = str(uuid.uuid4())
+    path = create_temp_file(text, suffix=suffix, dir=dir_)
+    path = get_file_path(str(path).replace(path.suffix, ""), "")
+    assert path
+    assert path.read_text() == text
+    file = path.name.replace(path.suffix, "")
+    path = get_file_path(file, dirname)
+    assert path
+    assert path.read_text() == text
+
+
+@patch("panpdf.tools.get_data_dir", mock_get_data_dir())
+def test_get_gedfaults_file_data_dir_none():
+    from panpdf.tools import get_defaults_file_path
+
+    assert get_defaults_file_path(Path("-")) is None
 
 
 def test_run():
@@ -104,3 +150,13 @@ def test_progress():
     args = ["python", "--version"]
 
     assert not progress(args)
+
+
+@pytest.mark.parametrize(
+    ("text", "color"), [("Error", "red bold"), ("Warning", "red"), ("INFO", "yellow")]
+)
+def test_get_color(text: str, color):
+    from panpdf.tools import get_color
+
+    assert get_color(text) == color
+    assert get_color(text.upper()) == color

@@ -94,6 +94,7 @@ config-path = "ruff_defaults.toml"
 line-length = 100
 target-version = "py312"
 extend = "ruff_defaults.toml"
+ignore = ['RUF001']
 
 [tool.ruff.extend-per-file-ignores]
 "main.py" = ["ARG001", "UP007"]
