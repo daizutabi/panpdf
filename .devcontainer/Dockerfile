@@ -1,10 +1,10 @@
-FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
+FROM texlive/texlive
 
 RUN apt-get update && apt-get install -y --no-install-recommends libcairo2 pipx
 
 WORKDIR /tmp
 
-RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz && \
+RUN wget https://texlive.texjp.org/2024/tlnet/install-tl-unx.tar.gz && \
     tar xvf install-tl-unx.tar.gz && \
     cd install-tl-2* && \
     echo "selected_scheme scheme-full" > ./texlive.profile && \

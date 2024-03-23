@@ -1,25 +1,28 @@
 {
   "name": "panpdf",
-  "build": {
-    "context": "..",
-    "dockerfile": "Dockerfile"
+  "image": "texlive/texlive",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": "true",
+      "username": "panpdf"
+    },
+    "ghcr.io/devcontainers-contrib/features/hatch:2": {},
+    "ghcr.io/devcontainers-contrib/features/pandoc:1": {},
+    "ghcr.io/devcontainers-contrib/features/starship:1": {}
   },
+  "remoteUser": "panpdf",
   "containerEnv": {
     "TZ": "Asia/Tokyo"
   },
-  "runArgs": ["--init"],
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/usr/local/py-utils/bin"
+  },
   "customizations": {
     "vscode": {
-      "settings": { "extensions.verifySignature": false },
+      "settings": {
+        // "terminal.integrated.defaultProfile.linux": "bash"
+      },
       "extensions": [
-        "davidanson.vscode-markdownlint",
-        "eamodio.gitlens",
-        "esbenp.prettier-vscode",
-        "github.vscode-github-actions",
-        "markis.code-coverage",
-        "redhat.vscode-yaml",
-        "tamasfe.even-better-toml",
-        "tyriar.sort-lines",
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-toolsai.jupyter",
@@ -27,21 +30,12 @@
       ]
     }
   },
-
-  // Features to add to the dev container. More info: https://containers.dev/features.
-  // "features": {},
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh"
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
 
-  // Uncomment the next line to run commands after the container is created.
-  // "postCreateCommand": "hatch config set dirs.env.virtual .hatch"
-  "postCreateCommand": ".devcontainer/postCreateCommand.sh"
-
   // "mounts": [
   //   "source=hatch-${devcontainerId},target=${containerWorkspaceFolder}/.hatch,type=volume"
   // ]
-
-  // Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-  // "remoteUser": "devcontainer"
 }
