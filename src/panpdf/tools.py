@@ -40,11 +40,11 @@ def add_metadata(doc: Doc, name: str, value: str) -> None:
 PANDOC_PATH: list[Path] = []
 
 
-def get_pandoc_path() -> Path:
+def get_pandoc_path(pandoc_cmd: str = "pandoc") -> Path:
     if PANDOC_PATH:
         return PANDOC_PATH[0]
 
-    if path := shutil.which("pandoc"):
+    if path := shutil.which(pandoc_cmd):
         PANDOC_PATH.append(Path(path))
         return PANDOC_PATH[0]
 
@@ -67,7 +67,7 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
     raise NotImplementedError
 
 
-def get_defaults_file_path(defaults: Path | None) -> Path | None:
+def get_file_path(defaults: Path | None, dir: str) -> Path | None:  # noqa: A002
     if not defaults:
         return None
 
@@ -80,15 +80,19 @@ def get_defaults_file_path(defaults: Path | None) -> Path | None:
 
     data_dir = get_data_dir()
 
-    path = data_dir / "defaults" / defaults
+    path = data_dir / dir / defaults
     if path.exists():
         return path
 
-    path = data_dir / "defaults" / f"{defaults}.yaml"
+    path = data_dir / dir / f"{defaults}.yaml"
     if path.exists():
         return path
 
     return None
+
+
+def get_defaults_file_path(defaults: Path | None) -> Path | None:
+    return get_file_path(defaults, "defaults")
 
 
 def create_temp_file(
