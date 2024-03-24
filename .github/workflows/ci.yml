@@ -12,6 +12,8 @@ concurrency:
 env:
   PYTHONUNBUFFERED: "1"
   FORCE_COLOR: "1"
+  ZOTERO_LIBRARY_ID: ${{ secrets.ZOTERO_LIBRARY_ID }}
+  ZOTERO_API_KEY: ${{ secrets.ZOTERO_API_KEY }}
 
 jobs:
   run:
@@ -50,7 +52,7 @@ jobs:
         run: hatch fmt --check
       - name: Install Packages
         run : |
-          pip install --upgrade aiohttp nbformat panflute pyyaml rich typer
+          pip install --upgrade aiohttp nbformat panflute pyyaml rich typer pyzotero
           pip install --upgrade pytest-cov matplotlib cairosvg
           pip install -e .
       - name: Run test
