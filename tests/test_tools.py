@@ -74,7 +74,7 @@ def test_create_temp_file(text):
         assert path.exists()
         assert path.suffix == ".txt"
         if isinstance(text, str):
-            assert path.read_text() == text
+            assert path.read_text(encoding="utf8") == text
         else:
             assert path.read_bytes() == text
 
@@ -107,11 +107,11 @@ def test_get_file_data_dir(suffix):
     path = create_temp_file(text, suffix=suffix, dir=dir_)
     path = get_file_path(str(path).replace(path.suffix, ""), "")
     assert path
-    assert path.read_text() == text
+    assert path.read_text(encoding="utf8") == text
     file = path.name.replace(path.suffix, "")
     path = get_file_path(file, dirname)
     assert path
-    assert path.read_text() == text
+    assert path.read_text(encoding="utf8") == text
 
 
 @patch("panpdf.tools.get_data_dir", mock_get_data_dir())

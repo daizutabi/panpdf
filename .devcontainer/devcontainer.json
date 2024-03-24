@@ -12,15 +12,15 @@
   },
   "remoteUser": "panpdf",
   "containerEnv": {
-    "TZ": "Asia/Tokyo",
-    "STARSHIP_CONFIG": "/home/panpdf/.local_config/starship.toml"
+    "TZ": "Asia/Tokyo"
+    // "STARSHIP_CONFIG": "/home/panpdf/.local_config/starship.toml"
   },
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/usr/local/py-utils/bin"
   },
-  "mounts": [
-    "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
-  ],
+  // "mounts": [
+  //   "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
+  // ],
   "customizations": {
     "vscode": {
       "settings": {
