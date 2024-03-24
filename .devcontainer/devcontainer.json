@@ -13,16 +13,15 @@
   "remoteUser": "panpdf",
   "containerEnv": {
     "TZ": "Asia/Tokyo",
-    "STARSHIP_CONFIG": "/home/panpdf/.local_config/starship.toml",
     "ZOTERO_LIBRARY_ID": "${localEnv:ZOTERO_LIBRARY_ID}",
     "ZOTERO_API_KEY": "${localEnv:ZOTERO_API_KEY}"
   },
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/usr/local/py-utils/bin"
   },
-  "mounts": [
-    "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
-  ],
+  // "mounts": [
+  //   "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
+  // ],
   "customizations": {
     "vscode": {
       "settings": {
