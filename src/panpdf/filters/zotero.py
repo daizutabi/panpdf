@@ -14,8 +14,6 @@ from panflute import Cite
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from panflute import Doc
 
 
