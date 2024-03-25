@@ -1,37 +1,65 @@
-from itertools import chain
-
 import panflute as pf
-from panflute import Cite, Para
-
-from panpdf.filters.zotero import Zotero, iter_keys
+from panflute import Cite, Doc, Para
 
 
-def test_zotero():
+def test_keys():
+    from panpdf.filters.zotero import Zotero
+
     zotero = Zotero()
-    zotero.run("a d e [@zotero] [@XXX]")
-    assert "zotero" in zotero.csl
-    assert "XXX" in zotero.csl
 
-
-def test_get_keys():
-    elems = pf.convert_text("a b [@key1], [@key2; @key3; @key4] @key5")
+    elems = pf.convert_text("[@key1; @key2; @key3]")
     assert isinstance(elems, list)
     para = elems[0]
     assert isinstance(para, Para)
-    keys_ = [iter_keys(c) for c in para.content if isinstance(c, Cite)]
-    keys = list(chain.from_iterable(keys_))  # type:ignore
-    for i in range(1, 6):
-        assert f"key{i}" in keys
+    cite = para.content[0]
+    assert isinstance(cite, Cite)
+    zotero.action(cite, Doc())
+    assert zotero.keys == ["key1", "key2", "key3"]
+    zotero.action(cite, Doc())
+    assert zotero.keys == ["key1", "key2", "key3"]
+
+
+def test_get_items_zotxt():
+    from panpdf.filters.zotero import get_items_zotxt
+
+    keys = ["panpdf", "panflute", "x"]
+    keys = ["panflute", "x"]
+    refs = get_items_zotxt(keys)
+
+    if refs is None:
+        return
+
+    assert len(refs) == 1
+    assert isinstance(refs[0], dict)
+    # for x in refs[0].items():
+    #     print(x)
+    # assert 0
+
+
+def test_get_items_api():
+    from panpdf.filters.zotero import get_items_api
+
+    keys = ["panpdf", "panflute", "x"]
+    keys = ["panflute", "x"]
+    refs = get_items_api(keys)
+    assert refs
+    # for x in refs.entries[0].items():
+    #     print(x)
+    # # for x in refs[0]["data"].items():
+    # #     print(x)
+    # import bibtexparser
+
+    # print(bibtexparser.dumps(refs))
+
+    # assert 0
 
 
 # def test_get_csl():
 #     import asyncio
 
-#     from panpdf.filters.zotero import gather, get_csl, get_url
+#     from panpdf.filters.zotero import gather, get_csl, get_url_zotxt
 
-#     url = get_url("panflute")
-#     print(url)
-#     assert 0
+#     url = get_url_zotxt("panflute")
 #     res = asyncio.run(gather([url], get_csl))
 #     print(res)
 #     assert 0

@@ -62,7 +62,7 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
 
     for line in output.splitlines():
         if line.startswith("User data directory:"):
-            return Path(line.split(":")[1].strip())
+            return Path(line.split(":", maxsplit=1)[1].strip())
 
     raise NotImplementedError
 

@@ -1,8 +1,11 @@
 import base64
 import io
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from IPython.lib.pretty import RepresentationPrinter
+
+mpl.use("agg")
 
 
 def test_matplotlib_figure(fmt):
