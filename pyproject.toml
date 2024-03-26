@@ -46,7 +46,7 @@ exclude = ["/.github", "/docs"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/panpdf"]
 
-[tool.hatch.envs.default]
+[tool.hatch.envs.test]
 dependencies = [
   "cairosvg",
   "matplotlib",
@@ -56,10 +56,10 @@ dependencies = [
   "seaborn",
 ]
 
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests src/panpdf}"
+[tool.hatch.envs.test.scripts]
+run = "pytest {args:tests src/panpdf}"
 
-[[tool.hatch.envs.default.matrix]]
+[[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12"]
 
 [tool.pytest.ini_options]
