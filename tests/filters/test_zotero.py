@@ -1,3 +1,5 @@
+import os
+
 import panflute as pf
 from panflute import Cite, Doc, Para
 
@@ -43,13 +45,41 @@ def test_get_items_api():
     assert isinstance(items[0], dict)
 
 
+def test_convert_note():
+    from panpdf.filters.zotero import convert_note
+
+    item = {}
+    assert convert_note(item) is item
+
+    item = {"note": "Citation Key: abc\nA B: a"}
+    item = convert_note(item)
+    assert item["id"] == "abc"
+    assert item["a-b"] == "a"
+
+
+def test_invalid_env():
+    from panpdf.filters.zotero import get_items_api, get_zotero_api
+
+    name = "ZOTERO_API_KEY"
+    if not (env := os.getenv(name)):
+        return
+
+    os.environ[name] = ""
+    assert not get_zotero_api()
+    assert get_items_api([]) is None
+    os.environ[name] = env
+
+
 def test_zotero():
     from panpdf.filters.zotero import Zotero
 
     doc = pf.convert_text("[@panflute;@panpdf]", standalone=True)
     assert isinstance(doc, Doc)
 
-    doc = Zotero().run(doc)
+    zotero = Zotero()
+    doc = zotero.run(doc)
+    assert zotero.keys == ["panflute", "panpdf"]
+    assert "references" in doc.metadata
 
     tex = pf.convert_text(
         doc,
@@ -61,3 +91,11 @@ def test_zotero():
     assert "{[}1{]}, {[}2{]}\n\n" in tex
     assert "\\CSLLeftMargin{{[}1{]} }%" in tex
     assert "\\url{https://github.com/daizutabi/panpdf}}" in tex
+
+
+def test_zotero_nokey():
+    from panpdf.filters.zotero import Zotero
+
+    doc = Doc()
+    doc = Zotero().run(doc)
+    assert not doc.metadata
