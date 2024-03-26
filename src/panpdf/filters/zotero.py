@@ -117,7 +117,7 @@ def convert_note(item: dict):
             if name == "Citation Key":
                 item["id"] = text
             else:
-                item[name.lower()] = text
+                item[name.lower().replace(" ", "-")] = text
 
     return item
 
