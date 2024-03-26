@@ -94,7 +94,8 @@ def get_items_api(keys: list[str]) -> list[dict] | None:
         return None
 
     zot = pyzotero.zotero.Zotero(library_id, library_type, api_key)
-    return zot.items(format="bibtex")
+    return zot.items(format="csljson")
+    # return zot.items(format="bibtex")
 
     items = []
     for item in zot.items():

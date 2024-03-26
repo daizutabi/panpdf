@@ -23,14 +23,15 @@ def test_get_items_zotxt():
     from panpdf.filters.zotero import get_items_zotxt
 
     keys = ["panpdf", "panflute", "x"]
-    keys = ["panflute", "x"]
-    refs = get_items_zotxt(keys)
+    items = get_items_zotxt(keys)
 
-    if refs is None:
+    if items is None:
         return
 
-    assert len(refs) == 1
-    assert isinstance(refs[0], dict)
+    print(items)
+    assert 0
+    # assert len(refs) == 1
+    # assert isinstance(refs[0], dict)
     # for x in refs[0].items():
     #     print(x)
     # assert 0
@@ -40,9 +41,9 @@ def test_get_items_api():
     from panpdf.filters.zotero import get_items_api
 
     keys = ["panpdf", "panflute", "x"]
-    keys = ["panflute", "x"]
-    refs = get_items_api(keys)
-    assert refs
+    items = get_items_api(keys)
+    print(items)
+    assert 0
     # for x in refs.entries[0].items():
     #     print(x)
     # # for x in refs[0]["data"].items():
