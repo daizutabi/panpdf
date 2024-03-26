@@ -28,13 +28,8 @@ def test_get_items_zotxt():
     if items is None:
         return
 
-    print(items)
-    assert 0
-    # assert len(refs) == 1
-    # assert isinstance(refs[0], dict)
-    # for x in refs[0].items():
-    #     print(x)
-    # assert 0
+    assert len(items) == 2
+    assert isinstance(items[0], dict)
 
 
 def test_get_items_api():
@@ -42,25 +37,27 @@ def test_get_items_api():
 
     keys = ["panpdf", "panflute", "x"]
     items = get_items_api(keys)
-    print(items)
-    assert 0
-    # for x in refs.entries[0].items():
-    #     print(x)
-    # # for x in refs[0]["data"].items():
-    # #     print(x)
-    # import bibtexparser
 
-    # print(bibtexparser.dumps(refs))
-
-    # assert 0
+    assert items
+    assert len(items) == 2
+    assert isinstance(items[0], dict)
 
 
-# def test_get_csl():
-#     import asyncio
+def test_zotero():
+    from panpdf.filters.zotero import Zotero
 
-#     from panpdf.filters.zotero import gather, get_csl, get_url_zotxt
+    doc = pf.convert_text("[@panflute;@panpdf]", standalone=True)
+    assert isinstance(doc, Doc)
 
-#     url = get_url_zotxt("panflute")
-#     res = asyncio.run(gather([url], get_csl))
-#     print(res)
-#     assert 0
+    doc = Zotero().run(doc)
+
+    tex = pf.convert_text(
+        doc,
+        input_format="panflute",
+        output_format="latex",
+        extra_args=["--citeproc", "--csl", "https://www.zotero.org/styles/ieee"],
+    )
+    assert isinstance(tex, str)
+    assert "{[}1{]}, {[}2{]}\n\n" in tex
+    assert "\\CSLLeftMargin{{[}1{]} }%" in tex
+    assert "\\url{https://github.com/daizutabi/panpdf}}" in tex

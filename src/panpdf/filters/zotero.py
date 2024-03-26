@@ -14,6 +14,8 @@ from panflute import Cite
 from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from panflute import Doc
 
 
@@ -32,8 +34,6 @@ class Zotero(Filter):
         if not self.keys:
             return
 
-        # if items := get_items_api(self.keys):
-
         if items := get_items_zotxt(self.keys):
             doc.metadata["references"] = items
             return
@@ -41,25 +41,8 @@ class Zotero(Filter):
         if items is not None:
             return
 
-        # if keys := [key for key in self.csl if not self.csl[key]]:
-        #     urls = [get_url_zotxt(key, self.host, self.port) for key in keys]
-        #     try:
-        #         csls = asyncio.run(gather(urls, get_csl))
-        #     except ClientError:
-        #         pass
-        #     else:
-        #         self.csl.update(dict(zip(keys, csls, strict=True)))
-
-        # if csls := [csl for csl in self.csl.values() if csl]:
-        #     doc.metadata["references"] = csls
-
-
-def get_items(keys: list[str]) -> list[dict]:
-    refs = get_items_zotxt(keys)
-    if refs is not None:
-        return refs
-
-    return []
+        if items := get_items_api(self.keys):
+            doc.metadata["references"] = items
 
 
 def get_items_zotxt(keys: list[str]) -> list[dict] | None:
@@ -85,7 +68,7 @@ async def get_csl(response: ClientResponse) -> dict:
     return json.loads(text)[0]
 
 
-def get_items_api(keys: list[str]) -> list[dict] | None:
+def get_zotero_api() -> pyzotero.zotero.Zotero | None:
     library_id = os.getenv("ZOTERO_LIBRARY_ID")
     library_type = os.getenv("ZOTERO_LIBRARY_TYPE") or "user"
     api_key = os.getenv("ZOTERO_API_KEY")
@@ -93,37 +76,50 @@ def get_items_api(keys: list[str]) -> list[dict] | None:
     if not library_id or not api_key:
         return None
 
-    zot = pyzotero.zotero.Zotero(library_id, library_type, api_key)
-    return zot.items(format="csljson")
-    # return zot.items(format="bibtex")
+    return pyzotero.zotero.Zotero(library_id, library_type, api_key)
+
+
+def get_items_api(
+    keys: list[str],
+    start: int | None = None,
+    limit: int | None = None,
+) -> list[dict] | None:
+    if not (zot := get_zotero_api()):
+        return None
 
     items = []
-    for item in zot.items():
-        if (item_ := convert_item_api(item)) and item_["id"] in keys:  # type: ignore
-            items.append(item)  # noqa: PERF401
+    for key, item in iter_items_api(zot, start, limit):
+        if key in keys:
+            items.append(item)
 
     return items
 
 
-def convert_item_api(ref: dict) -> dict | None:
-    if key := get_key(ref):
-        ref["id"] = key
-        return ref
+def iter_items_api(
+    zot: pyzotero.zotero.Zotero,
+    start: int | None = None,
+    limit: int | None = None,
+) -> Iterator[tuple[str, dict]]:
+    for item in zot.items(content="csljson", start=start, limit=limit):
+        item_ = convert_note(item)  # type:ignore
+        if key := item_.get("id"):
+            yield key, item_
 
-    return None
 
+def convert_note(item: dict):
+    if not (note := item.pop("note", None)):
+        return item
 
-def get_key(ref: dict) -> str | None:
-    if not (extra := ref.get("extra")):
-        return None
-
-    for line in extra.splitlines():
+    for line in note.splitlines():
         if ":" in line:
             name, text = line.split(":", maxsplit=1)
+            text = text.strip()
             if name == "Citation Key":
-                return text.strip()
+                item["id"] = text
+            else:
+                item[name.lower()] = text
 
-    return None
+    return item
 
 
 # Ref: https://gist.github.com/rhoboro/86629f831934827d832841709abfe715
