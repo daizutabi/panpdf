@@ -1,37 +1,63 @@
-from itertools import chain
-
 import panflute as pf
-from panflute import Cite, Para
-
-from panpdf.filters.zotero import Zotero, iter_keys
+from panflute import Cite, Doc, Para
 
 
-def test_zotero():
+def test_keys():
+    from panpdf.filters.zotero import Zotero
+
     zotero = Zotero()
-    zotero.run("a d e [@zotero] [@XXX]")
-    assert "zotero" in zotero.csl
-    assert "XXX" in zotero.csl
 
-
-def test_get_keys():
-    elems = pf.convert_text("a b [@key1], [@key2; @key3; @key4] @key5")
+    elems = pf.convert_text("[@key1; @key2; @key3]")
     assert isinstance(elems, list)
     para = elems[0]
     assert isinstance(para, Para)
-    keys_ = [iter_keys(c) for c in para.content if isinstance(c, Cite)]
-    keys = list(chain.from_iterable(keys_))  # type:ignore
-    for i in range(1, 6):
-        assert f"key{i}" in keys
+    cite = para.content[0]
+    assert isinstance(cite, Cite)
+    zotero.action(cite, Doc())
+    assert zotero.keys == ["key1", "key2", "key3"]
+    zotero.action(cite, Doc())
+    assert zotero.keys == ["key1", "key2", "key3"]
 
 
-# def test_get_csl():
-#     import asyncio
+def test_get_items_zotxt():
+    from panpdf.filters.zotero import get_items_zotxt
 
-#     from panpdf.filters.zotero import gather, get_csl, get_url
+    keys = ["panpdf", "panflute", "x"]
+    items = get_items_zotxt(keys)
 
-#     url = get_url("panflute")
-#     print(url)
-#     assert 0
-#     res = asyncio.run(gather([url], get_csl))
-#     print(res)
-#     assert 0
+    if items is None:
+        return
+
+    assert len(items) == 2
+    assert isinstance(items[0], dict)
+
+
+def test_get_items_api():
+    from panpdf.filters.zotero import get_items_api
+
+    keys = ["panpdf", "panflute", "x"]
+    items = get_items_api(keys)
+
+    assert items
+    assert len(items) == 2
+    assert isinstance(items[0], dict)
+
+
+def test_zotero():
+    from panpdf.filters.zotero import Zotero
+
+    doc = pf.convert_text("[@panflute;@panpdf]", standalone=True)
+    assert isinstance(doc, Doc)
+
+    doc = Zotero().run(doc)
+
+    tex = pf.convert_text(
+        doc,
+        input_format="panflute",
+        output_format="latex",
+        extra_args=["--citeproc", "--csl", "https://www.zotero.org/styles/ieee"],
+    )
+    assert isinstance(tex, str)
+    assert "{[}1{]}, {[}2{]}\n\n" in tex
+    assert "\\CSLLeftMargin{{[}1{]} }%" in tex
+    assert "\\url{https://github.com/daizutabi/panpdf}}" in tex
