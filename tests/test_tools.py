@@ -9,30 +9,7 @@ from unittest.mock import patch
 
 import panflute as pf
 import pytest
-from panflute import Doc
-
-
-def test_get_metadata():
-    from panpdf.tools import get_metadata
-
-    text = "---\na: a\nb: \\b\n---\n# x"
-    doc = pf.convert_text(text, standalone=True)
-    assert isinstance(doc, Doc)
-    assert get_metadata(doc, "a") == "a"
-    assert get_metadata(doc, "b") == "\\b"
-    assert get_metadata(doc, "c", "c") == "c"
-
-
-def test_add_metadata():
-    from panpdf.tools import add_metadata, get_metadata
-
-    text = "---\na: a\nb: \\b\n---\n# x"
-    doc = pf.convert_text(text, standalone=True)
-    assert isinstance(doc, Doc)
-    add_metadata(doc, "a", "A")
-    assert get_metadata(doc, "a") == "a\nA"
-    add_metadata(doc, "c", "C")
-    assert get_metadata(doc, "c") == "C"
+from panflute import Doc, Para, Str
 
 
 def test_get_pandoc_path():
@@ -160,3 +137,86 @@ def test_get_color(text: str, color):
 
     assert get_color(text) == color
     assert get_color(text.upper()) == color
+
+
+def test_get_metadata_str():
+    from panpdf.tools import get_metadata_str
+
+    text = "---\na: a\nb: \\b\n---\n# x"
+    doc = pf.convert_text(text, standalone=True)
+    assert isinstance(doc, Doc)
+    assert get_metadata_str(doc, "a") == "a"
+    assert get_metadata_str(doc, "b") == "\\b"
+    assert get_metadata_str(doc, "c", "c") == "c"
+
+
+def test_add_metadata_str():
+    from panpdf.tools import add_metadata_str, get_metadata_str
+
+    text = "---\na: a\nb: \\b\n---\n# x"
+    doc = pf.convert_text(text, standalone=True)
+    assert isinstance(doc, Doc)
+    add_metadata_str(doc, "a", "A")
+    assert get_metadata_str(doc, "a") == "a\nA"
+    add_metadata_str(doc, "c", "C")
+    assert get_metadata_str(doc, "c") == "C"
+
+
+def test_get_metadata_list():
+    from panpdf.tools import iter_metadata_list
+
+    doc = Doc()
+    doc.metadata["a"] = ["b", "c"]
+    assert list(iter_metadata_list(doc, "a")) == ["b", "c"]
+
+
+def test_add_metadata_list():
+    from panpdf.tools import add_metadata_list, iter_metadata_list
+
+    doc = Doc()
+    add_metadata_list(doc, "a", "x")
+    add_metadata_list(doc, "a", "y")
+    assert list(iter_metadata_list(doc, "a")) == ["x", "y"]
+
+
+def test_convert_metadata():
+    doc = Doc()
+    doc.metadata["a"] = ["b", "c"]
+    m = pf.convert_text(doc, input_format="panflute", output_format="markdown", standalone=True)
+    assert m == "---\na:\n- b\n- c\n---\n"
+    x = doc.metadata["a"]
+    assert isinstance(x, pf.MetaList)
+    x.append("d")
+    assert len(x) == 3
+
+
+def test_iter_extra_args_from_metadata():
+    from panpdf.tools import (
+        add_metadata_list,
+        create_temp_file,
+        iter_extra_args_from_metadata,
+    )
+
+    a = create_temp_file("AAA", suffix=".tex").as_posix()
+    b = create_temp_file("BBB", suffix=".tex").as_posix()
+
+    doc = Doc(Para(Str("123")))
+    add_metadata_list(doc, "include-in-header", a)
+    add_metadata_list(doc, "include-in-header", b)
+    add_metadata_list(doc, "include-before-body", a)
+    add_metadata_list(doc, "include-before-body", b)
+    add_metadata_list(doc, "include-after-body", a)
+    add_metadata_list(doc, "include-after-body", b)
+
+    extra_args = list(iter_extra_args_from_metadata(doc))
+
+    t = pf.convert_text(
+        doc,
+        input_format="panflute",
+        output_format="latex",
+        standalone=True,
+        extra_args=extra_args,
+    )
+    assert isinstance(t, str)
+    assert "AAA\nBBB\n\\ifLua" in t
+    assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t

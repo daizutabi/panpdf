@@ -72,8 +72,9 @@ def test_create_defaults_for_standalone_none():
 
     assert defaults["variables"] == {"documentclass": "standalone"}
     header = defaults["include-in-header"]
-    assert isinstance(header, str)
-    assert header.endswith(".tex")
+    assert isinstance(header, list)
+    assert isinstance(header[0], str)
+    assert header[0].endswith(".tex")
 
 
 @pytest.mark.parametrize("use_defaults", [False, True])

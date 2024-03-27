@@ -14,7 +14,7 @@ from panflute import Doc, Image, Plain, RawInline
 
 from panpdf.filters.filter import Filter
 from panpdf.stores import Store
-from panpdf.tools import convert_doc
+from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
 
 PGF_PREFIX = "%% Creator: Matplotlib"
 
@@ -30,7 +30,7 @@ class Jupyter(Filter):
     def set_notebooks_dir(self, notebooks_dir: list[Path]):
         self.store.set_notebooks_dir(notebooks_dir)
 
-    def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
+    def action(self, image: Image, doc: Doc) -> Image:
         url = image.url
         identifier = image.identifier
 
@@ -51,6 +51,7 @@ class Jupyter(Filter):
 
         if not url_or_text.startswith(PGF_PREFIX) or not self.standalone:
             image.url = url_or_text
+            doc.metadata["__pgf__"] = True
             return image
 
         image.url, text = create_image_file_pgf(
@@ -63,9 +64,10 @@ class Jupyter(Filter):
         self.store.save_notebook(url)
         return image
 
-    def create_image_file_pgf(self, image: Image, text: str) -> Image:
-        image.url = text
-        return image
+    def finalize(self, doc: Doc) -> None:
+        if doc.metadata.pop("__pgf__"):
+            path = create_temp_file("\\usepackage{pgf}", ".tex")
+            add_metadata_list(doc, "include-in-header", path.as_posix())
 
 
 def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str | None:
@@ -154,13 +156,16 @@ def create_defaults_for_standalone(path: Path | None = None) -> Path:
             defaults: dict[str, Any] = yaml.safe_load(f)
     else:
         path = Path(".")
-        fd, filename = tempfile.mkstemp(".tex", dir=path.parent, text=True)
-        path_header = Path(filename)
-        header = "\\usepackage{pgf}\\usepackage{lmodern}"
-        path_header.write_text(header, encoding="utf8")
-        os.close(fd)
-        atexit.register(path_header.unlink)
-        defaults = {"include-in-header": path_header.as_posix()}
+        defaults = {}
+
+    in_header = defaults.get("include-in-header", [])
+
+    if isinstance(in_header, str):
+        in_header = [in_header]
+
+    path = create_temp_file("\\usepackage{pgf}", suffix=".tex", dir=path.parent)
+    in_header.append(path.as_posix())
+    defaults["include-in-header"] = in_header
 
     for toc in ["table-of-contents", "toc", "toc-depth"]:
         if toc in defaults:

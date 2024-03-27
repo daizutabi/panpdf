@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar
 from panflute import Cite, RawInline, Str
 
 from panpdf.filters.filter import Filter
-from panpdf.tools import get_metadata
+from panpdf.tools import get_metadata_str
 
 if TYPE_CHECKING:
     from panflute import Doc, Element
@@ -22,13 +22,13 @@ class Crossref(Filter):
     suffix: dict[str, list[Element]] = field(default_factory=dict)
 
     def prepare(self, doc: Doc):
-        name = get_metadata(doc, "reference-figure-name") or "Fig."
+        name = get_metadata_str(doc, "reference-figure-name") or "Fig."
         self.set_prefix("fig", name)
 
-        name = get_metadata(doc, "reference-table-name") or "Table"
+        name = get_metadata_str(doc, "reference-table-name") or "Table"
         self.set_prefix("tbl", name)
 
-        name = get_metadata(doc, "reference-equation-name") or "Eq."
+        name = get_metadata_str(doc, "reference-equation-name") or "Eq."
         self.set_prefix("eq", name)
 
     def action(self, elem: Cite, doc: Doc) -> list[Element] | None:  # noqa: ARG002

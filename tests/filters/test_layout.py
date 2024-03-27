@@ -2,6 +2,7 @@ import platform
 from pathlib import Path
 
 import panflute as pf
+import pytest
 from panflute import Doc, Figure, Para, RawInline, Span, Table
 
 from panpdf.filters.attribute import Attribute
@@ -119,23 +120,36 @@ def test_convert_figure_minipage():
     assert "\\caption{}" not in tex
 
 
-def test_convert_figure_subfigure():
-    from panpdf.filters.layout import convert_figure
-    from panpdf.tools import get_metadata
-
+@pytest.fixture
+def fig():
     text = "![A $x$](a.png){#fig:a hspace=1mm}\n"
     text += "![B](b.png){#fig:b cwidth=3cm}\n"
     text += ": x $m$ {#fig:X}"
+    return _get_figure(text)
+
+
+def test_convert_figure_subfigure(fig):
+    from panpdf.filters.layout import convert_figure
 
     doc = Doc()
-    fig = _get_figure(text)
     fig = convert_figure(fig, doc)
     tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
     assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in tex
     assert "\\caption{x \\(m\\)}\\label{fig:X}" in tex
-    assert "panpdf.include-in-header" in doc.metadata
-    path = get_metadata(doc, "panpdf.include-in-header")
-    assert isinstance(path, str)
-    assert path.endswith(".tex")
-    assert Path(path).exists()
+    assert "__subcaption__" in doc.metadata
+
+
+def test_layout(fig):
+    from panpdf.filters.layout import Layout
+
+    assert isinstance(fig, Figure)
+    doc = Doc(fig)
+    layout = Layout()
+    layout.run(doc)
+
+    assert "__subcaption__" not in doc.metadata
+    x = doc.metadata["include-in-header"]
+    assert isinstance(x, pf.MetaList)
+    f = Path(pf.stringify(x[0]))
+    assert f.exists()
