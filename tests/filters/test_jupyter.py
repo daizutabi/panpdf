@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import platform
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -20,8 +19,10 @@ def test_create_image_file_base64(store: Store):
 
     data = store.get_data("png.ipynb", "fig:png")
     text = data["image/png"]
-    path = create_image_file_base64(text, ".png")
-    assert os.path.exists(path)
+    file = create_image_file_base64(text, ".png")
+    path = Path(file)
+    assert path.exists()
+    assert path.stat().st_size
 
 
 def test_create_image_file_svg(store: Store):
@@ -37,8 +38,9 @@ def test_create_image_file_svg(store: Store):
 
         raise
 
-    assert Path(url).exists()
-    assert Path(url).stat().st_size
+    path = Path(url)
+    assert path.exists()
+    assert path.stat().st_size
     assert text.startswith("JVBER")
 
 
@@ -85,8 +87,10 @@ def test_create_image_file_pgf(store: Store, defaults, use_defaults):
     text = data["text/plain"]
     defaults = defaults if use_defaults else None
     url, text = create_image_file_pgf(text, defaults)
-    assert Path(url).exists()
-    assert Path(url).stat().st_size
+
+    path = Path(url)
+    assert path.exists()
+    assert path.stat().st_size
     assert text.startswith("JVBER")
 
 

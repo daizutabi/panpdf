@@ -54,7 +54,7 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
 
 
 def create_temp_file(
-    text: str | bytes,
+    text: str | bytes | None,
     suffix: str | None = None,
     dir: str | Path | None = None,  # noqa: A002
 ) -> Path:
@@ -64,7 +64,7 @@ def create_temp_file(
 
     if isinstance(text, str):
         path.write_text(text, encoding="utf8")
-    else:
+    elif text:
         path.write_bytes(text)
 
     os.close(fd)
