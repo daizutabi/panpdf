@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import atexit
 import base64
 import io
-import os
-import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
@@ -96,29 +93,19 @@ def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str 
 
 
 def create_image_file_base64(text: str, suffix: str) -> str:
-    fd, filename = tempfile.mkstemp(suffix)
     data = base64.b64decode(text)
-    path = Path(filename)
-    path.write_bytes(data)
-
-    os.close(fd)
-    atexit.register(path.unlink)
+    path = create_temp_file(data, suffix)
     return path.as_posix()
 
 
 def create_image_file_svg(xml: str) -> tuple[str, str]:
     import cairosvg
 
-    fd, filename = tempfile.mkstemp(".pdf")
+    path = create_temp_file(None, ".pdf")
     file_obj = io.StringIO(xml)
-    cairosvg.svg2pdf(file_obj=file_obj, write_to=filename)
-
-    path = Path(filename)
+    cairosvg.svg2pdf(file_obj=file_obj, write_to=path.as_posix())
     data = path.read_bytes()
     text = base64.b64encode(data).decode()
-
-    os.close(fd)
-    atexit.register(path.unlink)
     return path.as_posix(), text
 
 
@@ -130,23 +117,21 @@ def create_image_file_pgf(
 ) -> tuple[str, str]:
     doc = Doc(Plain(RawInline(text, format="latex")))
     defaults = create_defaults_for_standalone(defaults)
-    fd, filename = tempfile.mkstemp(".pdf")
+
+    path = create_temp_file(None, ".pdf")
+    extra_args = ["--defaults", defaults.as_posix(), "--output", path.as_posix()]
 
     convert_doc(
         doc,
         output_format="pdf",
         standalone=True,
-        extra_args=["--defaults", defaults.as_posix(), "--output", filename],
+        extra_args=extra_args,
         pandoc_path=pandoc_path,
         description=description,
     )
 
-    path = Path(filename)
     data = path.read_bytes()
     text = base64.b64encode(data).decode()
-
-    os.close(fd)
-    atexit.register(path.unlink)
     return path.as_posix(), text
 
 
@@ -182,11 +167,4 @@ def create_defaults_for_standalone(path: Path | None = None) -> Path:
         variables["classoption"] = options
 
     text = yaml.dump(defaults)
-
-    fd, filename = tempfile.mkstemp(".yaml", dir=path.parent, text=True)
-    path = Path(filename)
-    path.write_text(text, encoding="utf8")
-
-    os.close(fd)
-    atexit.register(path.unlink)
-    return path
+    return create_temp_file(text, ".yaml", dir=path.parent)
