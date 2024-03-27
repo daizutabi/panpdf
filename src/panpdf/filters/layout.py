@@ -20,7 +20,7 @@ from panflute import (
 
 from panpdf.filters.filter import Filter
 from panpdf.filters.jupyter import PGF_PREFIX
-from panpdf.tools import add_metadata, create_temp_file
+from panpdf.tools import add_metadata_str, create_temp_file
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -76,7 +76,7 @@ def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:
     if (caption := figure.caption) and caption.content:
         env = "subfigure"
         path = create_temp_file("\\usepackage{subcaption}", ".tex")
-        add_metadata(doc, "panpdf.include-in-header", path.as_posix())
+        add_metadata_str(doc, "panpdf.include-in-header", path.as_posix())
     else:
         env = "minipage"
         caption = Caption()

@@ -17,7 +17,7 @@ from panpdf.filters.jupyter import Jupyter
 from panpdf.filters.layout import Layout
 from panpdf.filters.zotero import Zotero
 from panpdf.stores import Store
-from panpdf.tools import convert_doc, get_defaults_file_path, get_metadata, get_pandoc_version
+from panpdf.tools import convert_doc, get_defaults_file_path, get_metadata_str, get_pandoc_version
 
 # from panpdf.filters.latex import Latex
 # from panpdf.filters.outputcell import OutputCell
@@ -143,20 +143,20 @@ def cli(
             is_flag=True,
         ),
     ] = False,
-    host: Annotated[
-        str,
-        Option(
-            help="IP address.",
-            hidden=True,
-        ),
-    ] = "localhost",
-    port: Annotated[
-        int,
-        Option(
-            help="Port.",
-            hidden=True,
-        ),
-    ] = 23119,
+    # host: Annotated[
+    #     str,
+    #     Option(
+    #         help="IP address.",
+    #         hidden=True,
+    #     ),
+    # ] = "localhost",
+    # port: Annotated[
+    #     int,
+    #     Option(
+    #         help="Port.",
+    #         hidden=True,
+    #     ),
+    # ] = 23119,
     version: Annotated[
         bool,
         Option(
@@ -189,7 +189,7 @@ def cli(
     )  # type:ignore
 
     if output and str(output).startswith("."):
-        title = get_metadata(doc, "title") or "a"
+        title = get_metadata_str(doc, "title") or "a"
         output = Path(f"{title}{output}")
 
     if output_format == OutputFormat.auto:
@@ -210,14 +210,14 @@ def cli(
     filters.extend([Layout(), Crossref()])
 
     if citeproc:
-        filters.append(Zotero(host=host, port=port))
+        filters.append(Zotero())
 
     for filter_ in filters:
         doc = filter_.run(doc)
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
 
-    if include_in_header := get_metadata(doc, "panpdf.include-in-header"):
+    if include_in_header := get_metadata_str(doc, "panpdf.include-in-header"):
         extra_args.extend(["--include-in-header", include_in_header])
 
     if citeproc:

@@ -18,23 +18,9 @@ from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 if TYPE_CHECKING:
     from asyncio.streams import StreamReader
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 console = Console()
-
-
-def get_metadata(doc: Doc, name: str, default: str | None = None) -> str | None:
-    if metadata := doc.metadata.content.get(name):
-        return pf.stringify(metadata)
-
-    return default
-
-
-def add_metadata(doc: Doc, name: str, value: str) -> None:
-    if metadata := get_metadata(doc, name):
-        value = f"{metadata}\n{value}"
-
-    doc.metadata[name] = value
 
 
 PANDOC_PATH: list[Path] = []
@@ -241,3 +227,38 @@ def get_color(text: str) -> str:
         return "yellow"
 
     return "gray70"
+
+
+def get_metadata_str(doc: Doc, name: str, default: str | None = None) -> str | None:
+    if metadata := doc.metadata.get(name):
+        return pf.stringify(metadata)
+
+    return default
+
+
+def add_metadata_str(doc: Doc, name: str, value: str) -> None:
+    if metadata := get_metadata_str(doc, name):
+        value = f"{metadata}\n{value}"
+
+    doc.metadata[name] = value
+
+
+def iter_metadata_list(doc: Doc, name: str) -> Iterator[str]:
+    if metadata := doc.metadata.get(name):
+        for value in metadata:
+            yield pf.stringify(value)
+
+
+def add_metadata_list(doc: Doc, name: str, value: str) -> None:
+    if metadata := doc.metadata.get(name):
+        metadata.append(value)
+    else:
+        doc.metadata[name] = [value]
+
+
+def iter_extra_args_from_metadata(doc: Doc) -> Iterator[str]:
+    names = ["include-in-header", "include-before-body", "include-after-body"]
+    for name in names:
+        for value in iter_metadata_list(doc, name):
+            yield f"--{name}"
+            yield value

@@ -121,7 +121,7 @@ def test_convert_figure_minipage():
 
 def test_convert_figure_subfigure():
     from panpdf.filters.layout import convert_figure
-    from panpdf.tools import get_metadata
+    from panpdf.tools import get_metadata_str
 
     text = "![A $x$](a.png){#fig:a hspace=1mm}\n"
     text += "![B](b.png){#fig:b cwidth=3cm}\n"
@@ -135,7 +135,7 @@ def test_convert_figure_subfigure():
     assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in tex
     assert "\\caption{x \\(m\\)}\\label{fig:X}" in tex
     assert "panpdf.include-in-header" in doc.metadata
-    path = get_metadata(doc, "panpdf.include-in-header")
+    path = get_metadata_str(doc, "panpdf.include-in-header")
     assert isinstance(path, str)
     assert path.endswith(".tex")
     assert Path(path).exists()
