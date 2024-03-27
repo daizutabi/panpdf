@@ -113,9 +113,6 @@ def convert_doc(
     transient: bool = False,
 ):
     if output_format == "latex":
-        if not standalone:
-            extra_args = []
-
         return pf.convert_text(
             doc,
             input_format="panflute",

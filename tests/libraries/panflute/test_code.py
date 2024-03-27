@@ -37,3 +37,11 @@ def test_code_block_attr():
     assert code.identifier == "id"
     assert code.classes == ["python", "input"]
     assert code.attributes["k1"] == "v1"
+
+
+def test_code_block_latex():
+    text = "```python {numbers=left}\na = 1\n```"
+    t = pf.convert_text(text, output_format="latex")
+    assert isinstance(t, str)
+    assert "\\begin{Shaded}" in t
+    assert "\\begin{Highlighting}[]" in t

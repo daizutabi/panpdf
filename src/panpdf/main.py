@@ -15,12 +15,18 @@ from panpdf.filters.attribute import Attribute
 from panpdf.filters.crossref import Crossref
 from panpdf.filters.jupyter import Jupyter
 from panpdf.filters.layout import Layout
+from panpdf.filters.verbatim import Verbatim
 from panpdf.filters.zotero import Zotero
 from panpdf.stores import Store
-from panpdf.tools import convert_doc, get_defaults_file_path, get_metadata_str, get_pandoc_version
+from panpdf.tools import (
+    convert_doc,
+    get_defaults_file_path,
+    get_metadata_str,
+    get_pandoc_version,
+    iter_extra_args_from_metadata,
+)
 
 # from panpdf.filters.latex import Latex
-# from panpdf.filters.outputcell import OutputCell
 
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
@@ -199,8 +205,7 @@ def cli(
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
 
-    # filters = [Attribute(), OutputCell()]
-    filters: list[Filter] = [Attribute()]
+    filters: list[Filter] = [Attribute(), Verbatim()]
 
     if notebooks_dir:
         store = Store([notebooks_dir.absolute()])
@@ -217,8 +222,7 @@ def cli(
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
 
-    if include_in_header := get_metadata_str(doc, "panpdf.include-in-header"):
-        extra_args.extend(["--include-in-header", include_in_header])
+    extra_args.extend(iter_extra_args_from_metadata(doc))
 
     if citeproc:
         extra_args.append("--citeproc")
