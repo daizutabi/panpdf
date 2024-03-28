@@ -13,37 +13,25 @@ if TYPE_CHECKING:
 @dataclass
 class Filter:
     types: type[Element] | UnionType
-    elements: list[Element] = field(default_factory=list, init=False, repr=False)
+    elements: list[Element] = field(default_factory=list, init=False)
 
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
-    def _match(self, elem: Element) -> bool:
-        if isinstance(elem, self.types):
-            return self.match(elem)
-
-        return False
-
-    def match(self, elem: Element) -> bool:  # noqa: ARG002
-        return True
-
     def _prepare(self, doc: Doc):
-        def _append(elem: Element, doc: Doc):  # noqa: ARG001
-            if self._match(elem):
-                self.elements.append(elem)
-
-        self.elements = []
-        doc.walk(_append)
-
-        if self.elements:
-            self.prepare(doc)
+        self.prepare(doc)
 
     def prepare(self, doc: Doc):
         pass
 
     def _action(self, elem: Element, doc: Doc):
-        if self._match(elem):
-            return self.action(elem, doc)
+        if isinstance(elem, self.types):
+            elems = self.action(elem, doc)
+
+            if elems != []:
+                self.elements.append(elem)
+
+            return elems
 
         return None
 
@@ -62,6 +50,3 @@ class Filter:
             doc = pf.convert_text(doc, standalone=True)  # type:ignore
 
         return pf.run_filter(self._action, self._prepare, self._finalize, doc=doc)  # type: ignore
-
-    def set_metadata(self, doc: Doc, doc_from: Doc):
-        pass

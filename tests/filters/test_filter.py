@@ -4,8 +4,6 @@ import panflute as pf
 import pytest
 from panflute import Element
 
-from panpdf.filters.filter import Filter
-
 
 @pytest.fixture
 def doc():
@@ -24,6 +22,8 @@ def doc():
 
 
 def test_filter_types(doc):
+    from panpdf.filters.filter import Filter
+
     filter_ = Filter(types=Element)
     filter_.run(doc)
     assert len(filter_.elements) == 9
@@ -35,3 +35,10 @@ def test_filter_types(doc):
     filter_ = Filter(types=pf.Code | pf.CodeBlock)
     filter_.run(doc)
     assert len(filter_.elements) == 2
+
+
+def test_repr():
+    from panpdf.filters.filter import Filter
+
+    f = Filter(Element)
+    assert repr(f) == "Filter()"
