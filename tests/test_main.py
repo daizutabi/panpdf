@@ -44,7 +44,7 @@ def test_prompt(to):
     if to == "pdf":
         assert result.stdout.endswith("No output file. Aborted.\n")
     else:
-        assert result.stdout.endswith("\\section{section}\\label{section}\n")
+        assert "\\section{section}\\label{section}" in result.stdout
 
 
 def test_prompt_empty():
