@@ -220,3 +220,20 @@ def test_iter_extra_args_from_metadata():
     assert isinstance(t, str)
     assert "AAA\nBBB\n\\ifLua" in t
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
+
+
+def test_header():
+    from panpdf.tools import convert_header
+
+    text = "---\nrhead: \\RIGHT\n---\n# section"
+    doc = pf.convert_text(text, output_format="panflute", standalone=True)
+    assert isinstance(doc, Doc)
+    assert "rhead" in doc.metadata
+
+    convert_header(doc)
+    assert "rhead" not in doc.metadata
+    assert "include-in-header" in doc.metadata
+    p = pf.stringify(doc.metadata["include-in-header"][0])  # type:ignore
+
+    assert "\\usepackage{fancyhdr}" in Path(p).read_text()
+    assert "\\rhead{\\RIGHT}" in Path(p).read_text()
