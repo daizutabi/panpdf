@@ -62,7 +62,7 @@ class Jupyter(Filter):
         return image
 
     def finalize(self, doc: Doc) -> None:
-        if doc.metadata.pop("__pgf__"):
+        if doc.metadata.pop("__pgf__", None):
             path = create_temp_file("\\usepackage{pgf}", ".tex")
             add_metadata_list(doc, "include-in-header", path.as_posix())
 

@@ -26,8 +26,6 @@ from panpdf.tools import (
     iter_extra_args_from_metadata,
 )
 
-# from panpdf.filters.latex import Latex
-
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
 
@@ -307,11 +305,11 @@ def show_version(pandoc_path: Path | None):
 
 
 def main():
-    typer.run(cli)
+    typer.run(cli)  # no cov
 
 
 if __name__ == "__main__":
-    main()
+    main()  # no cov
 
 # def convert_notebook(path: str):
 #     nb = nbformat.read(path, as_version=4)
