@@ -222,7 +222,7 @@ def test_iter_extra_args_from_metadata():
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 
-def test_header():
+def test_convert_header():
     from panpdf.tools import convert_header
 
     text = "---\nrhead: \\RIGHT\n---\n# section"

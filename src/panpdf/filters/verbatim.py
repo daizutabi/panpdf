@@ -4,12 +4,14 @@ import inspect
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
-from panflute import CodeBlock, RawBlock
+from panflute import CodeBlock, Doc, RawBlock
 
 from panpdf.filters.filter import Filter
 from panpdf.tools import add_metadata_list, create_temp_file
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from panflute import Doc, Element
 
 DEFAULT_SHADE_COLOR = "\\definecolor{shadecolor}{RGB}{240,240,250}"
@@ -19,20 +21,25 @@ DEFAULT_SHADE_COLOR = "\\definecolor{shadecolor}{RGB}{240,240,250}"
 class Verbatim(Filter):
     types: ClassVar[type[CodeBlock]] = CodeBlock
 
-    def prepare(self, doc: Doc):
-        path = create_in_header()
-        add_metadata_list(doc, "include-in-header", path.as_posix())
+    def __post_init__(self) -> None:
+        self.shaded = False
 
     def action(self, elem: CodeBlock, doc: Doc) -> CodeBlock | list[Element]:  # noqa: ARG002
         if "output" not in elem.classes:
             return elem
 
+        self.shaded = True
         elem.classes.pop(elem.classes.index("output"))
         pre = "\\vspace{-0.5\\baselineskip}\\definecolor{shadecolor}{rgb}{1,1,0.9}%"
         return [RawBlock(pre, format="latex"), elem, RawBlock(DEFAULT_SHADE_COLOR, format="latex")]
 
+    def finalize(self, doc: Doc) -> None:
+        if self.shaded:
+            path = create_header()
+            add_metadata_list(doc, "include-in-header", path.as_posix())
 
-def create_in_header():
+
+def create_header() -> Path:
     text = r"""
     \ifdefined\Shaded
     \usepackage{framed}
