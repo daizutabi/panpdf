@@ -260,7 +260,8 @@ def get_text(files: list[Path] | None) -> str:
 def collect(files: Iterable[Path]) -> Iterator[Path]:
     for file in files:
         if file.is_dir():
-            for dirpath, _dirnames, filenames in os.walk(file):
+            for dirpath, dirnames, filenames in os.walk(file):
+                dirnames.sort()
                 for filename in sorted(filenames):
                     if filename.endswith(".md"):
                         yield Path(dirpath) / filename
