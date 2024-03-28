@@ -26,8 +26,6 @@ from panpdf.tools import (
     iter_extra_args_from_metadata,
 )
 
-# from panpdf.filters.latex import Latex
-
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
 
@@ -262,8 +260,9 @@ def get_text(files: list[Path] | None) -> str:
 def collect(files: Iterable[Path]) -> Iterator[Path]:
     for file in files:
         if file.is_dir():
-            for dirpath, _dirnames, filenames in os.walk(file):
-                for filename in filenames:
+            for dirpath, dirnames, filenames in os.walk(file):
+                dirnames.sort()
+                for filename in sorted(filenames):
                     if filename.endswith(".md"):
                         yield Path(dirpath) / filename
 
@@ -307,11 +306,11 @@ def show_version(pandoc_path: Path | None):
 
 
 def main():
-    typer.run(cli)
+    typer.run(cli)  # no cov
 
 
 if __name__ == "__main__":
-    main()
+    main()  # no cov
 
 # def convert_notebook(path: str):
 #     nb = nbformat.read(path, as_version=4)

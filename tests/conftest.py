@@ -8,9 +8,13 @@ from panflute import Figure, Image
 
 import panpdf
 
-# from panpdf.utils import set_asyncio_event_loop_policy
 
-# set_asyncio_event_loop_policy()
+@pytest.fixture(scope="session", autouse=True)
+def _read_write():
+    path = Path("notebooks/pgf.ipynb")
+    nb = path.read_text("utf-8")
+    yield
+    path.write_text(nb, "utf-8")
 
 
 @pytest.fixture(scope="session")
