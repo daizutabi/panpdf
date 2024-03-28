@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import atexit
+import inspect
 import io
 import os
 import shutil
@@ -254,8 +255,35 @@ def add_metadata_list(doc: Doc, name: str, value: str) -> None:
 
 
 def iter_extra_args_from_metadata(doc: Doc) -> Iterator[str]:
+    convert_header(doc)
+
     names = ["include-in-header", "include-before-body", "include-after-body"]
     for name in names:
         for value in iter_metadata_list(doc, name):
             yield f"--{name}"
             yield value
+
+
+HEADER = inspect.cleandoc(
+    r"""
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\pagestyle{fancy}
+\AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}
+"""
+)
+
+
+def convert_header(doc: Doc) -> None:
+    names = ["rhead", "lhead"]
+    lines = []
+    for name in names:
+        if text := get_metadata_str(doc, name):
+            doc.metadata.pop(name)
+            lines.append(f"\\{name}{{{text}}}")
+
+    if lines:
+        header = "\n".join(lines)
+        header = f"{HEADER}\n{header}"
+        path = create_temp_file(header, suffix=".tex")
+        add_metadata_list(doc, "include-in-header", path.as_posix())
