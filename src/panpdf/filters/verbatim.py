@@ -4,7 +4,7 @@ import inspect
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
-from panflute import CodeBlock, Doc, RawBlock
+from panflute import CodeBlock, RawBlock
 
 from panpdf.filters.filter import Filter
 from panpdf.tools import add_metadata_list, create_temp_file

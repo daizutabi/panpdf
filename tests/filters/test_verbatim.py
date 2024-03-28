@@ -1,5 +1,3 @@
-import inspect
-
 import panflute as pf
 from panflute import Doc
 
