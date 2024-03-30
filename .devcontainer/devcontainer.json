@@ -28,10 +28,11 @@
         // "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
+        "charliermarsh.ruff",
+        "github.vscode-github-actions",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-toolsai.jupyter",
-        "charliermarsh.ruff"
+        "ms-toolsai.jupyter"
       ]
     }
   },
