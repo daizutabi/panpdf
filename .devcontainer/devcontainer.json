@@ -36,7 +36,7 @@
       ]
     }
   },
-  "postCreateCommand": ".devcontainer/postCreateCommand.sh"
+  "postCreateCommand": ".devcontainer/postCreate.sh"
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
