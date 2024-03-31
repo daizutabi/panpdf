@@ -300,8 +300,10 @@ def search_path(
     if isinstance(path, str):
         path = Path(path)
 
+    print("A", Path(".").absolute())  # noqa: T201
+
     if path.exists():
-        print("BBB")
+        print("BBB")  # noqa: T201
         return path
 
     resource_path = [Path(p) for p in resource_path]
@@ -310,9 +312,9 @@ def search_path(
         resource_path.extend(Path(p) for p in paths)
 
     for parent in resource_path:
-        print("AAA", parent, path)
+        print("AAA", parent, path)  # noqa: T201
         if (parent / path).exists():
-            print("CCC")
+            print("CCC")  # noqa: T201
             return parent / path
 
     return path
