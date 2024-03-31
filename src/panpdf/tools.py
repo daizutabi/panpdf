@@ -314,6 +314,7 @@ def search_path(
 
     for parent in resource_path:
         print("AAA", parent, path)  # noqa: T201
+        print("c", list(parent.iterdir()))  # noqa: T201
         if (parent / path).exists():
             print("CCC")  # noqa: T201
             return parent / path
