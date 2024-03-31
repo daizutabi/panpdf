@@ -222,6 +222,36 @@ def test_iter_extra_args_from_metadata():
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 
+def test_search_path():
+    from panpdf.tools import search_path
+
+    assert search_path("pyproject.toml") == Path("pyproject.toml")
+
+    defaults = "examples/defaults"
+
+    path = search_path("header.pdf", ["examples/images"])
+    assert path == Path("examples/images/header.pdf")
+
+    path = search_path("header.png", ["examples/images"])
+    assert path == Path("header.png")
+
+    path = search_path("header.pdf", defaults=defaults)
+    assert path == Path("examples/images/header.pdf")
+
+    path = search_path("header.png", defaults=defaults)
+    assert path == Path("header.png")
+
+
+def test_resolve_image():
+    from panpdf.tools import resolve_image
+
+    defaults = "examples/defaults"
+
+    text = "\\includegraphics[width=1cm]{header.pdf}"
+    text = resolve_image(text, defaults=defaults)
+    assert text == r"\includegraphics[width=1cm]{examples/images/header.pdf}"
+
+
 def test_convert_header():
     from panpdf.tools import convert_header
 

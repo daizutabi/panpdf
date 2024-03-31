@@ -3,6 +3,10 @@ toc-depth: 2
 number-sections: true
 wrap: preserve
 
+resource-path:
+- .
+- ${.}/images
+
 pdf-engine: lualatex
 pdf-engine-opts:
   - -interaction=nonstopmode

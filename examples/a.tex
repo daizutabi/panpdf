@@ -91,6 +91,39 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{5}
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 \usepackage{caption}
 \captionsetup[figure]{format=plain, labelformat=simple, labelsep=quad, font=small}
 \captionsetup[table]{format=plain, labelformat=simple, labelsep=quad, font=small}
@@ -101,14 +134,6 @@
 \ModifyHeading{subsubsection}{font=\normalsize\sffamily\gtfamily\mdseries,lines=1.3,before_lines=0,after_lines=0}
 \ModifyHeading{paragraph}{font=\normalsize\sffamily\gtfamily\mdseries}
 \ModifyHeading{subparagraph}{font=\normalsize\sffamily\gtfamily\mdseries}
-\usepackage{fancyhdr}
-\renewcommand{\headrulewidth}{0pt}
-\pagestyle{fancy}
-\rhead{RIGHT}
-\lhead{LEFT}
-\AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}
-% \rhead{\includegraphics[width=2cm]{}}
-% \lhead{\includegraphics[width=2cm]{}}
 \ifdefined\Shaded
 \usepackage{framed}
 \renewenvironment{Shaded}{\begin{quotation}\begin{snugshade}\linespread{0.9}}%
@@ -124,8 +149,8 @@
 \renewcommand{\headrulewidth}{0pt}
 \pagestyle{fancy}
 \AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}
-\rhead{RIGHT}
-\lhead{LEFT}
+\rhead{\includegraphics{examples/images/header.pdf}}
+\lhead{LEFT-HEAD}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -745,7 +770,7 @@
 
 \begin{figure}
 \centering
-\includegraphics{/tmp/tmpj9db494w.png}
+\includegraphics{/tmp/tmp9ctgl5st.png}
 \caption{a}\label{fig:png}
 \end{figure}
 
@@ -757,12 +782,12 @@
 \centering
 \begin{subfigure}{0.475\columnwidth}
 \centering
-\includegraphics[width=4cm]{/tmp/tmpvjs0r023.png}
+\includegraphics[width=4cm]{/tmp/tmpkm6qg_qz.png}
 \caption{a}\label{fig:png}
 \end{subfigure}
 \begin{subfigure}{0.475\columnwidth}
 \centering
-\includegraphics[width=4cm]{/tmp/tmp3mjnu_7u.png}
+\includegraphics[width=4cm]{/tmp/tmp06etv0eb.png}
 \caption{a 図~\ref{fig:pgf}}\label{fig:png}
 \end{subfigure}
 \caption{}\label{fig:xxx}
@@ -772,12 +797,12 @@
 \centering
 \begin{subfigure}{0.475\columnwidth}
 \centering
-\includegraphics[width=4cm]{/tmp/tmpg7lgp_ud.png}
+\includegraphics[width=4cm]{/tmp/tmpkf06nof2.png}
 \caption{a}\label{fig:png}
 \end{subfigure}
 \begin{subfigure}{0.475\columnwidth}
 \centering
-\includegraphics[width=4cm]{/tmp/tmp39h61grb.png}
+\includegraphics[width=4cm]{/tmp/tmpe8as9jnn.png}
 \caption{a 図~\ref{fig:pgf}}\label{fig:png}
 \end{subfigure}
 \caption{}\label{fig:xxx}
@@ -790,7 +815,7 @@
 
 あいう
 
-{[}@panpdf{]}, {[}@panflute{]}
+\citeproc{ref-panpdf}{{[}1{]}}, \citeproc{ref-panflute}{{[}2{]}}
 
 \section{Section 2}\label{sec:2}
 
@@ -813,6 +838,27 @@
 \end{Shaded}
 
 \definecolor{shadecolor}{RGB}{240,240,250}
+
+\begin{figure}
+\centering
+\includegraphics{figure.pdf}
+\caption{figure}\label{fig:figure}
+\end{figure}
+
+\section*{参考文献}\label{bibliography}
+\addcontentsline{toc}{section}{参考文献}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{0}{0}
+\bibitem[\citeproctext]{ref-panpdf}
+\CSLLeftMargin{{[}1{]} }%
+\CSLRightInline{Daizu, \emph{\href{https://github.com/daizutabi/panpdf}{daizutabi/panpdf}}. 2024.}
+
+\bibitem[\citeproctext]{ref-panflute}
+\CSLLeftMargin{{[}2{]} }%
+\CSLRightInline{S. Correia, \emph{\href{https://github.com/sergiocorreia/panflute}{sergiocorreia/panflute}}. 2024.}
+
+\end{CSLReferences}
 
 
 

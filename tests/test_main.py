@@ -121,3 +121,10 @@ def test_extra_args():
     assert result.exit_code == 0
     assert "{[}1{]}" in result.stdout
     sys.argv = argv
+
+
+def test_header():
+    text = "---\nrhead: \\includegraphics[width=1cm]{header.pdf}\n---\n"
+    result = runner.invoke(app, ["-d", "examples/defaults"], input=text)
+    assert "\\rhead{\\includegraphics[width=1cm]{examples/images/header.pdf}}" in result.stdout
+    assert "\\usepackage{graphicx}" in result.stdout
