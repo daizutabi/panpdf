@@ -5,6 +5,7 @@ import atexit
 import inspect
 import io
 import os
+import re
 import shutil
 import tempfile
 from asyncio.subprocess import PIPE
@@ -12,6 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import panflute as pf
+import yaml
 from panflute import Doc
 from panflute.io import dump
 from rich.console import Console
@@ -19,7 +21,7 @@ from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 if TYPE_CHECKING:
     from asyncio.streams import StreamReader
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
 
 console = Console()
 
@@ -97,7 +99,7 @@ def get_file_path(name: Path | str | None, dir: str) -> Path | None:  # noqa: A0
     return None
 
 
-def get_defaults_file_path(defaults: Path | None) -> Path | None:
+def get_defaults_file_path(defaults: Path | str | None) -> Path | None:
     return get_file_path(defaults, "defaults")
 
 
@@ -254,14 +256,76 @@ def add_metadata_list(doc: Doc, name: str, value: str) -> None:
         doc.metadata[name] = [value]
 
 
-def iter_extra_args_from_metadata(doc: Doc) -> Iterator[str]:
-    convert_header(doc)
+def iter_extra_args_from_metadata(
+    doc: Doc,
+    resource_path: Iterable[Path | str] = (),
+    defaults: Path | str | None = None,
+) -> Iterator[str]:
+    convert_header(doc, resource_path, defaults)
 
     names = ["include-in-header", "include-before-body", "include-after-body"]
     for name in names:
         for value in iter_metadata_list(doc, name):
             yield f"--{name}"
             yield value
+
+
+def resolve_path(path: Path, value: str) -> str:
+    return value.replace("${.}", path.parent.as_posix())
+
+
+def get_defaults(path: Path | str, name: str):
+    if not (default_path := get_defaults_file_path(path)):
+        return None
+
+    with default_path.open(encoding="utf8") as f:
+        defaults = yaml.safe_load(f)
+
+    value = defaults.get(name)
+
+    if isinstance(value, str):
+        return resolve_path(default_path, value)
+
+    if isinstance(value, list):
+        return [resolve_path(default_path, v) for v in value]
+
+    return value
+
+
+def search_path(
+    path: Path | str,
+    resource_path: Iterable[Path | str] = (),
+    defaults: Path | str | None = None,
+) -> Path:
+    if isinstance(path, str):
+        path = Path(path)
+
+    if path.exists():
+        return path
+
+    resource_path = [Path(p) for p in resource_path]
+
+    if defaults and (paths := get_defaults(defaults, "resource-path")):
+        resource_path.extend(Path(p) for p in paths)
+
+    for parent in resource_path:
+        if (parent / path).exists():
+            return parent / path
+
+    return path
+
+
+def resolve_image(
+    text: str,
+    resource_path: Iterable[Path | str] = (),
+    defaults: Path | str | None = None,
+) -> str:
+    if m := re.match(r"^(\\includegraphics.*?)\{(.+?)\}$", text):
+        prefix, path = m.groups()
+        text = search_path(path, resource_path, defaults).as_posix()
+        return f"{prefix}{{{text}}}"
+
+    return text
 
 
 HEADER = inspect.cleandoc(
@@ -274,13 +338,21 @@ HEADER = inspect.cleandoc(
 )
 
 
-def convert_header(doc: Doc) -> None:
+def convert_header(
+    doc: Doc,
+    resource_path: Iterable[Path | str] = (),
+    defaults: Path | str | None = None,
+) -> None:
     names = ["rhead", "lhead"]
     lines = []
     for name in names:
         if text := get_metadata_str(doc, name):
             doc.metadata.pop(name)
+            text = resolve_image(text, resource_path, defaults)
             lines.append(f"\\{name}{{{text}}}")
+            if text.startswith("\\includegraphics"):
+                path = create_temp_file("\\usepackage{graphicx}", ".tex")
+                add_metadata_list(doc, "include-in-header", path.as_posix())
 
     if lines:
         header = "\n".join(lines)

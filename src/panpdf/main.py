@@ -220,7 +220,7 @@ def cli(
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
 
-    extra_args.extend(iter_extra_args_from_metadata(doc))
+    extra_args.extend(iter_extra_args_from_metadata(doc, defaults=defaults))
 
     if citeproc:
         extra_args.append("--citeproc")

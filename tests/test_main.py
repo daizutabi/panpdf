@@ -121,3 +121,23 @@ def test_extra_args():
     assert result.exit_code == 0
     assert "{[}1{]}" in result.stdout
     sys.argv = argv
+
+
+def test_header():
+    text = "---\nrhead: \\includegraphics[width=1cm]{header.pdf}\n---\nabc\n"
+    result = runner.invoke(app, ["-d", "examples/defaults"], input=text)
+    assert "\\rhead{\\includegraphics[width=1cm]{examples/images/header.pdf}}" in result.stdout
+    assert "\\usepackage{graphicx}" in result.stdout
+
+
+@pytest.mark.parametrize("quiet", [True, False])
+def test_quiet(quiet):
+    text = "---\ntitle: Title\n---\n"
+    args = ["-o", ".pdf"]
+    if quiet:
+        args.append("--quiet")
+
+    runner.invoke(app, args, input=text)
+    path = Path("Title.pdf")
+    assert path.exists()
+    path.unlink()
