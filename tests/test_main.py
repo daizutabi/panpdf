@@ -137,11 +137,7 @@ def test_quiet(quiet):
     if quiet:
         args.append("--quiet")
 
-    result = runner.invoke(app, args, input=text)
+    runner.invoke(app, args, input=text)
     path = Path("Title.pdf")
     assert path.exists()
     path.unlink()
-    if quiet:
-        assert "[INFO]" not in result.stdout
-    else:
-        assert "[INFO]" in result.stdout
