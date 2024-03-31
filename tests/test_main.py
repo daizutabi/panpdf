@@ -96,13 +96,18 @@ def test_output_format():
 
 
 def test_citeproc():
-    text = "[@panflute]"
-    result = runner.invoke(app, ["-C"], input=text)
+    result = runner.invoke(app, ["-C"], input="[@panflute]")
     assert "(Correia {[}2016{]} 2024)" in result.stdout
     assert "\\url{https://github.com/sergiocorreia/panflute}." in result.stdout
 
-    text = "[@x]"
-    result = runner.invoke(app, ["-C"], input=text)
+
+def test_citeproc_csl():
+    result = runner.invoke(app, ["-C", "-d", "examples/defaults"], input="[@panflute]")
+    assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
+
+
+def test_citeproc_not_found():
+    result = runner.invoke(app, ["-C"], input="[@x]")
     assert "[WARNING] Citeproc: citation x not found" in result.stdout
 
 
