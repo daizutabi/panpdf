@@ -6,8 +6,6 @@ import panflute as pf
 import pytest
 from panflute import Figure, Image
 
-import panpdf
-
 
 @pytest.fixture(scope="session", autouse=True)
 def _read_write():
@@ -19,7 +17,7 @@ def _read_write():
 
 @pytest.fixture(scope="session")
 def notebook_dir() -> Path:
-    return Path(panpdf.__file__).parent.parent.parent / "notebooks"
+    return Path("notebooks")
 
 
 @pytest.fixture(scope="session")
