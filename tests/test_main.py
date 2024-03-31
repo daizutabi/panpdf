@@ -102,8 +102,11 @@ def test_citeproc():
 
 
 def test_citeproc_csl():
-    result = runner.invoke(app, ["-C", "-d", "examples/defaults"], input="[@panflute]")
-    assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
+    from panpdf.tools import get_pandoc_version
+
+    if get_pandoc_version() > "3.1":
+        result = runner.invoke(app, ["-C", "-d", "examples/defaults"], input="[@panflute]")
+        assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
 
 
 def test_citeproc_not_found():
