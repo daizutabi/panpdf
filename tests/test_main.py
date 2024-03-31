@@ -128,3 +128,20 @@ def test_header():
     result = runner.invoke(app, ["-d", "examples/defaults"], input=text)
     assert "\\rhead{\\includegraphics[width=1cm]{examples/images/header.pdf}}" in result.stdout
     assert "\\usepackage{graphicx}" in result.stdout
+
+
+@pytest.mark.parametrize("quiet", [True, False])
+def test_quiet(quiet):
+    text = "---\ntitle: Title\n---\n"
+    args = ["-o", ".pdf"]
+    if quiet:
+        args.append("--quiet")
+
+    result = runner.invoke(app, args, input=text)
+    path = Path("Title.pdf")
+    assert path.exists()
+    path.unlink()
+    if quiet:
+        assert "[INFO]" not in result.stdout
+    else:
+        assert "[INFO]" in result.stdout

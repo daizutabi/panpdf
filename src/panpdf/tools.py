@@ -301,6 +301,7 @@ def search_path(
         path = Path(path)
 
     if path.exists():
+        print("BBB")
         return path
 
     resource_path = [Path(p) for p in resource_path]
@@ -309,7 +310,9 @@ def search_path(
         resource_path.extend(Path(p) for p in paths)
 
     for parent in resource_path:
+        print("AAA", parent, path)
         if (parent / path).exists():
+            print("CCC")
             return parent / path
 
     return path
