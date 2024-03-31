@@ -3,7 +3,7 @@ from pathlib import Path
 
 import panflute as pf
 import pytest
-from panflute import Doc, Figure, Para, RawInline, Span, Table
+from panflute import Doc, Figure, Image, Para, RawInline, Span, Str, Table
 
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
@@ -153,3 +153,10 @@ def test_layout(fig):
     assert isinstance(x, pf.MetaList)
     f = Path(pf.stringify(x[0]))
     assert f.exists()
+
+
+def test_get_width():
+    from panpdf.filters.layout import get_width
+
+    image = Image(Str("a"), attributes={"width": "50%"})
+    assert get_width(image, "width") == "0.5\\columnwidth"

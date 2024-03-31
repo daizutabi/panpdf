@@ -97,5 +97,5 @@ def test_zotero_nokey():
     from panpdf.filters.zotero import Zotero
 
     doc = Doc()
-    doc = Zotero().run(doc)
+    Zotero().finalize(doc)
     assert not doc.metadata

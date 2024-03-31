@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 import yaml
-from panflute import Doc, Image
+from panflute import Doc, Image, Str
 
 from panpdf.filters.jupyter import Jupyter
 
@@ -42,6 +42,12 @@ def test_create_image_file_svg(store: Store):
     assert path.exists()
     assert path.stat().st_size
     assert text.startswith("JVBER")
+
+
+def test_create_image_file_none():
+    from panpdf.filters.jupyter import create_image_file
+
+    assert create_image_file({}) is None
 
 
 def test_create_defaults_for_standalone(defaults):
@@ -140,3 +146,22 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
         assert "image/png" in data
         assert "text/plain" in data
         assert "application/pdf" not in data
+
+
+def test_jupyter_action():
+    from panpdf.filters.jupyter import Jupyter
+
+    doc = Doc()
+    jupyter = Jupyter()
+    image = Image(Str("a"), url="a.png")
+    assert jupyter.action(image, doc) is image
+
+
+def test_jupyter_action_error():
+    from panpdf.filters.jupyter import Jupyter
+
+    doc = Doc()
+    jupyter = Jupyter()
+    image = Image(Str("a"), url="a.ipynb", identifier="a")
+    with pytest.raises(ValueError, match=r"\[panpdf\] Unknown"):
+        jupyter.action(image, doc)
