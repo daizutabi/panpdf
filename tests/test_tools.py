@@ -222,6 +222,32 @@ def test_iter_extra_args_from_metadata():
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 
+def test_get_defaults():
+    from panpdf.tools import get_defaults
+
+    path = "examples/defaults"
+    x = get_defaults(path, "pdf-engine")
+    assert x == "lualatex"
+    x = get_defaults(path, "resource-path")
+    assert x == [".", "examples/images"]
+
+
+def test_get_defaults_dict():
+    from panpdf.tools import get_defaults
+
+    path = "examples/defaults"
+    x = get_defaults(path, "variables")
+    assert isinstance(x, dict)
+
+
+def test_get_defaults_none():
+    from panpdf.tools import get_defaults
+
+    assert not get_defaults("", "")
+
+    assert not get_defaults("", "")
+
+
 def test_search_path():
     from panpdf.tools import search_path
 
