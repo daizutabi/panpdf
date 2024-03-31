@@ -301,6 +301,7 @@ def search_path(
         path = Path(path)
 
     print("A", Path(".").absolute())  # noqa: T201
+    print("B", list(Path(".").iterdir()))  # noqa: T201
 
     if path.exists():
         print("BBB")  # noqa: T201
