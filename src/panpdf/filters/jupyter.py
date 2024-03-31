@@ -24,8 +24,8 @@ class Jupyter(Filter):
     pandoc_path: Path | None = None
     store: Store = field(default_factory=Store)
 
-    def set_notebooks_dir(self, notebooks_dir: list[Path]):
-        self.store.set_notebooks_dir(notebooks_dir)
+    # def set_notebooks_dir(self, notebooks_dir: list[Path]):
+    #     self.store.set_notebooks_dir(notebooks_dir)
 
     def action(self, image: Image, doc: Doc) -> Image:
         url = image.url
