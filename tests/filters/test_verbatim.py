@@ -7,7 +7,8 @@ def test_create_header():
 
     path = create_header()
     assert path.exists()
-    path.read_text("utf-8").startswith("\\ifdefined\\Shaded")
+    text = path.read_text("utf-8")
+    assert text.startswith("\\ifdefined\\Shaded")
 
 
 def test_verbatim():
