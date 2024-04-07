@@ -3,7 +3,7 @@
   "image": "texlive/texlive",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
-      "configureZshAsDefaultShell": "true",
+      "installZsh": false,
       "username": "panpdf"
     },
     "ghcr.io/devcontainers-contrib/features/hatch:2": {},
@@ -19,14 +19,9 @@
   "remoteEnv": {
     "PATH": "${containerEnv:PATH}:/usr/local/py-utils/bin"
   },
-  // "mounts": [
-  //   "source=${localEnv:HOME}/.config,target=/home/panpdf/.local_config,type=bind,consistency=cached"
-  // ],
   "customizations": {
     "vscode": {
-      "settings": {
-        // "terminal.integrated.defaultProfile.linux": "bash"
-      },
+      "settings": {},
       "extensions": [
         "charliermarsh.ruff",
         "github.vscode-github-actions",
@@ -37,7 +32,4 @@
     }
   },
   "postCreateCommand": ".devcontainer/postCreate.sh"
-
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
 }
