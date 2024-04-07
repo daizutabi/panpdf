@@ -12,7 +12,6 @@
   },
   "remoteUser": "panpdf",
   "containerEnv": {
-    "TZ": "Asia/Tokyo",
     "ZOTERO_LIBRARY_ID": "${localEnv:ZOTERO_LIBRARY_ID}",
     "ZOTERO_API_KEY": "${localEnv:ZOTERO_API_KEY}"
   },
