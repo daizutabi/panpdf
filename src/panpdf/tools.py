@@ -55,13 +55,17 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
     raise NotImplementedError
 
 
+TEMPFILE_PREFIX = "panpdf__"
+
+
 def create_temp_file(
     text: str | bytes | None,
     *,
     suffix: str | None = None,
+    prefix: str = TEMPFILE_PREFIX,
     dir: str | Path | None = None,  # noqa: A002
 ) -> Path:
-    fd, filename = tempfile.mkstemp(suffix=suffix, dir=dir, text=isinstance(text, str))
+    fd, filename = tempfile.mkstemp(suffix, prefix, dir, text=isinstance(text, str))
 
     path = Path(filename)
 
@@ -172,10 +176,11 @@ def progress(
         task = progress.add_task(description, total=None)
 
         def stdout(output: str) -> None:
-            progress.log(f"[green]{output}".rstrip())
+            if TEMPFILE_PREFIX not in output:
+                progress.log(f"[green]{output}".rstrip())
 
         def stderr(output: str) -> None:
-            if not verbose and output.startswith(" "):
+            if not verbose and (output.startswith(" ") or TEMPFILE_PREFIX in output):
                 return
 
             color = get_color(output)
@@ -219,13 +224,16 @@ async def log(reader: StreamReader, write: Callable[[str], None]) -> None:
 
 def get_color(text: str) -> str:
     if "ERROR" in text or "Error" in text:
-        return "red bold"
-
-    if "WARNING" in text or "Warning" in text:
         return "red"
 
-    if "INFO" in text:
+    if "WARNING" in text or "Warning" in text:
         return "yellow"
+
+    if "LaTeX run number" in text:
+        return "green"
+
+    if "INFO" in text:
+        return "gray50"
 
     return "gray70"
 
