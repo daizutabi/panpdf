@@ -49,18 +49,18 @@ def get_items_zotxt(keys: list[str]) -> list[dict] | None:
     urls = [get_url_zotxt(key) for key in keys]
 
     try:
-        asyncio.run(gather([urls[0]], get_csl))
+        asyncio.run(gather([urls[0]], get_csl_json))
     except ClientError:
         return None
 
-    return [ref for ref in asyncio.run(gather(urls, get_csl)) if ref]
+    return [ref for ref in asyncio.run(gather(urls, get_csl_json)) if ref]
 
 
 def get_url_zotxt(key: str, host: str = "localhost", port: int = 23119) -> str:
     return f"http://{host}:{port}/zotxt/items?betterbibtexkey={key}"
 
 
-async def get_csl(response: ClientResponse) -> dict:
+async def get_csl_json(response: ClientResponse) -> dict:
     if response.status != 200:  # noqa: PLR2004
         return {}
 
