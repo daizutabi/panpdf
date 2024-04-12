@@ -130,7 +130,7 @@ def test_progress():
 
 
 @pytest.mark.parametrize(
-    ("text", "color"), [("Error", "red bold"), ("Warning", "red"), ("INFO", "yellow")]
+    ("text", "color"), [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")]
 )
 def test_get_color(text: str, color):
     from panpdf.tools import get_color
