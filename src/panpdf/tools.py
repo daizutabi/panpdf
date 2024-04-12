@@ -23,8 +23,7 @@ if TYPE_CHECKING:
     from asyncio.streams import StreamReader
     from collections.abc import Callable, Iterable, Iterator
 
-console = Console()
-
+console = Console(log_time=False, log_path=False)
 
 PANDOC_PATH: list[Path] = []
 
@@ -166,6 +165,7 @@ def progress(
         SpinnerColumn(),
         *Progress.get_default_columns(),
         TimeElapsedColumn(),
+        console=console,
         transient=transient,
     ) as progress:
         task = progress.add_task(description, total=None)
