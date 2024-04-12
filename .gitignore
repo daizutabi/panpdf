@@ -1,5 +1,6 @@
 *.egg
 *.egg-info/
+*.pdf
 .coverage
 .ipynb_checkpoints
 __pycache__/

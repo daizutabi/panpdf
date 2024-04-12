@@ -57,6 +57,7 @@ def get_data_dir(pandoc_path: Path | None = None) -> Path:
 
 def create_temp_file(
     text: str | bytes | None,
+    *,
     suffix: str | None = None,
     dir: str | Path | None = None,  # noqa: A002
 ) -> Path:
@@ -351,7 +352,7 @@ def convert_header(
             text = resolve_image(text, resource_path, defaults)
             lines.append(f"\\{name}{{{text}}}")
             if text.startswith("\\includegraphics"):
-                path = create_temp_file("\\usepackage{graphicx}", ".tex")
+                path = create_temp_file("\\usepackage{graphicx}", suffix=".tex")
                 add_metadata_list(doc, "include-in-header", path.as_posix())
 
     if lines:
