@@ -63,7 +63,7 @@ class Jupyter(Filter):
 
     def finalize(self, doc: Doc) -> None:
         if doc.metadata.pop("__pgf__", None):
-            path = create_temp_file("\\usepackage{pgf}", ".tex")
+            path = create_temp_file("\\usepackage{pgf}", suffix=".tex")
             add_metadata_list(doc, "include-in-header", path.as_posix())
 
 
@@ -94,14 +94,14 @@ def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str 
 
 def create_image_file_base64(text: str, suffix: str) -> str:
     data = base64.b64decode(text)
-    path = create_temp_file(data, suffix)
+    path = create_temp_file(data, suffix=suffix)
     return path.as_posix()
 
 
 def create_image_file_svg(xml: str) -> tuple[str, str]:
     import cairosvg
 
-    path = create_temp_file(None, ".pdf")
+    path = create_temp_file(None, suffix=".pdf")
     file_obj = io.StringIO(xml)
     cairosvg.svg2pdf(file_obj=file_obj, write_to=path.as_posix())
     data = path.read_bytes()
@@ -118,7 +118,7 @@ def create_image_file_pgf(
     doc = Doc(Plain(RawInline(text, format="latex")))
     defaults = create_defaults_for_standalone(defaults)
 
-    path = create_temp_file(None, ".pdf")
+    path = create_temp_file(None, suffix=".pdf")
     extra_args = ["--defaults", defaults.as_posix(), "--output", path.as_posix()]
 
     convert_doc(
@@ -167,4 +167,4 @@ def create_defaults_for_standalone(path: Path | None = None) -> Path:
         variables["classoption"] = options
 
     text = yaml.dump(defaults)
-    return create_temp_file(text, ".yaml", dir=path.parent)
+    return create_temp_file(text, suffix=".yaml", dir=path.parent)

@@ -46,7 +46,7 @@ class Layout(Filter):
 
     def finalize(self, doc: Doc) -> None:
         if doc.metadata.pop("__subcaption__", None):
-            path = create_temp_file("\\usepackage{subcaption}", ".tex")
+            path = create_temp_file("\\usepackage{subcaption}", suffix=".tex")
             add_metadata_list(doc, "include-in-header", path.as_posix())
 
 
