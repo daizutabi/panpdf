@@ -5,11 +5,9 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
-from panpdf.main import cli
+from panpdf.main import app
 
 runner = CliRunner()
-app = typer.Typer()
-app.command()(cli)
 
 
 def test_version():

@@ -37,7 +37,7 @@ Source = "https://github.com/daizutabi/panpdf"
 Issues = "https://github.com/daizutabi/panpdf/issues"
 
 [project.scripts]
-panpdf = "panpdf.main:main"
+panpdf = "panpdf.main:app"
 
 [tool.hatch.version]
 path = "src/panpdf/__about__.py"
@@ -81,7 +81,7 @@ omit = ["src/panpdf/__about__.py"]
 exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs-material"]
+dependencies = ["mkdocs-material", "mkdocs-typer"]
 python = "3.12"
 
 [tool.hatch.envs.docs.scripts]

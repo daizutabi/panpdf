@@ -36,6 +36,10 @@ class OutputFormat(str, Enum):
     auto = "auto"
 
 
+app = typer.Typer(add_completion=False)
+
+
+@app.command(name="panpdf")
 def cli(
     files: Annotated[
         Optional[list[Path]],
@@ -147,20 +151,6 @@ def cli(
             is_flag=True,
         ),
     ] = False,
-    # host: Annotated[
-    #     str,
-    #     Option(
-    #         help="IP address.",
-    #         hidden=True,
-    #     ),
-    # ] = "localhost",
-    # port: Annotated[
-    #     int,
-    #     Option(
-    #         help="Port.",
-    #         hidden=True,
-    #     ),
-    # ] = 23119,
     version: Annotated[
         bool,
         Option(
@@ -305,12 +295,12 @@ def show_version(pandoc_path: Path | None):
     raise typer.Exit
 
 
-def main():
-    typer.run(cli)  # no cov
+# def main():
+#     typer.run(cli)  # no cov
 
 
-if __name__ == "__main__":
-    main()  # no cov
+# if __name__ == "__main__":
+#     main()  # no cov
 
 # def convert_notebook(path: str):
 #     nb = nbformat.read(path, as_version=4)
