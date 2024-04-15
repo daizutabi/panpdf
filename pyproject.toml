@@ -51,6 +51,7 @@ packages = ["src/panpdf"]
 dependencies = [
   "cairosvg",
   "matplotlib",
+  "pandas",
   "pytest-cov",
   "pytest-randomly",
   "seaborn",

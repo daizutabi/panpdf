@@ -3,6 +3,7 @@ import io
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn.objects as so
 from IPython.core.formatters import PlainTextFormatter
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.lib.pretty import RepresentationPrinter
@@ -40,6 +41,39 @@ def test_matplotlib_figure(fmt):
 
     elif fmt == "svg":
         xml = function(fig)
+        assert isinstance(xml, str)
+        assert xml.startswith('<?xml version="1.0"')
+
+
+def test_seaborn_plot(fmt):
+    from panpdf.formatters import FUNCTIONS
+
+    if fmt == "png":
+        return
+
+    functions = FUNCTIONS.get(("seaborn._core.plot", "Plot"))
+    assert functions
+    function = functions.get(fmt)
+    assert function
+
+    p = so.Plot()
+
+    if fmt == "pgf":
+        out = io.StringIO()
+        rp = RepresentationPrinter(out)
+
+        function(p, rp, None)
+        text = out.getvalue()
+        assert text.startswith("%% Creator: Matplotlib, PGF backend")
+        assert text.endswith("\\endgroup%\n")
+
+    elif fmt == "pdf":
+        data = function(p)
+        assert isinstance(data, bytes)
+        assert base64.b64encode(data).decode().startswith("JVBER")
+
+    elif fmt == "svg":
+        xml = function(p)
         assert isinstance(xml, str)
         assert xml.startswith('<?xml version="1.0"')
 

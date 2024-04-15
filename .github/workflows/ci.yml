@@ -53,7 +53,7 @@ jobs:
       - name: Install Packages
         run : |
           pip install --upgrade aiohttp nbformat panflute pyyaml rich typer pyzotero
-          pip install --upgrade pytest-cov matplotlib cairosvg
+          pip install --upgrade pytest-cov matplotlib cairosvg seaborn
           pip install -e .
       - name: Run test
         run: pytest
