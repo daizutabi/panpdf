@@ -46,18 +46,27 @@ def test_get_cell_unknown(store: Store):
 def test_get_source(store: Store, fmt: str):
     source = store.get_source(f"{fmt}.ipynb", f"fig:{fmt}")
     assert isinstance(source, str)
-    assert source.rstrip() == "import matplotlib.pyplot as plt\n\nplt.plot([-1, 1], [-1, 1])"
+    if fmt != "pgf":
+        assert source.rstrip() == "import matplotlib.pyplot as plt\n\nplt.plot([-1, 1], [-1, 1])"
+    else:
+        assert source.startswith("import matplotlib.pyplot as plt\n\nplt.plot([1, 10, 100],")
 
 
 def test_get_outputs(store: Store, fmt: str):
     outputs = store.get_outputs(f"{fmt}.ipynb", f"fig:{fmt}")
     assert isinstance(outputs, list)
-    assert len(outputs) == 2
-    assert isinstance(outputs[0], dict)
-    assert outputs[0]["output_type"] == "execute_result"
-    assert "text/plain" in outputs[0]["data"]
-    assert isinstance(outputs[1], dict)
-    assert outputs[1]["output_type"] == "display_data"
+    if fmt != "pgf":
+        assert len(outputs) == 2
+        assert isinstance(outputs[0], dict)
+        assert outputs[0]["output_type"] == "execute_result"
+        assert "text/plain" in outputs[0]["data"]
+        assert isinstance(outputs[1], dict)
+        assert outputs[1]["output_type"] == "display_data"
+    else:
+        assert len(outputs) == 1
+        assert isinstance(outputs[0], dict)
+        assert outputs[0]["output_type"] == "display_data"
+        assert "text/plain" in outputs[0]["data"]
 
 
 def test_get_data(store: Store, fmt: str):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import io
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
@@ -23,11 +24,10 @@ class Jupyter(Filter):
     standalone: bool = False
     pandoc_path: Path | None = None
     store: Store = field(default_factory=Store)
+    pgf: bool = field(default=False, init=False)
+    preamble: str = field(default="", init=False)
 
-    # def set_notebooks_dir(self, notebooks_dir: list[Path]):
-    #     self.store.set_notebooks_dir(notebooks_dir)
-
-    def action(self, image: Image, doc: Doc) -> Image:
+    def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
         url = image.url
         identifier = image.identifier
 
@@ -46,15 +46,25 @@ class Jupyter(Filter):
         if not (url_or_text := create_image_file(data, standalone=self.standalone)):
             return image
 
-        if not url_or_text.startswith(PGF_PREFIX) or not self.standalone:
+        if not url_or_text.startswith(PGF_PREFIX):
             image.url = url_or_text
-            doc.metadata["__pgf__"] = True
+            return image
+
+        text = url_or_text
+
+        if not self.preamble:
+            self.preamble = get_preamble(text)
+
+        if not self.standalone:
+            image.url = text
+            self.pgf = True
             return image
 
         image.url, text = create_image_file_pgf(
-            url_or_text,
-            self.defaults,
-            self.pandoc_path,
+            text,
+            defaults=self.defaults,
+            preamble=self.preamble,
+            pandoc_path=self.pandoc_path,
             description=f"Creating an image for {url}#{identifier}",
         )
         self.store.add_data(url, identifier, "application/pdf", text)
@@ -62,9 +72,23 @@ class Jupyter(Filter):
         return image
 
     def finalize(self, doc: Doc) -> None:
-        if doc.metadata.pop("__pgf__", None):
-            path = create_temp_file("\\usepackage{pgf}", suffix=".tex")
-            add_metadata_list(doc, "include-in-header", path.as_posix())
+        if not self.pgf:
+            return
+
+        path = create_temp_file(f"\\usepackage{{pgf}}{self.preamble}", suffix=".tex")
+        add_metadata_list(doc, "include-in-header", path.as_posix())
+
+
+PREAMBLE_PATTERN = re.compile(
+    r"^%% Matplotlib used the following preamble\n(.+?)\n%%\n", re.M | re.S
+)
+
+
+def get_preamble(text: str) -> str:
+    if m := PREAMBLE_PATTERN.search(text):
+        return re.sub(r"^%%\s+", "", m.group(1), flags=re.M)
+
+    return ""
 
 
 def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str | None:
@@ -111,12 +135,14 @@ def create_image_file_svg(xml: str) -> tuple[str, str]:
 
 def create_image_file_pgf(
     text: str,
+    *,
     defaults: Path | None = None,
+    preamble: str = "",
     pandoc_path: Path | None = None,
     description: str = "",
 ) -> tuple[str, str]:
     doc = Doc(Plain(RawInline(text, format="latex")))
-    defaults = create_defaults_for_standalone(defaults)
+    defaults = create_defaults_for_standalone(defaults, preamble)
 
     path = create_temp_file(None, suffix=".pdf")
     extra_args = ["--defaults", defaults.as_posix(), "--output", path.as_posix()]
@@ -135,7 +161,7 @@ def create_image_file_pgf(
     return path.as_posix(), text
 
 
-def create_defaults_for_standalone(path: Path | None = None) -> Path:
+def create_defaults_for_standalone(path: Path | None = None, preamble: str = "") -> Path:
     if path:
         with path.open(encoding="utf8") as f:
             defaults: dict[str, Any] = yaml.safe_load(f)
@@ -143,12 +169,15 @@ def create_defaults_for_standalone(path: Path | None = None) -> Path:
         path = Path(".")
         defaults = {}
 
+    if "\\usepackage{fontspec}" in preamble:
+        defaults.setdefault("pdf-engine", "xelatex")
+
     in_header = defaults.get("include-in-header", [])
 
     if isinstance(in_header, str):
         in_header = [in_header]
 
-    path = create_temp_file("\\usepackage{pgf}", suffix=".tex", dir=path.parent)
+    path = create_temp_file(f"\\usepackage{{pgf}}{preamble}", suffix=".tex", dir=path.parent)
     in_header.append(path.as_posix())
     defaults["include-in-header"] = in_header
 
