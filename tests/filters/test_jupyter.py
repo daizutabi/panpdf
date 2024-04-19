@@ -85,14 +85,26 @@ def test_create_defaults_for_standalone_none():
     assert header[0].endswith(".tex")
 
 
+def test_get_preamble(store: Store):
+    from panpdf.filters.jupyter import get_preamble
+
+    data = store.get_data("pgf.ipynb", "fig:pgf")
+    text = data["text/plain"]
+    preamble = get_preamble(text)
+    assert r"\def\mathdefault#1{#1}" in preamble
+    assert r"\usepackage[strings]{underscore}" in preamble
+    assert r"\setmainfont" not in preamble
+
+
 @pytest.mark.parametrize("use_defaults", [False, True])
 def test_create_image_file_pgf(store: Store, defaults, use_defaults):
-    from panpdf.filters.jupyter import create_image_file_pgf
+    from panpdf.filters.jupyter import create_image_file_pgf, get_preamble
 
     data = store.get_data("pgf.ipynb", "fig:pgf")
     text = data["text/plain"]
     defaults = defaults if use_defaults else None
-    url, text = create_image_file_pgf(text, defaults)
+    preamble = get_preamble(text)
+    url, text = create_image_file_pgf(text, defaults=defaults, preamble=preamble)
 
     path = Path(url)
     assert path.exists()
