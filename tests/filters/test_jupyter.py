@@ -96,6 +96,12 @@ def test_get_preamble(store: Store):
     assert r"\setmainfont" not in preamble
 
 
+def test_get_preamble_none():
+    from panpdf.filters.jupyter import get_preamble
+
+    assert get_preamble("") == ""
+
+
 @pytest.mark.parametrize("use_defaults", [False, True])
 def test_create_image_file_pgf(store: Store, defaults, use_defaults):
     from panpdf.filters.jupyter import create_image_file_pgf, get_preamble
@@ -177,3 +183,18 @@ def test_jupyter_action_error():
     image = Image(Str("a"), url="a.ipynb", identifier="a")
     with pytest.raises(ValueError, match=r"\[panpdf\] Unknown"):
         jupyter.action(image, doc)
+
+
+@pytest.mark.parametrize("pgf", [True, False])
+def test_jupyter_finalize(pgf):
+    from panpdf.filters.jupyter import Jupyter
+
+    doc = Doc()
+    jupyter = Jupyter()
+    jupyter.pgf = pgf
+    jupyter.finalize(doc)
+    x = doc.metadata.get("include-in-header")
+    if pgf:
+        assert x
+    else:
+        assert not x
