@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from IPython.core.getipython import get_ipython
-from seaborn._core.plot import theme_context
 
 from panpdf.tools import create_temp_dir
 
@@ -60,18 +59,24 @@ def matplotlib_figure_to_svg(fig: Figure) -> str:
 
 
 def seaborn_plot_to_pgf(plot: Plot, rp: RepresentationPrinter, cycle) -> None:
+    from seaborn._core.plot import theme_context
+
     plotter = plot.plot()
     with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
         return matplotlib_figure_to_pgf(plotter._figure, rp, cycle)  # type: ignore # noqa: SLF001
 
 
 def seaborn_plot_to_pdf(plot: Plot) -> bytes:
+    from seaborn._core.plot import theme_context
+
     plotter = plot.plot()
     with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
         return matplotlib_figure_to_pdf(plotter._figure)  # type: ignore  # noqa: SLF001
 
 
 def seaborn_plot_to_svg(plot: Plot) -> str:
+    from seaborn._core.plot import theme_context
+
     plotter = plot.plot()
     with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
         return matplotlib_figure_to_svg(plotter._figure)  # type: ignore  # noqa: SLF001
