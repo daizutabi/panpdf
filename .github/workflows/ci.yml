@@ -32,8 +32,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install texlive-xetex texlive-luatex texlive-latex-recommended
           sudo apt-get install texlive-latex-extra texlive-lang-japanese
-          sudo apt-get install libcairo2
+          sudo apt-get install libcairo2 poppler-utils
           lualatex --version
+          pdffonts -v
       - name: Install Pandoc
         run: |
           [[ ${{ matrix.pandoc-version }} == "latest" ]] && url="https://github.com/jgm/pandoc/releases/latest" || url="https://github.com/jgm/pandoc/releases/tag/${{ matrix.pandoc-version }}"

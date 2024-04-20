@@ -9,7 +9,8 @@
     "ghcr.io/devcontainers-contrib/features/hatch:2": {},
     "ghcr.io/devcontainers-contrib/features/pandoc:1": {},
     "ghcr.io/devcontainers-contrib/features/starship:1": {},
-    "./features/zotero": {}
+    "./features/zotero": {},
+    "./features/poppler": {}
   },
   "remoteUser": "panpdf",
   "containerEnv": {

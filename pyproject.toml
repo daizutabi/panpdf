@@ -88,7 +88,7 @@ omit = ["src/panpdf/__about__.py"]
 exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs-material", "mkdocs-typer"]
+dependencies = ["mkdocs-material", "mkdocs-typer", "seaborn"]
 python = "3.12"
 
 [tool.hatch.envs.docs.scripts]
