@@ -11,6 +11,7 @@ import yaml
 from panflute import Doc, Image, Plain, RawInline
 
 from panpdf.filters.filter import Filter
+from panpdf.formatters import convert_pgf_text
 from panpdf.stores import Store
 from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
 
@@ -50,7 +51,7 @@ class Jupyter(Filter):
             image.url = url_or_text
             return image
 
-        text = url_or_text
+        text = convert_pgf_text(url_or_text)
 
         if not self.preamble:
             self.preamble = get_preamble(text)

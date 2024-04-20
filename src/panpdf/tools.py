@@ -79,6 +79,18 @@ def create_temp_file(
     return path
 
 
+def create_temp_dir(
+    *,
+    suffix: str | None = None,
+    prefix: str = TEMPFILE_PREFIX,
+    dir: str | Path | None = None,  # noqa: A002
+) -> Path:
+    dirname = tempfile.mkdtemp(suffix, prefix, dir)
+    path = Path(dirname)
+    atexit.register(lambda: shutil.rmtree(path))
+    return path
+
+
 def get_file_path(name: Path | str | None, dir: str) -> Path | None:  # noqa: A002
     if not name:
         return None

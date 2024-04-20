@@ -56,7 +56,7 @@ jobs:
           pip install --upgrade pytest-cov matplotlib cairosvg seaborn
           pip install -e .
       - name: Run test
-        run: pytest
+        run: pytest --capture=fd
       - name: Upload Codecov Results
         if: success()
         uses: codecov/codecov-action@v4
