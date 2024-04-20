@@ -43,17 +43,24 @@ def test_get_data_dir():
 
 
 @pytest.mark.parametrize("text", ["abcあα", b"abc"])
-def test_create_temp_file(text):
+def test_create_temp_file(text, tmp_path):
     from panpdf.tools import create_temp_file
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        path = create_temp_file(text, suffix=".txt", dir=tmpdir)
-        assert path.exists()
-        assert path.suffix == ".txt"
-        if isinstance(text, str):
-            assert path.read_text(encoding="utf8") == text
-        else:
-            assert path.read_bytes() == text
+    path = create_temp_file(text, suffix=".txt", dir=tmp_path)
+    assert path.exists()
+    assert path.suffix == ".txt"
+    if isinstance(text, str):
+        assert path.read_text(encoding="utf8") == text
+    else:
+        assert path.read_bytes() == text
+
+
+def test_create_temp_dir(tmp_path):
+    from panpdf.tools import create_temp_dir
+
+    path = create_temp_dir(dir=tmp_path)
+    assert path.exists()
+    assert path.parent == tmp_path
 
 
 def test_get_file_path():

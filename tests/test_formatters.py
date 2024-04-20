@@ -1,8 +1,12 @@
 import base64
 import io
+import re
+from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 import seaborn.objects as so
 from IPython.core.formatters import PlainTextFormatter
 from IPython.core.interactiveshell import InteractiveShell
@@ -93,3 +97,61 @@ def test_set_formatter_none():
     from panpdf.formatters import set_formatter
 
     set_formatter("matplotlib", "pgf")
+
+
+@pytest.fixture(scope="module")
+def text():
+    from panpdf.formatters import matplotlib_figure_to_pgf
+
+    data = np.random.randn(50, 50)
+    fig, ax = plt.subplots(figsize=(3, 2))
+    a = ax.imshow(data, interpolation="nearest", aspect=1)
+    ax.set(xlabel="x", ylabel="α")
+    fig.colorbar(a)
+
+    out = io.StringIO()
+    rp = RepresentationPrinter(out)
+
+    matplotlib_figure_to_pgf(fig, rp, None)
+    return out.getvalue()
+
+
+def test_matplotlib_figure_to_pgf_raster(text: str):
+    assert "\n%% __panpdf_begin__\n" in text
+    assert text.endswith("%% __panpdf_end__")
+
+
+def test_split_pgf_text(text: str):
+    from panpdf.formatters import split_pgf_text
+
+    text, image_dict = split_pgf_text(text)
+    assert text.startswith("%% Creator: Matplotlib, PGF backend")
+    assert text.endswith("\\endgroup%\n")
+
+    for name, data in image_dict.items():
+        assert name in text
+        assert data.startswith("iVBOR")
+        assert not data.endswith("\n")
+
+
+def test_split_pgf_text_none():
+    from panpdf.formatters import split_pgf_text
+
+    text, image_dict = split_pgf_text("abc")
+    assert text == "abc"
+    assert not image_dict
+
+
+def test_convert_pgf_text(text: str):
+    from panpdf.formatters import convert_pgf_text
+
+    text = convert_pgf_text(text)
+
+    for x in re.findall(r"\\includegraphics\[.+?\]{(.+?)}", text):
+        assert Path(x).exists()
+
+
+def test_convert_pgf_text_none():
+    from panpdf.formatters import convert_pgf_text
+
+    assert convert_pgf_text("abc") == "abc"
