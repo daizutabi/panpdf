@@ -296,11 +296,11 @@ def show_version(pandoc_path: Path | None):
 
 
 # def main():
-#     typer.run(cli)  # no cov
+#     typer.run(cli)  # pragma: no cover
 
 
 # if __name__ == "__main__":
-#     main()  # no cov
+#     main()  # pragma: no cover
 
 # def convert_notebook(path: str):
 #     nb = nbformat.read(path, as_version=4)

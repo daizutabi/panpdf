@@ -93,8 +93,11 @@ def get_preamble(text: str) -> str:
 
 
 def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str | None:
-    text = data.get("text/plain", "")
-    text_pgf = text if text.startswith(PGF_PREFIX) else None
+    if text := data.get("text/pgf"):
+        text_pgf = base64.b64decode(text).decode(encoding="utf-8")
+    else:
+        text = data.get("text/plain", "")
+        text_pgf = text if text.startswith(PGF_PREFIX) else None
 
     if not standalone and text_pgf:
         return text_pgf

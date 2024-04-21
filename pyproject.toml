@@ -85,7 +85,11 @@ filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
 omit = ["src/panpdf/__about__.py"]
 
 [tool.coverage.report]
-exclude_lines = ["no cov", "raise NotImplementedError", "if TYPE_CHECKING:"]
+exclude_lines = [
+  "# pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+]
 
 [tool.hatch.envs.docs]
 dependencies = ["mkdocs-material", "mkdocs-typer"]

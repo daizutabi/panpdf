@@ -108,6 +108,10 @@ FUNCTIONS: dict[tuple[str, str], dict[str, Callable]] = {
 
 
 def set_formatter(module: str, fmt: str, ip=None) -> None:
+    if module == "holoviews":
+        set_formatter_holoviews(fmt)
+        return
+
     if not ip and not (ip := get_ipython()):
         return
 
@@ -120,6 +124,29 @@ def set_formatter(module: str, fmt: str, ip=None) -> None:
         for module_class in module_classes:
             if function := FUNCTIONS.get(module_class, {}).get(fmt):
                 formatter.for_type_by_name(*module_class, function)
+
+
+try:
+    from holoviews.ipython.display_hooks import display_hook, image_display
+
+    @display_hook
+    def pgf_display(element, max_frames):
+        """Used to render elements to PGF if requested in the display formats."""
+        return image_display(element, max_frames, fmt="pgf")
+
+except ModuleNotFoundError:  # pragma: no cover
+    pgf_display = None  # type: ignore
+
+
+def set_formatter_holoviews(fmt: str) -> None:
+    from holoviews.core.dimension import LabelledData
+    from holoviews.core.options import Store
+
+    if fmt not in Store.display_formats:
+        Store.display_formats.append(fmt)
+
+    if fmt == "pgf" and pgf_display:
+        Store.set_display_hook(fmt, LabelledData, pgf_display)
 
 
 def split_pgf_text(text: str) -> tuple[str, dict[str, str]]:

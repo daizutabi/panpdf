@@ -3,11 +3,14 @@ import io
 import re
 from pathlib import Path
 
+import holoviews as hv
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 import pytest
 import seaborn.objects as so
+from holoviews.core.options import Store
 from IPython.core.formatters import PlainTextFormatter
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.lib.pretty import RepresentationPrinter
@@ -97,6 +100,27 @@ def test_set_formatter_none():
     from panpdf.formatters import set_formatter
 
     set_formatter("matplotlib", "pgf")
+
+
+@pytest.fixture(scope="module")
+def curve():
+    from panpdf.formatters import set_formatter
+
+    set_formatter("holoviews", "pgf")
+    hv.extension("matplotlib")  # type: ignore
+
+    df = pl.DataFrame({"x": [1, 2], "y": [3, 4]})
+    return hv.Curve(df, "x", "y")
+
+
+def test_set_formatter_holoviews(curve):
+    renderer = Store.renderers["matplotlib"]
+    plot = renderer.get_plot(curve)
+    data, metadata = renderer(plot, fmt="pgf")
+    assert isinstance(data, bytes)
+    assert data.startswith(b"%% Creator: Matplotlib, PGF backend\n%")
+    assert isinstance(metadata, dict)
+    assert metadata["mime_type"] == "text/pgf"
 
 
 @pytest.fixture(scope="module")
