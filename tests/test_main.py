@@ -1,3 +1,4 @@
+import subprocess
 import sys
 from pathlib import Path
 
@@ -147,3 +148,28 @@ def test_quiet(quiet):
     path = Path("Title.pdf")
     assert path.exists()
     path.unlink()
+
+
+def test_command():
+    args = [
+        "panpdf",
+        "examples/src",
+        "-n",
+        "notebooks",
+        "-d",
+        "examples/defaults.yaml",
+        "-C",
+        "-o",
+        "a.pdf",
+    ]
+    subprocess.run(args, check=False)
+    assert Path("a.pdf").exists()
+
+    p = subprocess.run(["pdffonts", "a.pdf"], check=False, capture_output=True)
+    stdout = p.stdout.decode("utf-8")
+
+    fonts = ["Pagella", "HaranoAji", "Heros", "DejaVuSansMono", "LMRoman"]
+    for font in fonts:
+        assert font in stdout
+
+    Path("a.pdf").unlink()

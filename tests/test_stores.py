@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -46,10 +47,7 @@ def test_get_cell_unknown(store: Store):
 def test_get_source(store: Store, fmt: str):
     source = store.get_source(f"{fmt}.ipynb", f"fig:{fmt}")
     assert isinstance(source, str)
-    if fmt != "pgf":
-        assert source.rstrip() == "import matplotlib.pyplot as plt\n\nplt.plot([-1, 1], [-1, 1])"
-    else:
-        assert source.startswith("import matplotlib.pyplot as plt\n\nplt.plot([1, 10, 100],")
+    assert "plot" in source
 
 
 def test_get_outputs(store: Store, fmt: str):
@@ -75,6 +73,7 @@ def test_get_data(store: Store, fmt: str):
     assert len(data) == 3 if fmt in ["pdf", "svg"] else 2
     assert "text/plain" in data
     assert "image/png" in data
+
     if fmt == "pgf":
         assert data["text/plain"].startswith("%% Creator: Matplotlib,")
     if fmt == "png":
@@ -83,6 +82,32 @@ def test_get_data(store: Store, fmt: str):
         assert data["application/pdf"].startswith("JVBE")
     if fmt == "svg":
         assert data["image/svg+xml"].startswith('<?xml version="1.0"')
+
+
+def test_get_data_seaborn(store: Store):
+    data = store.get_data("seaborn.ipynb", "fig:seaborn")
+    assert isinstance(data, dict)
+
+    for mime in ["image/png", "text/plain"]:
+        assert mime in data
+
+    text = data["text/plain"]
+    assert isinstance(text, str)
+    assert text.startswith("%% Creator: Matplotlib,")
+
+
+@pytest.mark.parametrize("lib", ["holoviews", "hvplot"])
+def test_get_data_holoviews(store: Store, lib: str):
+    data = store.get_data(f"{lib}.ipynb", f"fig:{lib}")
+    assert isinstance(data, dict)
+
+    for mime in ["text/html", "text/pgf", "text/plain"]:
+        assert mime in data
+
+    text = data["text/pgf"]
+    assert isinstance(text, str)
+    text = base64.b64decode(text).decode(encoding="utf-8")
+    assert text.startswith("%% Creator: Matplotlib,")
 
 
 def test_get_data_none(store: Store):

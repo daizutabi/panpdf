@@ -44,12 +44,12 @@ variables:
     - foot_space=24.8mm
   mainfont: TeX Gyre Pagella
   mathfont: TeX Gyre Pagella Math
-  # sansfont: Fira Sans
-  # sansfontoptions:
-  #   - Scale=1.00
-  # monofont: Fira Code
-  # monofontoptions:
-  #   - Scale=0.85
+  sansfont: TeX Gyre Heros
+  sansfontoptions:
+    - Scale=1.00
+  monofont: DejaVu Sans Mono
+  monofontoptions:
+    - Scale=0.85
   luatexjapresetoptions:
     - deluxe
     - match
