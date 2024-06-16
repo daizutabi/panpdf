@@ -24,12 +24,16 @@ def test_create_code_block():
 
 
 def test_define_verbatim_environment():
-    from panpdf.filters.verbatim import define_verbatim_environment
+    from panpdf.filters.verbatim import CONFIG, define_verbatim_environment
 
-    text = define_verbatim_environment({}, "large")
-    assert text.endswith(r"{commandchars=\\\{\},fontsize=\large}")
+    config = CONFIG.copy()
+    text = define_verbatim_environment({"fontsize": "\\large"})
+    assert text.endswith(r"{commandchars=\\\{\},fontsize=\large,baselinestretch=auto}")
     text = define_verbatim_environment({"a": "b"})
-    assert text.endswith(r"small,a=b}")
+    assert text.endswith(r"a=b,fontsize=\large,baselinestretch=auto}")
+    CONFIG.update(config)
+    text = define_verbatim_environment({})
+    assert text.endswith(r"{commandchars=\\\{\},fontsize=\small,baselinestretch=auto}")
 
 
 def test_define_shade_color():

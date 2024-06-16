@@ -15,6 +15,9 @@ if TYPE_CHECKING:
     from panflute import Doc, Element
 
 
+CONFIG: dict[str, str] = {"fontsize": "\\small", "baselinestretch": "auto"}
+
+
 @dataclass(repr=False)
 class Verbatim(Filter):
     types: ClassVar[type[CodeBlock]] = CodeBlock
@@ -25,11 +28,11 @@ class Verbatim(Filter):
     def action(self, elem: CodeBlock, doc: Doc) -> CodeBlock | list[Element]:  # noqa: ARG002
         self.shaded = True
 
-        if "output" in elem.classes:
-            return create_output(elem)
-
         if "title" in elem.attributes:
             return create_title(elem)
+
+        if "output" in elem.classes:
+            return create_output(elem)
 
         return create_default(elem)
 
@@ -80,11 +83,20 @@ OUTPUT_SHADE_COLOR = (1, 1, 0.9)
 TITLE_COLOR = "NavyBlue"
 
 
-def define_verbatim_environment(attrs: dict[str, str], fontsize: str = "small") -> str:
-    text = r"\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},"
-    text = f"{text}fontsize=\\{fontsize}"
-    args = ",".join(f"{k}={v}" for k, v in attrs.items())
-    return f"{text},{args}}}" if args else text + "}"
+def define_verbatim_environment(attrs: dict[str, str]) -> str:
+    text = r"\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}"
+    args = []
+    for key, value in attrs.items():
+        args.append(f"{key}={value}")
+        if key in CONFIG:
+            CONFIG[key] = value
+
+    for key, value in CONFIG.items():
+        if key not in attrs:
+            args.append(f"{key}={value}")
+
+    args_str = ",".join(args)
+    return f"{text},{args_str}}}"
 
 
 def define_shade_color(rgb: Iterable) -> str:
