@@ -71,7 +71,6 @@ python = ["3.10", "3.11", "3.12"]
 [tool.pytest.ini_options]
 addopts = [
   "-vv",
-  "--capture=no",
   "--color=yes",
   "--cov-report=lcov:lcov.info",
   "--cov=panpdf",
