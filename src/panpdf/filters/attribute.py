@@ -133,12 +133,13 @@ def _iter_elements(elems: Iterable[Element]) -> Iterator[Element]:
     for elem in elems:
         if isinstance(elem, Math) and elem.format == "DisplayMath":
             yield from collected
-            collected = [Span(elem)]
+            collected = [elem]
 
         elif not collected:
             yield elem
 
         elif isinstance(elem, Str) and elem.text.endswith("}"):
+            collected[0] = Span(collected[0])
             set_attributes(collected[0], (*collected[1:], elem))
 
             yield collected[0]

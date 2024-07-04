@@ -3,7 +3,7 @@ from pathlib import Path
 
 import panflute as pf
 import pytest
-from panflute import Doc, Figure, Image, Para, RawInline, Span, Str, Table
+from panflute import Doc, Figure, Image, Math, Para, RawInline, Span, Str, Table
 
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
@@ -42,9 +42,9 @@ def test_convert_span_eqnarray():
 def test_convert_span():
     from panpdf.filters.layout import convert_span
 
-    span = _prepare("$$x=1$$").content[0]  # type:ignore
-    assert isinstance(span, Span)
-    s = convert_span(span)
+    math = _prepare("$$x=1$$").content[0]  # type:ignore
+    assert isinstance(math, Math)
+    s = convert_span(Span(math))
     assert isinstance(s, Span)
 
 
