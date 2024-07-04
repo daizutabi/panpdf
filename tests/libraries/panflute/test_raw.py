@@ -5,11 +5,11 @@ from panflute import Math, Para, RawInline, Space, Str
 def test_raw():
     r1 = RawInline("\\begin{env}", format="latex")
     r2 = RawInline("\\end{env}", format="latex")
-    text = "![caption](a.png){#fig:id}"
+    text = "![caption](a.png){#fig:id width=1cm height=1cm}"
     elems = pf.convert_text(text)
     para = Para(r1, elems[0].content[0].content[0], r2)  # type:ignore
     tex = pf.convert_text(para, input_format="panflute", output_format="latex")
-    assert tex == "\\begin{env}\\includegraphics{a.png}\\end{env}"
+    assert tex == "\\begin{env}\\includegraphics[width=1cm,height=1cm]{a.png}\\end{env}"
 
 
 def test_raw_elements():

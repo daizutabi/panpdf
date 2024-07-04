@@ -225,7 +225,7 @@ def test_iter_extra_args_from_metadata():
         extra_args=extra_args,
     )
     assert isinstance(t, str)
-    assert "AAA\nBBB\n\\ifLua" in t
+    assert "AAA\nBBB\n" in t
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 

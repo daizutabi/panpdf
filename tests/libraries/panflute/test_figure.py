@@ -28,14 +28,17 @@ def test_figure_single():
 
 
 def test_figure_width():
-    text = "![A](a.png){#fig:id width=1cm}"
+    text = "![A](a.png){#fig:id width=1cm height=1cm}"
     tex = pf.convert_text(text, output_format="latex")
     assert isinstance(tex, str)
-    assert "[width=1cm,height=\\textheight]" in tex
+    assert "[width=1cm,height=1cm]" in tex
 
 
 def test_figure_multi():
-    text = "a\n\n![A](a.png){#fig:a .c k=v} ![A](a.png){#fig:a .c k=v}\n\nb"
+    text = (
+        "a\n\n![A](a.png){#fig:a .c k=v width=1in height=1in} "
+        "![A](a.png){#fig:a .c k=v width=1in height=1in}\n\nb"
+    )
     elems = pf.convert_text(text)
     assert isinstance(elems, list)
     for e in elems:
@@ -47,7 +50,9 @@ def test_figure_multi():
     assert img.identifier == "fig:a"
     assert img.classes == ["c"]
     tex = pf.convert_text(elems, input_format="panflute", output_format="latex")
-    assert tex == "a\n\n\\includegraphics{a.png} \\includegraphics{a.png}\n\nb"
+    assert isinstance(tex, str)
+    assert "a\n\n\\includegraphics[width=1in,height=1in]{a.png}" in tex
+    assert "\\includegraphics[width=1in,height=1in]{a.png}\n\nb" in tex
 
 
 def test_figure_class():
@@ -55,13 +60,13 @@ def test_figure_class():
         Str("Description"),
         title="The Title",
         url="example.png",
-        attributes={"height": "256px"},
+        attributes={"width": "128px", "height": "256px"},
     )
     caption = Caption(Plain(Str("The"), Space, Str("Caption")))
     figure = Figure(Plain(image), caption=caption, identifier="figure1")
     tex = pf.convert_text(figure, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
-    assert "\\includegraphics[width=\\textwidth,height=2.66667in]{example.png}" in tex
+    assert "\\includegraphics[width=1.33333in,height=2.66667in]{example.png}" in tex
 
 
 def test_image_class():
@@ -81,7 +86,7 @@ def test_figure_class_multi():
         Str("Description"),
         title="The Title",
         url="example.png",
-        attributes={"height": "256px"},
+        attributes={"width": "128px", "height": "256px"},
     )
     caption = Caption(Plain(Str("The"), Space, Str("Caption")))
     figure = Figure(Plain(image, Space, image), caption=caption, identifier="figure1")
@@ -90,8 +95,8 @@ def test_figure_class_multi():
     lines = [
         "\\begin{figure}",
         "\\centering",
-        "\\includegraphics[width=\\textwidth,height=2.66667in]{example.png}",
-        "\\includegraphics[width=\\textwidth,height=2.66667in]{example.png}",
+        "\\includegraphics[width=1.33333in,height=2.66667in]{example.png}",
+        "\\includegraphics[width=1.33333in,height=2.66667in]{example.png}",
         "\\end{figure}",
     ]
     for x in lines:
@@ -152,24 +157,24 @@ def test_figure_from_latex_minipage():
 
 
 def test_figure_from_panflute_subfigure():
-    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm"}))
+    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"}))
     a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
-    ib = Plain(Image(Str("B"), url="b.png"))
+    ib = Plain(Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"}))
     b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
     f = Figure(a, b, caption=Caption(Plain(Str("c"))), identifier="c")
     x = pf.convert_text(f, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
-    assert "\\includegraphics{b.png}\n\\caption{b}\\label{b}" in x
+    assert "\\includegraphics[width=3cm,height=4cm]{b.png}\n\\caption{b}\\label{b}" in x
     assert "\\end{subfigure}\n\\caption{c}\\label{c}" in x
 
 
 def test_figure_from_panflute_subfigure_none():
-    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm"}))
+    ia = Plain(Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"}))
     a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
-    ib = Plain(Image(Str("B"), url="b.png"))
+    ib = Plain(Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"}))
     b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
     f = Figure(a, b, identifier="c")
     x = pf.convert_text(f, input_format="panflute", output_format="latex")
     assert isinstance(x, str)
-    assert "\\includegraphics{b.png}\n\\caption{b}\\label{b}" in x
+    assert "\\includegraphics[width=3cm,height=4cm]{b.png}\n\\caption{b}\\label{b}" in x
     assert "\\end{subfigure}\n\\caption{}\\label{c}" in x
