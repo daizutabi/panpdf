@@ -22,8 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
-        pandoc-version: ['3.1.12', 'latest']
+        python-version: ["3.10", "3.11", "3.12"]
+        pandoc-version: ["3.1.12", "3.2", "latest"]
 
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
       - name: Check format
         run: hatch fmt --check
       - name: Install Packages
-        run : |
+        run: |
           pip install --upgrade aiohttp nbformat panflute pyyaml rich typer pyzotero
           pip install --upgrade pytest-cov matplotlib cairosvg seaborn hvplot polars
           pip install -e .

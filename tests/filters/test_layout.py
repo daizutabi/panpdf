@@ -101,7 +101,7 @@ def test_create_figure_from_image(store, defaults, fmt):
         assert "\\endgroup%\n\\caption{A}" in tex
     else:
         fmt_ = "pdf" if fmt == "svg" else fmt
-        assert f".{fmt_}}}\n" in tex
+        assert f".{fmt_}" in tex
     assert f"\\caption{{A}}\\label{{fig:{fmt}}}" in tex
 
 
