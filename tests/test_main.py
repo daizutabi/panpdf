@@ -1,5 +1,4 @@
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
@@ -47,7 +46,7 @@ def test_prompt(to):
 
 
 def test_prompt_empty():
-    result = runner.invoke(app, [], input="\n\n")
+    result = runner.invoke(app, [], input="")
     assert result.stdout.endswith("No input text. Aborted.\n")
 
 
@@ -116,18 +115,15 @@ def test_citeproc_not_found():
 def test_figure_only():
     result = runner.invoke(app, ["-F", "-n", "notebooks"], input="abc\n")
     assert result.exit_code == 0
-    result.stdout.endswith(": abc\n:\n.\n")
+    assert not result.stdout
 
 
 def test_extra_args():
     url = "https://www.zotero.org/styles/ieee"
-    text = "[@panflute]"
-    argv = sys.argv[:]
-    sys.argv.extend(["--", "--csl", url])
-    result = runner.invoke(app, ["-C"], input=text)
-    assert result.exit_code == 0
-    assert "{[}1{]}" in result.stdout
-    sys.argv = argv
+    text = "[@panflute]\n\n"
+    args = ["panpdf", "-C", "--", "--csl", url]
+    out = subprocess.check_output(args, input=text, text=True)
+    assert "{[}1{]}" in out
 
 
 def test_header():
