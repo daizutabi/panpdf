@@ -31,14 +31,10 @@ if TYPE_CHECKING:
 
 EXTRA_ARGS: list[str] = []
 
-
-def split_args(func):
-    if "--" in sys.argv:
-        index = sys.argv.index("--")
-        EXTRA_ARGS[:] = sys.argv[index + 1 :]
-        sys.argv = sys.argv[:index]
-
-    return func
+if "--" in sys.argv:
+    index = sys.argv.index("--")
+    EXTRA_ARGS[:] = sys.argv[index + 1 :]
+    sys.argv = sys.argv[:index]
 
 
 class OutputFormat(str, Enum):
@@ -51,7 +47,6 @@ app = typer.Typer(add_completion=False)
 
 
 @app.command(name="panpdf")
-@split_args
 def cli(
     files: Annotated[
         Optional[list[Path]],
