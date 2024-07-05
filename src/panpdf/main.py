@@ -29,6 +29,13 @@ from panpdf.tools import (
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
 
+EXTRA_ARGS: list[str] = []
+
+if "--" in sys.argv:
+    index = sys.argv.index("--")
+    EXTRA_ARGS[:] = sys.argv[index + 1 :]
+    sys.argv = sys.argv[:index]
+
 
 class OutputFormat(str, Enum):
     latex = "latex"
@@ -218,8 +225,8 @@ def cli(
     if output:
         extra_args.extend(["--output", output.as_posix()])
 
-    if "--" in sys.argv:
-        extra_args.extend(sys.argv[sys.argv.index("--") + 1 :])
+    if EXTRA_ARGS:
+        extra_args.extend(EXTRA_ARGS)
 
     result = convert_doc(
         doc,
@@ -240,7 +247,7 @@ def get_text(files: list[Path] | None) -> str:
         it = (file.read_text(encoding="utf8") for file in collect(files))
         return "\n\n".join(it)
 
-    if text := prompt():
+    if text := sys.stdin.read():
         return text
 
     typer.secho("No input text. Aborted.", fg="red")
@@ -271,44 +278,10 @@ def get_output_format(output: Path | None) -> OutputFormat:
     raise typer.Exit
 
 
-def prompt() -> str:
-    typer.secho("Enter double blank lines to exit.", fg="green")
-    lines: list[str] = []
-
-    while True:
-        suffix = ": " if not lines or lines[-1] else ". "
-        line = typer.prompt("", type=str, default="", prompt_suffix=suffix, show_default=False)
-        if lines and lines[-1] == "" and line == "":
-            break
-
-        lines.append(line)
-
-    return "\n".join(lines).rstrip()
-
-
 def show_version(pandoc_path: Path | None):
-    pandoc_version = get_pandoc_version()
+    pandoc_version = get_pandoc_version(pandoc_path)
 
     typer.echo(f"pandoc {pandoc_version}")
     typer.echo(f"panflute {pf.__version__}")
     typer.echo(f"panpdf {__version__}")
     raise typer.Exit
-
-
-# def main():
-#     typer.run(cli)  # pragma: no cover
-
-
-# if __name__ == "__main__":
-#     main()  # pragma: no cover
-
-# def convert_notebook(path: str):
-#     nb = nbformat.read(path, as_version=4)
-#     ids = get_ids(nb, "fig")
-#     notebook_dir, path = os.path.split(path)
-#     if not notebook_dir:
-#         notebook_dir = "."
-#     imgs = [f"![a]({path}){{#{identifier}}}\n\n" for identifier in ids]
-#     text = "".join(imgs)
-#     converter = Converter(False, notebook_dir, True)
-#     converter.convert_text(text, standalone=True, external_only=True)
