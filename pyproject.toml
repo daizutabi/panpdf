@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "panpdf"
+version = "0.2.7"
 description = "PDF documentation generator"
 readme = "README.md"
 license = "MIT"
@@ -18,7 +19,6 @@ classifiers = [
   "Topic :: Documentation",
   "Topic :: Software Development :: Documentation",
 ]
-dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
   "aiohttp",
@@ -39,15 +39,15 @@ Issues = "https://github.com/daizutabi/panpdf/issues"
 [project.scripts]
 panpdf = "panpdf.main:app"
 
-[tool.hatch.version]
-path = "src/panpdf/__about__.py"
-
 [tool.hatch.build.targets.sdist]
 exclude = ["/.github", "/docs"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/panpdf"]
 
-[tool.hatch.envs.test]
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.hatch-test]
 dependencies = [
   "cairosvg",
   "hvplot",
@@ -58,30 +58,14 @@ dependencies = [
   "pytest-clarity",
   "pytest-cov",
   "pytest-randomly",
+  "pytest-xdist",
   "seaborn",
 ]
 
-[tool.hatch.envs.test.scripts]
-run = "pytest {args:tests src/panpdf}"
-cov = "coverage report {args:--skip-covered --show-missing}"
-
-[[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11", "3.12"]
-
 [tool.pytest.ini_options]
-addopts = [
-  "-vv",
-  "--color=yes",
-  "--cov-report=lcov:lcov.info",
-  "--cov=panpdf",
-  "--doctest-modules",
-  "--tb=short",
-]
+addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf", "--doctest-modules"]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
 filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
-
-[tool.coverage.run]
-omit = ["src/panpdf/__about__.py"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -109,10 +93,7 @@ extend = "ruff_defaults.toml"
 
 [tool.ruff.lint]
 ignore = ['RUF001']
-unfixable = [
-  "F401",   # Don't touch unused imports
-  "RUF100", # Don't touch noqa lines
-]
+unfixable = ["F401", "RUF100"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "main.py" = ["ARG001", "UP007"]
