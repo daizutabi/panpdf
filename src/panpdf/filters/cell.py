@@ -15,6 +15,9 @@ class Cell(Filter):
     store: Store = field(default_factory=Store)
 
     def action(self, figure: Figure, doc: Doc) -> Figure | list[Element]:
+        if not figure.content:
+            return figure
+
         plain = figure.content[0]
 
         if not isinstance(plain, Plain):
