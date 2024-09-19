@@ -5,6 +5,6 @@ import pytest
 
 @pytest.fixture
 def defaults():
-    path = Path("examples/defaults.yaml")
+    path = Path("tests/examples/defaults.yaml")
     assert path.exists()
     return path

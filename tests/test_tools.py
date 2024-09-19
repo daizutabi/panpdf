@@ -189,7 +189,9 @@ def test_add_metadata_list():
 def test_convert_metadata():
     doc = Doc()
     doc.metadata["a"] = ["b", "c"]
-    m = pf.convert_text(doc, input_format="panflute", output_format="markdown", standalone=True)
+    m = pf.convert_text(
+        doc, input_format="panflute", output_format="markdown", standalone=True
+    )
     assert m == "---\na:\n- b\n- c\n---\n"
     x = doc.metadata["a"]
     assert isinstance(x, pf.MetaList)
@@ -232,17 +234,17 @@ def test_iter_extra_args_from_metadata():
 def test_get_defaults():
     from panpdf.tools import get_defaults
 
-    path = "examples/defaults"
+    path = "tests/examples/defaults"
     x = get_defaults(path, "pdf-engine")
     assert x == "lualatex"
     x = get_defaults(path, "resource-path")
-    assert x == [".", "examples/images"]
+    assert x == [".", "tests/examples/images"]
 
 
 def test_get_defaults_dict():
     from panpdf.tools import get_defaults
 
-    path = "examples/defaults"
+    path = "tests/examples/defaults"
     x = get_defaults(path, "variables")
     assert isinstance(x, dict)
 
@@ -260,16 +262,16 @@ def test_search_path():
 
     assert search_path("pyproject.toml") == Path("pyproject.toml")
 
-    defaults = "examples/defaults"
+    defaults = "tests/examples/defaults"
 
-    path = search_path("header.pdf", ["examples/images"])
-    assert path == Path("examples/images/header.pdf")
+    path = search_path("header.pdf", ["tests/examples/images"])
+    assert path == Path("tests/examples/images/header.pdf")
 
-    path = search_path("header.png", ["examples/images"])
+    path = search_path("header.png", ["tests/examples/images"])
     assert path == Path("header.png")
 
     path = search_path("header.pdf", defaults=defaults)
-    assert path == Path("examples/images/header.pdf")
+    assert path == Path("tests/examples/images/header.pdf")
 
     path = search_path("header.png", defaults=defaults)
     assert path == Path("header.png")
@@ -278,11 +280,11 @@ def test_search_path():
 def test_resolve_image():
     from panpdf.tools import resolve_image
 
-    defaults = "examples/defaults"
+    defaults = "tests/examples/defaults"
 
     text = "\\includegraphics[width=1cm]{header.pdf}"
     text = resolve_image(text, defaults=defaults)
-    assert text == r"\includegraphics[width=1cm]{examples/images/header.pdf}"
+    assert text == r"\includegraphics[width=1cm]{tests/examples/images/header.pdf}"
 
 
 def test_convert_header():

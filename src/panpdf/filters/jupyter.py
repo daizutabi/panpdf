@@ -165,7 +165,9 @@ def create_image_file_pgf(
     return path.as_posix(), text
 
 
-def create_defaults_for_standalone(path: Path | None = None, preamble: str = "") -> Path:
+def create_defaults_for_standalone(
+    path: Path | None = None, preamble: str = ""
+) -> Path:
     if path:
         with path.open(encoding="utf8") as f:
             defaults: dict[str, Any] = yaml.safe_load(f)
@@ -181,7 +183,9 @@ def create_defaults_for_standalone(path: Path | None = None, preamble: str = "")
     if isinstance(in_header, str):
         in_header = [in_header]
 
-    path = create_temp_file(f"\\usepackage{{pgf}}{preamble}", suffix=".tex", dir=path.parent)
+    path = create_temp_file(
+        f"\\usepackage{{pgf}}{preamble}", suffix=".tex", dir=path.parent
+    )
     in_header.append(path.as_posix())
     defaults["include-in-header"] = in_header
 

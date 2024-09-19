@@ -161,6 +161,7 @@ def cli(
         show_version(pandoc_path)
 
     from panpdf.filters.attribute import Attribute
+    from panpdf.filters.cell import Cell
     from panpdf.filters.crossref import Crossref
     from panpdf.filters.jupyter import Jupyter
     from panpdf.filters.layout import Layout
@@ -199,14 +200,15 @@ def cli(
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
 
-    filters: list[Filter] = [Attribute(), Verbatim()]
+    filters: list[Filter] = [Attribute()]
 
     if notebooks_dir:
         store = Store([notebooks_dir.absolute()])
+        cell = Cell(store)
         jupyter = Jupyter(defaults_path, standalone_figure, pandoc_path, store)
-        filters.append(jupyter)
+        filters.extend([cell, jupyter])
 
-    filters.extend([Layout(), Crossref()])
+    filters.extend([Verbatim(), Layout(), Crossref()])
 
     if citeproc:
         filters.append(Zotero())

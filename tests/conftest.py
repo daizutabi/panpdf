@@ -9,7 +9,7 @@ from panflute import Figure, Image
 
 @pytest.fixture(scope="session", autouse=True)
 def _read_write():
-    path = Path("notebooks/pgf.ipynb")
+    path = Path("tests/notebooks/pgf.ipynb")
     nb = path.read_text("utf-8")
     yield
     path.write_text(nb, "utf-8")
@@ -17,7 +17,7 @@ def _read_write():
 
 @pytest.fixture(scope="session")
 def notebook_dir() -> Path:
-    return Path("notebooks")
+    return Path("tests/notebooks")
 
 
 @pytest.fixture(scope="session")

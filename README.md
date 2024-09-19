@@ -5,6 +5,16 @@
 [![Build Status][GHAction-image]][GHAction-link]
 [![Coverage Status][codecov-image]][codecov-link]
 
+panpdf is a versatile PDF documentation generator that
+transforms Markdown files into beautifully formatted PDF
+documents using Pandoc.
+
+panpdf can extract figures and source code from Jupyter
+notebooks.
+
+It offers customizable headers, footers, and table of contents,
+along with support for inserting figures and tables.
+
 <!-- Badges -->
 [pypi-v-image]: https://img.shields.io/pypi/v/panpdf.svg
 [pypi-v-link]: https://pypi.org/project/panpdf/

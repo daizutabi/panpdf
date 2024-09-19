@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from seaborn.objects import Plot
 
 
-def matplotlib_figure_to_pgf(fig: Figure, rp: RepresentationPrinter, cycle) -> None:  # noqa: ARG001
+def matplotlib_figure_to_pgf(fig: Figure, rp: RepresentationPrinter, cycle) -> None:
     name = str(uuid.uuid4())
 
     with tempfile.TemporaryDirectory() as dirname:
@@ -35,8 +35,8 @@ def matplotlib_figure_to_pgf(fig: Figure, rp: RepresentationPrinter, cycle) -> N
             return rp.text(text)
 
         imagetexts = [_encode_pgf_text(x, directory) for x in imagenames]
-
-        text = "\n".join([text, "%% __panpdf_begin__", *imagetexts, "%% __panpdf_end__"])
+        texts = [text, "%% __panpdf_begin__", *imagetexts, "%% __panpdf_end__"]
+        text = "\n".join(texts)
         return rp.text(text)
 
 
@@ -62,24 +62,24 @@ def seaborn_plot_to_pgf(plot: Plot, rp: RepresentationPrinter, cycle) -> None:
     from seaborn._core.plot import theme_context
 
     plotter = plot.plot()
-    with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
-        return matplotlib_figure_to_pgf(plotter._figure, rp, cycle)  # type: ignore # noqa: SLF001
+    with theme_context(plotter._theme):  # type: ignore
+        return matplotlib_figure_to_pgf(plotter._figure, rp, cycle)  # type: ignore
 
 
 def seaborn_plot_to_pdf(plot: Plot) -> bytes:
     from seaborn._core.plot import theme_context
 
     plotter = plot.plot()
-    with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
-        return matplotlib_figure_to_pdf(plotter._figure)  # type: ignore  # noqa: SLF001
+    with theme_context(plotter._theme):  # type: ignore
+        return matplotlib_figure_to_pdf(plotter._figure)  # type: ignore
 
 
 def seaborn_plot_to_svg(plot: Plot) -> str:
     from seaborn._core.plot import theme_context
 
     plotter = plot.plot()
-    with theme_context(plotter._theme):  # type: ignore  # noqa: SLF001
-        return matplotlib_figure_to_svg(plotter._figure)  # type: ignore  # noqa: SLF001
+    with theme_context(plotter._theme):  # type: ignore
+        return matplotlib_figure_to_svg(plotter._figure)  # type: ignore
 
 
 MIMES: dict[str, str] = {

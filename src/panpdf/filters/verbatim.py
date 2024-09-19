@@ -25,7 +25,7 @@ class Verbatim(Filter):
     def __post_init__(self) -> None:
         self.shaded = False
 
-    def action(self, elem: CodeBlock, doc: Doc) -> CodeBlock | list[Element]:  # noqa: ARG002
+    def action(self, elem: CodeBlock, doc: Doc) -> CodeBlock | list[Element]:
         self.shaded = True
 
         if "title" in elem.attributes:
