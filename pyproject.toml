@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "panpdf"
 version = "0.3.1"
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
-description = "A PDF generator from Markdown that extracts figures from Jupyter Notebooks."
+description = "A PDF generator from Markdown that embeds figures from Jupyter Notebooks."
 readme = "README.md"
 license = "MIT"
 classifiers = [
