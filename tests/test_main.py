@@ -20,7 +20,7 @@ def test_version():
 def test_get_text():
     from panpdf.main import get_text
 
-    files = [Path("examples/src/1.md"), Path("examples/src/2.md")]
+    files = [Path("tests/examples/src/1.md"), Path("tests/examples/src/2.md")]
     text = get_text(files)
     assert text.startswith("---\n")
     assert "# Section 2" in text
@@ -29,7 +29,7 @@ def test_get_text():
 def test_collect():
     from panpdf.main import get_text
 
-    files = [Path("examples/src")]
+    files = [Path("tests/examples/src")]
     text = get_text(files)
     assert text.startswith("---\n")
     assert "# Section 2" in text
@@ -57,7 +57,7 @@ def test_standalone():
 
 
 def test_defaults():
-    result = runner.invoke(app, ["-d", "examples/defaults"], input="# section\n")
+    result = runner.invoke(app, ["-d", "tests/examples/defaults"], input="# section\n")
     assert "{jlreq}" in result.stdout
     assert "\\begin{document}" in result.stdout
 
@@ -72,7 +72,7 @@ def test_output_title():
 
 def test_figure(fmt: str):
     text = f"![a]({fmt}.ipynb){{#fig:{fmt}}}"
-    result = runner.invoke(app, ["-n", "notebooks"], input=text)
+    result = runner.invoke(app, ["-n", "tests/notebooks"], input=text)
 
     fmt = fmt.replace("svg", "pdf")
     if fmt == "pgf":
@@ -103,7 +103,9 @@ def test_citeproc_csl():
     from panpdf.tools import get_pandoc_version
 
     if get_pandoc_version() > "3.1":
-        result = runner.invoke(app, ["-C", "-d", "examples/defaults"], input="[@panflute]")
+        result = runner.invoke(
+            app, ["-C", "-d", "tests/examples/defaults"], input="[@panflute]"
+        )
         assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
 
 
@@ -113,7 +115,7 @@ def test_citeproc_not_found():
 
 
 def test_figure_only():
-    result = runner.invoke(app, ["-F", "-n", "notebooks"], input="abc\n")
+    result = runner.invoke(app, ["-F", "-n", "tests/notebooks"], input="abc\n")
     assert result.exit_code == 0
     assert not result.stdout
 
@@ -128,8 +130,11 @@ def test_extra_args():
 
 def test_header():
     text = "---\nrhead: \\includegraphics[width=1cm]{header.pdf}\n---\nabc\n"
-    result = runner.invoke(app, ["-d", "examples/defaults"], input=text)
-    assert "\\rhead{\\includegraphics[width=1cm]{examples/images/header.pdf}}" in result.stdout
+    result = runner.invoke(app, ["-d", "tests/examples/defaults"], input=text)
+    assert (
+        "\\rhead{\\includegraphics[width=1cm]{tests/examples/images/header.pdf}}"
+        in result.stdout
+    )
     assert "\\usepackage{graphicx}" in result.stdout
 
 
@@ -149,11 +154,11 @@ def test_quiet(quiet):
 def test_command():
     args = [
         "panpdf",
-        "examples/src",
+        "tests/examples/src",
         "-n",
-        "notebooks",
+        "tests/notebooks",
         "-d",
-        "examples/defaults.yaml",
+        "tests/examples/defaults.yaml",
         "-C",
         "-o",
         "a.pdf",
