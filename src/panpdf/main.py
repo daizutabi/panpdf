@@ -2,6 +2,7 @@ import os
 import sys
 from collections.abc import Iterable, Iterator
 from enum import Enum
+from importlib.metadata import version
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Optional
 
@@ -10,26 +11,10 @@ import typer
 from panflute import Doc
 from typer import Argument, Option
 
-from panpdf.__about__ import __version__
-from panpdf.filters.attribute import Attribute
-from panpdf.filters.crossref import Crossref
-from panpdf.filters.jupyter import Jupyter
-from panpdf.filters.layout import Layout
-from panpdf.filters.verbatim import Verbatim
-from panpdf.filters.zotero import Zotero
-from panpdf.stores import Store
-from panpdf.tools import (
-    convert_doc,
-    get_defaults_file_path,
-    get_metadata_str,
-    get_pandoc_version,
-    iter_extra_args_from_metadata,
-)
-
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
 
-EXTRA_ARGS: list[str]= []
+EXTRA_ARGS: list[str] = []
 
 if "--" in sys.argv:
     index = sys.argv.index("--")
@@ -125,7 +110,7 @@ def cli(
             hidden=True,
         ),
     ] = False,
-    citeproc:Annotated[
+    citeproc: Annotated[
         bool,
         Option(
             "--citeproc",
@@ -134,11 +119,11 @@ def cli(
             is_flag=True,
         ),
     ] = False,
-    pandoc_path:Annotated[
+    pandoc_path: Annotated[
         Optional[Path],
         Option(
             metavar="FILE",
-            help="If specified, use the Pandoc at this path. If None, default to that from PATH.",
+            help="If specified, use the Pandoc at this path.",
             show_default=False,
         ),
     ] = None,
@@ -174,6 +159,20 @@ def cli(
     """
     if version:
         show_version(pandoc_path)
+
+    from panpdf.filters.attribute import Attribute
+    from panpdf.filters.crossref import Crossref
+    from panpdf.filters.jupyter import Jupyter
+    from panpdf.filters.layout import Layout
+    from panpdf.filters.verbatim import Verbatim
+    from panpdf.filters.zotero import Zotero
+    from panpdf.stores import Store
+    from panpdf.tools import (
+        convert_doc,
+        get_defaults_file_path,
+        get_metadata_str,
+        iter_extra_args_from_metadata,
+    )
 
     text = get_text(files)
 
@@ -279,9 +278,11 @@ def get_output_format(output: Path | None) -> OutputFormat:
 
 
 def show_version(pandoc_path: Path | None):
+    from panpdf.tools import get_pandoc_version
+
     pandoc_version = get_pandoc_version(pandoc_path)
 
     typer.echo(f"pandoc {pandoc_version}")
     typer.echo(f"panflute {pf.__version__}")
-    typer.echo(f"panpdf {__version__}")
+    typer.echo(f"panpdf {version('panpdf')}")
     raise typer.Exit
