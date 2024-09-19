@@ -1,2 +1,2 @@
-notebooks/* linguist-vendored
+tests/notebooks/* linguist-vendored
 .devcontainer/* linguist-vendored
