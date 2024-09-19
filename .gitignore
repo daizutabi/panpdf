@@ -1,11 +1,8 @@
-*.egg
-*.egg-info/
 *.pdf
 .coverage
 .ipynb_checkpoints
+.venv/
 __pycache__/
-_images/
-build/
 dist/
 lcov.info
-sdist/
+uv.lock

@@ -29,7 +29,7 @@ from panpdf.tools import (
 if TYPE_CHECKING:
     from panpdf.filters.filter import Filter
 
-EXTRA_ARGS: list[str] = []
+EXTRA_ARGS: list[str]= []
 
 if "--" in sys.argv:
     index = sys.argv.index("--")
@@ -125,7 +125,7 @@ def cli(
             hidden=True,
         ),
     ] = False,
-    citeproc: Annotated[
+    citeproc:Annotated[
         bool,
         Option(
             "--citeproc",
@@ -134,7 +134,7 @@ def cli(
             is_flag=True,
         ),
     ] = False,
-    pandoc_path: Annotated[
+    pandoc_path:Annotated[
         Optional[Path],
         Option(
             metavar="FILE",

@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "panpdf"
 version = "0.2.7"
+authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 description = "PDF documentation generator"
 readme = "README.md"
 license = "MIT"
-authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: MkDocs",
@@ -39,16 +39,8 @@ Issues = "https://github.com/daizutabi/panpdf/issues"
 [project.scripts]
 panpdf = "panpdf.main:app"
 
-[tool.hatch.build.targets.sdist]
-exclude = ["/.github", "/docs"]
-[tool.hatch.build.targets.wheel]
-packages = ["src/panpdf"]
-
-[[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.hatch-test]
-dependencies = [
+[tool.uv]
+dev-dependencies = [
   "cairosvg",
   "hvplot",
   "matplotlib",
@@ -62,41 +54,24 @@ dependencies = [
   "seaborn",
 ]
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/docs"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/panpdf"]
+
 [tool.pytest.ini_options]
 addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf", "--doctest-modules"]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
 filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
 
 [tool.coverage.report]
-exclude_lines = [
-  "# pragma: no cover",
-  "raise NotImplementedError",
-  "if TYPE_CHECKING:",
-]
-
-[tool.hatch.envs.docs]
-dependencies = ["mkdocs-material", "mkdocs-typer"]
-python = "3.12"
-
-[tool.hatch.envs.docs.scripts]
-build = "mkdocs build --clean --strict {args}"
-serve = "mkdocs serve --dev-addr localhost:8000 {args}"
-deploy = "mkdocs gh-deploy --force"
-
-[tool.hatch.envs.hatch-static-analysis]
-config-path = "ruff_defaults.toml"
+exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError"]
 
 [tool.ruff]
-line-length = 100
+line-length = 88
 target-version = "py312"
-extend = "ruff_defaults.toml"
 
 [tool.ruff.lint]
-ignore = ['RUF001']
+select = ["E", "W", "F", "I"]
 unfixable = ["F401", "RUF100"]
-
-[tool.ruff.lint.extend-per-file-ignores]
-"main.py" = ["ARG001", "UP007"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
