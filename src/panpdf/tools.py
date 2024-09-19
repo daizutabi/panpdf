@@ -168,7 +168,12 @@ def convert_doc(
         output = extra_args[extra_args.index("--output") + 1]
         description = f"Producing {output}"
 
-    return progress(args, f"[green]{description}", transient=transient or quiet, verbose=verbose)
+    return progress(
+        args,
+        f"[green]{description}",
+        transient=transient or quiet,
+        verbose=verbose,
+    )
 
 
 def progress(
