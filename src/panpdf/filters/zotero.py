@@ -24,7 +24,7 @@ class Zotero(Filter):
     types: ClassVar[type[Cite]] = Cite
     keys: list[str] = field(default_factory=list, init=False)
 
-    def action(self, elem: Cite, doc: Doc) -> None:  # noqa: ARG002
+    def action(self, elem: Cite, doc: Doc) -> None:
         for citation in elem.citations:
             key = citation.id
             if key not in self.keys:

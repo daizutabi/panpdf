@@ -4,7 +4,19 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
 import panflute as pf
-from panflute import Caption, Figure, Image, Math, Para, Plain, SoftBreak, Space, Span, Str, Table
+from panflute import (
+    Caption,
+    Figure,
+    Image,
+    Math,
+    Para,
+    Plain,
+    SoftBreak,
+    Space,
+    Span,
+    Str,
+    Table,
+)
 
 from panpdf.filters.filter import Filter
 
@@ -19,7 +31,9 @@ if TYPE_CHECKING:
 class Attribute(Filter):
     types: ClassVar[UnionType] = Table | Figure | Para
 
-    def action(self, elem: Table | Figure | Para, doc: Doc | None) -> Table | Figure | Para:  # noqa: ARG002
+    def action(
+        self, elem: Table | Figure | Para, doc: Doc | None
+    ) -> Table | Figure | Para:  # noqa: ARG002
         if isinstance(elem, Table):
             return set_attributes_table(elem)
 
