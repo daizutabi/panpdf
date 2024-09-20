@@ -165,6 +165,7 @@ def cli(
     from panpdf.filters.crossref import Crossref
     from panpdf.filters.jupyter import Jupyter
     from panpdf.filters.layout import Layout
+    from panpdf.filters.snippet import Snippet
     from panpdf.filters.verbatim import Verbatim
     from panpdf.filters.zotero import Zotero
     from panpdf.stores import Store
@@ -200,7 +201,7 @@ def cli(
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
 
-    filters: list[Filter] = [Attribute()]
+    filters: list[Filter] = [Attribute(), Snippet()]
 
     if notebooks_dir:
         store = Store([notebooks_dir.absolute()])

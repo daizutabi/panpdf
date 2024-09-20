@@ -222,7 +222,9 @@ def test_set_attributes_image_caption():
 def test_set_attributes_image_caption_attr():
     from panpdf.filters.attribute import set_attributes_image
 
-    para = _get_para("![a](a.png){#fig:a}\n![b](b.png){#fig:b}\n: caption\na {#fig:ab .c k=v} b")
+    para = _get_para(
+        "![a](a.png){#fig:a}\n![b](b.png){#fig:b}\n: caption\na {#fig:ab .c k=v} b"
+    )
     fig = set_attributes_image(para)
     assert isinstance(fig.caption, Caption)
     assert fig.identifier == "fig:ab"
