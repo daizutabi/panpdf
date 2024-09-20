@@ -6,8 +6,6 @@ import panflute as pf
 import pytest
 from panflute import CodeBlock, Doc, Figure
 
-from panpdf.filters.cell import Cell
-
 if TYPE_CHECKING:
     from panpdf.stores import Store
 
@@ -32,6 +30,8 @@ def test_code_block():
 
 
 def test_get_code_block(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     code_block = cell.get_code_block("cell.ipynb", "fig:source")
     assert code_block.text.startswith("fig, ax = plt.subplots")
@@ -39,12 +39,16 @@ def test_get_code_block(store: Store):
 
 
 def test_get_code_block_unknown(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     with pytest.raises(ValueError):
         cell.get_code_block("cell.ipynb", "fig:invalid")
 
 
 def test_action_source(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#fig:source .source}"
     list_ = pf.convert_text(text)
@@ -62,6 +66,8 @@ def test_action_source(store: Store):
 
 
 def test_action_cell(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#fig:source .cell}"
     list_ = pf.convert_text(text)
@@ -79,14 +85,18 @@ def test_action_cell(store: Store):
     assert elems[1] is figure
 
 
-def test_action_cell_none(store: Store):
+def test_action_none(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     figure = Figure()
     elems = cell.action(figure, Doc())
     assert elems is figure
 
 
-def test_action_cell_not_plain(store: Store):
+def test_action_not_plain(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     figure = Figure(CodeBlock("a"))
     elems = cell.action(figure, Doc())
@@ -94,6 +104,8 @@ def test_action_cell_not_plain(store: Store):
 
 
 def test_action_cell_not_image(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     figure = Figure(pf.Plain(pf.Str("a")))
     elems = cell.action(figure, Doc())
@@ -150,6 +162,8 @@ def test_convert_text_polars(store: Store):
 
 
 def test_action_text_stdout(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#text:stdout .cell}"
     list_ = pf.convert_text(text)
@@ -167,6 +181,8 @@ def test_action_text_stdout(store: Store):
 
 
 def test_action_text_print(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#text:print .output}"
     list_ = pf.convert_text(text)
@@ -184,6 +200,8 @@ def test_action_text_print(store: Store):
 
 
 def test_action_text_both(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#text:both .cell}"
     list_ = pf.convert_text(text)
@@ -201,6 +219,8 @@ def test_action_text_both(store: Store):
 
 
 def test_action_text_polars(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#text:polars .cell}"
     list_ = pf.convert_text(text)
@@ -219,6 +239,8 @@ def test_action_text_polars(store: Store):
 
 
 def test_action_text_pandas(store: Store):
+    from panpdf.filters.cell import Cell
+
     cell = Cell(store=store)
     text = "![source](cell.ipynb){#text:pandas .output .html}"
     list_ = pf.convert_text(text)
