@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 
 
 def test_source(store: Store):
-    source = store.get_source("source.ipynb", "fig:source")
+    source = store.get_source("cell.ipynb", "fig:source")
     assert source.startswith("fig, ax = plt.subplots")
 
 
 def test_language(store: Store):
-    lang = store.get_language("source.ipynb")
+    lang = store.get_language("cell.ipynb")
     assert lang == "python"
 
 
@@ -33,7 +33,7 @@ def test_code_block():
 
 def test_get_code_block(store: Store):
     cell = Cell(store=store)
-    code_block = cell.get_code_block("source.ipynb", "fig:source")
+    code_block = cell.get_code_block("cell.ipynb", "fig:source")
     assert code_block.text.startswith("fig, ax = plt.subplots")
     assert code_block.classes == ["python"]
 
@@ -41,12 +41,12 @@ def test_get_code_block(store: Store):
 def test_get_code_block_unknown(store: Store):
     cell = Cell(store=store)
     with pytest.raises(ValueError):
-        cell.get_code_block("source.ipynb", "fig:invalid")
+        cell.get_code_block("cell.ipynb", "fig:invalid")
 
 
 def test_action_source(store: Store):
     cell = Cell(store=store)
-    text = "![source](source.ipynb){#fig:source .source}"
+    text = "![source](cell.ipynb){#fig:source .source}"
     list_ = pf.convert_text(text)
     assert isinstance(list_, list)
     assert len(list_) == 1
@@ -63,7 +63,7 @@ def test_action_source(store: Store):
 
 def test_action_cell(store: Store):
     cell = Cell(store=store)
-    text = "![source](source.ipynb){#fig:source .cell}"
+    text = "![source](cell.ipynb){#fig:source .cell}"
     list_ = pf.convert_text(text)
     assert isinstance(list_, list)
     assert len(list_) == 1
@@ -98,3 +98,45 @@ def test_action_cell_not_image(store: Store):
     figure = Figure(pf.Plain(pf.Str("a")))
     elems = cell.action(figure, Doc())
     assert elems is figure
+
+
+def test_stdout(store: Store):
+    data = store.get_data("cell.ipynb", "text:stdout")
+    assert len(data) == 1
+    assert data["text/plain"] == "'stdout'"
+
+
+def test_print(store: Store):
+    data = store.get_data("cell.ipynb", "text:print")
+    assert len(data) == 1
+    assert data["text/plain"] == "print\n"
+
+
+def test_pandas(store: Store):
+    data = store.get_data("cell.ipynb", "text:pandas")
+    assert len(data) == 2
+    assert "a  b\n0  1  4" in data["text/plain"]
+    assert "<div>\n<style scoped>\n" in data["text/html"]
+
+
+def test_polars(store: Store):
+    data = store.get_data("cell.ipynb", "text:polars")
+    assert len(data) == 2
+    assert "shape: (3, 2)\n┌─────┬─────┐\n" in data["text/plain"]
+    assert "<div><style>\n" in data["text/html"]
+
+
+def test_convert_text_pandas(store: Store):
+    data = store.get_data("cell.ipynb", "text:pandas")
+    html = data["text/html"]
+    list_ = pf.convert_text(html, input_format="html")
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+
+
+def test_convert_text_polars(store: Store):
+    data = store.get_data("cell.ipynb", "text:polars")
+    html = data["text/html"]
+    list_ = pf.convert_text(html, input_format="html")
+    assert isinstance(list_, list)
+    assert len(list_) == 1

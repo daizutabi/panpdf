@@ -28,12 +28,12 @@ def test_define_verbatim_environment():
 
     config = CONFIG.copy()
     text = define_verbatim_environment({"fontsize": "\\large"})
-    assert text.endswith(r"{commandchars=\\\{\},fontsize=\large,baselinestretch=auto}")
+    assert text.endswith(r"{commandchars=\\\{\},fontsize=\large}")
     text = define_verbatim_environment({"a": "b"})
-    assert text.endswith(r"a=b,fontsize=\large,baselinestretch=auto}")
+    assert text.endswith(r"a=b,fontsize=\large}")
     CONFIG.update(config)
     text = define_verbatim_environment({})
-    assert text.endswith(r"{commandchars=\\\{\},fontsize=\small,baselinestretch=auto}")
+    assert text.endswith(r"{commandchars=\\\{\},fontsize=\small}")
 
 
 def test_define_shade_color():
@@ -68,7 +68,9 @@ def test_verbatim_output():
     assert isinstance(doc, Doc)
     assert verbatim.shaded
 
-    t = pf.convert_text(doc, input_format="panflute", output_format="latex", standalone=True)
+    t = pf.convert_text(
+        doc, input_format="panflute", output_format="latex", standalone=True
+    )
     assert isinstance(t, str)
     assert "\\vspace{-0.5\\baselineskip}" in t
 
@@ -84,7 +86,9 @@ def test_verbatim_title():
     assert isinstance(doc, Doc)
     assert verbatim.shaded
 
-    t = pf.convert_text(doc, input_format="panflute", output_format="latex", standalone=True)
+    t = pf.convert_text(
+        doc, input_format="panflute", output_format="latex", standalone=True
+    )
     assert isinstance(t, str)
     assert "formatcom=\\color{NavyBlue}\\bfseries" in t
     assert "\\NormalTok{Title}" in t

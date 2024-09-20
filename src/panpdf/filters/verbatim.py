@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from panflute import Doc, Element
 
 
-CONFIG: dict[str, str] = {"fontsize": "\\small", "baselinestretch": "auto"}
+CONFIG: dict[str, str] = {"fontsize": "\\small"}  # , "baselinestretch": "auto"}
 
 
 @dataclass(repr=False)
