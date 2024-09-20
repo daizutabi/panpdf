@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 import panflute as pf
 import pytest
-from panflute import CodeBlock, Doc, Figure, Table
+from panflute import CodeBlock, Doc, Figure
 
 from panpdf.filters.cell import Cell
 
