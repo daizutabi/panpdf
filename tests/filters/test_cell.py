@@ -107,9 +107,16 @@ def test_stdout(store: Store):
 
 
 def test_print(store: Store):
-    data = store.get_data("cell.ipynb", "text:print")
+    data = store.get_stream("cell.ipynb", "text:print")
+    assert data == "print\n"
+
+
+def test_both(store: Store):
+    data = store.get_stream("cell.ipynb", "text:both")
+    assert data == "print\n"
+    data = store.get_data("cell.ipynb", "text:both")
     assert len(data) == 1
-    assert data["text/plain"] == "print\n"
+    assert data["text/plain"] == "'hello'"
 
 
 def test_pandas(store: Store):
@@ -140,3 +147,86 @@ def test_convert_text_polars(store: Store):
     list_ = pf.convert_text(html, input_format="html")
     assert isinstance(list_, list)
     assert len(list_) == 1
+
+
+def test_action_text_stdout(store: Store):
+    cell = Cell(store=store)
+    text = "![source](cell.ipynb){#text:stdout .cell}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    elems = cell.action(figure, Doc())
+    assert isinstance(elems, list)
+    assert len(elems) == 2
+    code_block = elems[1]
+    assert isinstance(code_block, CodeBlock)
+    assert code_block.text == "'stdout'"
+    assert code_block.classes == ["output"]
+
+
+def test_action_text_print(store: Store):
+    cell = Cell(store=store)
+    text = "![source](cell.ipynb){#text:print .output}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    elems = cell.action(figure, Doc())
+    assert isinstance(elems, list)
+    assert len(elems) == 1
+    code_block = elems[0]
+    assert isinstance(code_block, CodeBlock)
+    assert code_block.text == "print"
+    assert code_block.classes == ["output"]
+
+
+def test_action_text_both(store: Store):
+    cell = Cell(store=store)
+    text = "![source](cell.ipynb){#text:both .cell}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    elems = cell.action(figure, Doc())
+    assert isinstance(elems, list)
+    assert len(elems) == 2
+    code_block = elems[1]
+    assert isinstance(code_block, CodeBlock)
+    assert code_block.text == "print\n'hello'"
+    assert code_block.classes == ["output"]
+
+
+def test_action_text_polars(store: Store):
+    cell = Cell(store=store)
+    text = "![source](cell.ipynb){#text:polars .cell}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    elems = cell.action(figure, Doc())
+    assert isinstance(elems, list)
+    assert len(elems) == 2
+    code_block = elems[1]
+    assert isinstance(code_block, CodeBlock)
+    assert "shape: (3, 2)" in code_block.text
+    assert "│ a   │ b   │" in code_block.text
+    assert code_block.classes == ["output"]
+
+
+def test_action_text_pandas(store: Store):
+    cell = Cell(store=store)
+    text = "![source](cell.ipynb){#text:pandas .output .html}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    elems = cell.action(figure, Doc())
+    assert isinstance(elems, list)
+    assert len(elems) == 1
+    assert isinstance(elems[0], pf.Div)

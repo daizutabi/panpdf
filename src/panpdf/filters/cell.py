@@ -45,7 +45,9 @@ class Cell(Filter):
                 return [code_block, figure]
 
         if "output" in image.classes or "cell" in image.classes:
-            output = self.get_output(url, identifier)
+            stream = self.store.get_stream(url, identifier)
+            html = "html" in image.classes
+            output = self.get_output(url, identifier, stream, html=html)
 
             if code_block and output:
                 return [code_block, *output]
@@ -70,18 +72,32 @@ class Cell(Filter):
         lang = self.store.get_language(url)
         return CodeBlock(source.strip(), classes=[lang])
 
-    def get_output(self, url: str, identifier: str) -> list[Element] | None:
+    def get_output(
+        self,
+        url: str,
+        identifier: str,
+        stream: str | None = None,
+        *,
+        html: bool = False,
+    ) -> list[Element] | None:
         try:
             data = self.store.get_data(url, identifier)
         except ValueError:
+            if stream:
+                return [CodeBlock(stream.strip(), classes=["output"])]
+
             return None
 
-        if identifier.startswith("html:") and "text/html" in data:
-            html = data["text/html"]
-            return pf.convert_text(html, input_format="html")  # type: ignore
+        if "text/html" in data and html:
+            text = data["text/html"]
+            return pf.convert_text(text, input_format="html")  # type: ignore
 
         if "text/plain" in data:
             text = data["text/plain"]
+            text = text.replace("┆", "│")
+            if stream:
+                text = f"{stream}{text}"
+
             return [CodeBlock(text, classes=["output"])]
 
         return None
