@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import panflute as pf
-import pytest
 from panflute import CodeBlock, Doc, Figure, Image, Plain, Str
 
 if TYPE_CHECKING:

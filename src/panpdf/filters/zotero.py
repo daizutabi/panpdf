@@ -134,18 +134,3 @@ async def gather(urls: list[str], coro):
     async with aiohttp.ClientSession() as session:
         tasks = (asyncio.create_task(get(session, url, coro)) for url in urls)
         return await asyncio.gather(*tasks)
-
-
-# def set_asyncio_event_loop_policy():
-#     if not sys.platform.startswith("win"):
-#         return
-
-#     import asyncio
-
-#     try:
-#         from asyncio import WindowsSelectorEventLoopPolicy
-#     except ImportError:
-#         pass
-#     else:
-#         if not isinstance(asyncio.get_event_loop_policy(), WindowsSelectorEventLoopPolicy):
-#             asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
