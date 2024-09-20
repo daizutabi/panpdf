@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+import panflute as pf
 from panflute import CodeBlock, Doc, Element, Figure, Image, Plain
 
 from panpdf.filters.filter import Filter
@@ -33,13 +34,29 @@ class Cell(Filter):
         if not identifier or (url and not url.endswith(".ipynb")):
             return figure
 
+        code_block = None
         if "source" in image.classes or "cell" in image.classes:
             code_block = self.get_code_block(url, identifier)
 
             if "source" in image.classes:
                 return [code_block]
 
-            return [code_block, figure]
+            if identifier.startswith("fig:"):
+                return [code_block, figure]
+
+        if "output" in image.classes or "cell" in image.classes:
+            output = self.get_output(url, identifier)
+
+            if code_block and output:
+                return [code_block, *output]
+
+            if code_block:
+                return [code_block]
+
+            if output:
+                return output
+
+            return []
 
         return figure
 
@@ -52,3 +69,19 @@ class Cell(Filter):
 
         lang = self.store.get_language(url)
         return CodeBlock(source.strip(), classes=[lang])
+
+    def get_output(self, url: str, identifier: str) -> list[Element] | None:
+        try:
+            data = self.store.get_data(url, identifier)
+        except ValueError:
+            return None
+
+        if identifier.startswith("html:") and "text/html" in data:
+            html = data["text/html"]
+            return pf.convert_text(html, input_format="html")  # type: ignore
+
+        if "text/plain" in data:
+            text = data["text/plain"]
+            return [CodeBlock(text, classes=["output"])]
+
+        return None
