@@ -64,6 +64,6 @@ def test_action_source():
     figure = Figure(Plain(image))
     code_block = snippet.action(figure, Doc())
     assert isinstance(code_block, CodeBlock)
-    assert code_block.text == "text"
+    assert code_block.text == "text αβγ"
     assert code_block.classes == ["output"]
     assert code_block.attributes == attrs

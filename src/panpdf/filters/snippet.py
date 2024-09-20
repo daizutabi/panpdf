@@ -35,6 +35,6 @@ class Snippet(Filter):
         if identifier or "source" not in image.classes:
             return figure
 
-        text = Path(url).read_text()
+        text = Path(url).read_text(encoding="utf-8")
         classes = [cls for cls in image.classes if cls != "source"]
         return CodeBlock(text, classes=classes, attributes=image.attributes)  # type: ignore
