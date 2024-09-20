@@ -65,6 +65,10 @@ class Store:
         nb = self.get_notebook(url)
         return get_outputs(nb, identifier)
 
+    def get_stream(self, url: str, identifier: str) -> str | None:
+        outputs = self.get_outputs(url, identifier)
+        return get_stream(outputs)
+
     def get_data(self, url: str, identifier: str) -> dict[str, str]:
         outputs = self.get_outputs(url, identifier)
         return get_data(outputs)
@@ -120,8 +124,15 @@ def get_data_by_type(outputs: list, output_type: str) -> dict[str, str] | None:
     return None
 
 
+def get_stream(outputs: list) -> str | None:
+    if data := get_data_by_type(outputs, "stream"):
+        return data["text/plain"]
+
+    return None
+
+
 def get_data(outputs: list) -> dict[str, str]:
-    for type_ in ["display_data", "execute_result", "stream"]:
+    for type_ in ["display_data", "execute_result"]:
         if data := get_data_by_type(outputs, type_):
             return data
 
