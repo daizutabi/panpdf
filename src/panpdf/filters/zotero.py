@@ -106,7 +106,7 @@ def iter_items_api(
             yield key, item_
 
 
-def convert_note(item: dict):
+def convert_note(item: dict) -> dict:
     if not (note := item.pop("note", None)):
         return item
 
@@ -125,12 +125,12 @@ def convert_note(item: dict):
 # Ref: https://gist.github.com/rhoboro/86629f831934827d832841709abfe715
 
 
-async def get(session: ClientSession, url: str, coro):
+async def get(session: ClientSession, url: str, coro):  # noqa: ANN001, ANN201
     response = await session.get(url)
     return await coro(response)
 
 
-async def gather(urls: list[str], coro):
+async def gather(urls: list[str], coro):  # noqa: ANN001, ANN201
     async with aiohttp.ClientSession() as session:
         tasks = (asyncio.create_task(get(session, url, coro)) for url in urls)
         return await asyncio.gather(*tasks)

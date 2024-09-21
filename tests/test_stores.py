@@ -23,7 +23,7 @@ def test_get_abs_path_unknown(store: Store):
 
 def test_set_notebooks_dir(store: Store):
     path = store.path
-    store.set_notebooks_dir([Path(".")])
+    store.set_notebooks_dir([Path()])
     assert not store.notebooks
     store.set_notebooks_dir(path)
 

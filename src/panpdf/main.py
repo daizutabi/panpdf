@@ -4,7 +4,7 @@ from collections.abc import Iterable, Iterator
 from enum import Enum
 from importlib.metadata import version
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated
 
 import panflute as pf
 import typer
@@ -32,9 +32,9 @@ app = typer.Typer(add_completion=False)
 
 
 @app.command(name="panpdf")
-def cli(
+def cli(  # noqa: C901, PLR0912, PLR0913
     files: Annotated[
-        Optional[list[Path]],
+        list[Path] | None,
         Argument(
             help="Input files or directories.",
             show_default=False,
@@ -42,10 +42,11 @@ def cli(
     ] = None,
     *,
     output_format: Annotated[
-        OutputFormat, Option("--to", "-t", help="Output format.", show_default="auto")  # type: ignore
+        OutputFormat,
+        Option("--to", "-t", help="Output format.", show_default="auto"),  # type: ignore
     ] = OutputFormat.auto,
     output: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             "--output",
             "-o",
@@ -54,8 +55,8 @@ def cli(
             show_default=False,
         ),
     ] = None,
-    data_dir: Annotated[
-        Optional[Path],
+    data_dir: Annotated[  # noqa: ARG001
+        Path | None,
         Option(
             metavar="DIRECTORY",
             help="Specify the user data directory to search for pandoc data files.",
@@ -63,7 +64,7 @@ def cli(
         ),
     ] = None,
     notebooks_dir: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             "--notebooks-dir",
             "-n",
@@ -73,7 +74,7 @@ def cli(
         ),
     ] = None,
     defaults: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             "--defaults",
             "-d",
@@ -120,7 +121,7 @@ def cli(
         ),
     ] = False,
     pandoc_path: Annotated[
-        Optional[Path],
+        Path | None,
         Option(
             metavar="FILE",
             help="If specified, use the Pandoc at this path.",
@@ -151,9 +152,8 @@ def cli(
             help="Show version and exit.",
         ),
     ] = False,
-):
-    """
-    Optionally, you can add extra pandoc options after --.
+) -> None:
+    """Optionally, you can add extra pandoc options after --.
 
     Example usage: panpdf -o dest.pdf src.md -- --pdf-engine lualatex
     """
@@ -280,7 +280,7 @@ def get_output_format(output: Path | None) -> OutputFormat:
     raise typer.Exit
 
 
-def show_version(pandoc_path: Path | None):
+def show_version(pandoc_path: Path | None) -> None:
     from panpdf.tools import get_pandoc_version
 
     pandoc_version = get_pandoc_version(pandoc_path)

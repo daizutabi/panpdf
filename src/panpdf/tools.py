@@ -10,7 +10,7 @@ import shutil
 import tempfile
 from asyncio.subprocess import PIPE
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import panflute as pf
 import yaml
@@ -119,7 +119,7 @@ def get_defaults_file_path(defaults: Path | str | None) -> Path | None:
     return get_file_path(defaults, "defaults")
 
 
-def convert_doc(
+def convert_doc(  # noqa: PLR0913
     doc: Doc,
     *,
     output_format: str = "latex",
@@ -130,7 +130,7 @@ def convert_doc(
     verbose: bool = False,
     quiet: bool = False,
     transient: bool = False,
-):
+) -> Any:  # noqa: ANN401
     if output_format == "latex":
         return pf.convert_text(
             doc,
@@ -300,7 +300,7 @@ def resolve_path(path: Path, value: str) -> str:
     return value.replace("${.}", path.parent.as_posix())
 
 
-def get_defaults(path: Path | str, name: str):
+def get_defaults(path: Path | str, name: str) -> Any:  # noqa: ANN401
     if not (default_path := get_defaults_file_path(path)):
         return None
 
@@ -360,7 +360,7 @@ HEADER = inspect.cleandoc(
 \renewcommand{\headrulewidth}{0pt}
 \pagestyle{fancy}
 \AtBeginDocument{\addtocontents{toc}{\protect\thispagestyle{fancy}}}
-"""
+""",
 )
 
 

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import panflute as pf
 import pytest
-from panflute import CodeBlock, Doc, Figure, Image, Plain
+from panflute import CodeBlock, Doc, Figure, Plain
 
 if TYPE_CHECKING:
     from panpdf.stores import Store

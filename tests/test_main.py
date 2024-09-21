@@ -104,7 +104,7 @@ def test_citeproc_csl():
 
     if get_pandoc_version() > "3.1":
         result = runner.invoke(
-            app, ["-C", "-d", "tests/examples/defaults"], input="[@panflute]"
+            app, ["-C", "-d", "tests/examples/defaults"], input="[@panflute]",
         )
         assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
 

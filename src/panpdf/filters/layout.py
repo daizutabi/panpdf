@@ -112,8 +112,7 @@ def create_cell_plain(plain: Plain) -> Plain:
     vspace = RawInline("\\vspace{0.4\\baselineskip}", format="latex")
     begin = RawInline("\\begin{quote}\n", format="latex")
     end = RawInline("\\end{quote}\n", format="latex")
-    plain = Plain(vspace, begin, image, end)
-    return plain
+    return Plain(vspace, begin, image, end)
 
 
 def get_images(figure: Figure) -> list[Image]:

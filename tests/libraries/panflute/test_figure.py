@@ -158,11 +158,11 @@ def test_figure_from_latex_minipage():
 
 def test_figure_from_panflute_subfigure():
     ia = Plain(
-        Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"})
+        Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"}),
     )
     a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
     ib = Plain(
-        Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"})
+        Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"}),
     )
     b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
     f = Figure(a, b, caption=Caption(Plain(Str("c"))), identifier="c")
@@ -174,11 +174,11 @@ def test_figure_from_panflute_subfigure():
 
 def test_figure_from_panflute_subfigure_none():
     ia = Plain(
-        Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"})
+        Image(Str("A"), url="a.png", attributes={"width": "1cm", "height": "2cm"}),
     )
     a = Figure(ia, caption=Caption(Plain(Str("a"))), identifier="a")
     ib = Plain(
-        Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"})
+        Image(Str("B"), url="b.png", attributes={"width": "3cm", "height": "4cm"}),
     )
     b = Figure(ib, caption=Caption(Plain(Str("b"))), identifier="b")
     f = Figure(a, b, identifier="c")
