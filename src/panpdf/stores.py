@@ -9,7 +9,7 @@ import nbformat
 
 @dataclass
 class Store:
-    path: list[Path] = field(default_factory=lambda: [Path(".")])
+    path: list[Path] = field(default_factory=lambda: [Path()])
     notebooks: dict[Path, dict] = field(default_factory=dict, init=False)
     st_mtime: dict[Path, float] = field(default_factory=dict, init=False)
     current_path: Path | None = field(default=None, init=False)
@@ -20,7 +20,7 @@ class Store:
         if (nb := self.notebooks.get(abs_path)) and self.st_mtime[abs_path] == mtime:
             return nb
 
-        with open(abs_path, encoding="utf-8") as f:
+        with abs_path.open(encoding="utf-8") as f:
             nb = nbformat.reader.reads(f.read())
 
         self.notebooks[abs_path] = nb
@@ -28,7 +28,7 @@ class Store:
 
         return nb
 
-    def _write(self, abs_path: Path):
+    def _write(self, abs_path: Path) -> None:
         if nb := self.notebooks.get(abs_path):
             nbformat.write(nb, abs_path)
 

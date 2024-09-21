@@ -25,13 +25,13 @@ def test_header_includes():
     doc = Doc()
     doc.metadata["header-includes"] = "AAA\nBBB"
     x = pf.convert_text(
-        doc, input_format="panflute", output_format="markdown", standalone=True
+        doc, input_format="panflute", output_format="markdown", standalone=True,
     )
     assert isinstance(x, str)
     assert "---\nheader-includes: AAA BBB\n---\n" in x
 
     x = pf.convert_text(
-        doc, input_format="panflute", output_format="latex", standalone=True
+        doc, input_format="panflute", output_format="latex", standalone=True,
     )
     assert isinstance(x, str)
     assert "AAA BBB" in x

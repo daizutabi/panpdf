@@ -108,7 +108,7 @@ def test_get_gedfaults_file_data_dir_none():
 def test_run():
     from panpdf.tools import run
 
-    args = ["python", "-c" "print(1);1/0"]
+    args = ["python", "-cprint(1);1/0"]
 
     out: list[str] = []
     err: list[str] = []
@@ -127,7 +127,7 @@ def test_run():
 def test_progress():
     from panpdf.tools import progress
 
-    args = ["python", "-c" "print(1);1/0"]
+    args = ["python", "-cprint(1);1/0"]
 
     assert progress(args)
 
@@ -137,7 +137,7 @@ def test_progress():
 
 
 @pytest.mark.parametrize(
-    ("text", "color"), [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")]
+    ("text", "color"), [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")],
 )
 def test_get_color(text: str, color):
     from panpdf.tools import get_color
@@ -190,7 +190,7 @@ def test_convert_metadata():
     doc = Doc()
     doc.metadata["a"] = ["b", "c"]
     m = pf.convert_text(
-        doc, input_format="panflute", output_format="markdown", standalone=True
+        doc, input_format="panflute", output_format="markdown", standalone=True,
     )
     assert m == "---\na:\n- b\n- c\n---\n"
     x = doc.metadata["a"]

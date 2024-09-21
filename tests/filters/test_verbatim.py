@@ -69,7 +69,7 @@ def test_verbatim_output():
     assert verbatim.shaded
 
     t = pf.convert_text(
-        doc, input_format="panflute", output_format="latex", standalone=True
+        doc, input_format="panflute", output_format="latex", standalone=True,
     )
     assert isinstance(t, str)
     assert "\\vspace{-0.5\\baselineskip}" in t
@@ -87,7 +87,7 @@ def test_verbatim_title():
     assert verbatim.shaded
 
     t = pf.convert_text(
-        doc, input_format="panflute", output_format="latex", standalone=True
+        doc, input_format="panflute", output_format="latex", standalone=True,
     )
     assert isinstance(t, str)
     assert "formatcom=\\color{NavyBlue}\\bfseries" in t

@@ -28,7 +28,7 @@ class Jupyter(Filter):
     pgf: bool = field(default=False, init=False)
     preamble: str = field(default="", init=False)
 
-    def action(self, image: Image, doc: Doc) -> Image:  # noqa: ARG002
+    def action(self, image: Image, doc: Doc) -> Image:
         url = image.url
         identifier = image.identifier
 
@@ -81,13 +81,14 @@ class Jupyter(Filter):
 
 
 PREAMBLE_PATTERN = re.compile(
-    r"^%% Matplotlib used the following preamble\n(.+?)\n%%\n", re.M | re.S
+    r"^%% Matplotlib used the following preamble\n(.+?)\n%%\n",
+    re.MULTILINE | re.DOTALL,
 )
 
 
 def get_preamble(text: str) -> str:
     if m := PREAMBLE_PATTERN.search(text):
-        return re.sub(r"^%%\s+", "", m.group(1), flags=re.M)
+        return re.sub(r"^%%\s+", "", m.group(1), flags=re.MULTILINE)
 
     return ""
 
@@ -166,13 +167,14 @@ def create_image_file_pgf(
 
 
 def create_defaults_for_standalone(
-    path: Path | None = None, preamble: str = ""
+    path: Path | None = None,
+    preamble: str = "",
 ) -> Path:
     if path:
         with path.open(encoding="utf8") as f:
             defaults: dict[str, Any] = yaml.safe_load(f)
     else:
-        path = Path(".")
+        path = Path()
         defaults = {}
 
     if "\\usepackage{fontspec}" in preamble:
@@ -184,7 +186,9 @@ def create_defaults_for_standalone(
         in_header = [in_header]
 
     path = create_temp_file(
-        f"\\usepackage{{pgf}}{preamble}", suffix=".tex", dir=path.parent
+        f"\\usepackage{{pgf}}{preamble}",
+        suffix=".tex",
+        dir=path.parent,
     )
     in_header.append(path.as_posix())
     defaults["include-in-header"] = in_header

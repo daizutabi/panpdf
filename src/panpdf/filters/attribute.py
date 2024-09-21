@@ -32,8 +32,8 @@ class Attribute(Filter):
     types: ClassVar[UnionType] = Table | Figure | Para
 
     def action(
-        self, elem: Table | Figure | Para, doc: Doc | None
-    ) -> Table | Figure | Para:  # noqa: ARG002
+        self, elem: Table | Figure | Para, doc: Doc | None,
+    ) -> Table | Figure | Para:
         if isinstance(elem, Table):
             return set_attributes_table(elem)
 

@@ -51,6 +51,8 @@ jobs:
         run: pip install uv
       - name: Install the project
         run: uv sync
+      - name: Ruff check
+        run: uv run ruff check .
       - name: Run test
         run: uv run pytest --junitxml=junit.xml
       - name: Upload Codecov Results
