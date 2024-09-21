@@ -73,6 +73,8 @@ def strip_elements(elems: Iterable[Element]) -> Iterator[Element]:
                 continue
             else:
                 prev = elem
+                if i == len(elems) - 1 and elem not in spaces:
+                    yield elem
 
         elif elem in spaces and prev in spaces:
             continue
