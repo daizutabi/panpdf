@@ -78,7 +78,7 @@ def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:
     if n == 1:
         figure = create_figure_from_image(images[0])
         if "cell" in images[0].classes:
-            return figure.content[0]  # type: ignore
+            return create_cell_plain(figure.content[0])  # type: ignore
 
         return figure
 
@@ -105,6 +105,15 @@ def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:
     begin = RawInline("\\begin{figure}\n\\centering\n", format="latex")
     end = RawInline("\\end{figure}\n", format="latex")
     return Plain(begin, *elems, end)
+
+
+def create_cell_plain(plain: Plain) -> Plain:
+    image = plain.content[0]
+    vspace = RawInline("\\vspace{0.4\\baselineskip}", format="latex")
+    begin = RawInline("\\begin{quote}\n", format="latex")
+    end = RawInline("\\end{quote}\n", format="latex")
+    plain = Plain(vspace, begin, image, end)
+    return plain
 
 
 def get_images(figure: Figure) -> list[Image]:

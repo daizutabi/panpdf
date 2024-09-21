@@ -104,11 +104,11 @@ def define_shade_color(rgb: Iterable) -> str:
     return f"\\definecolor{{shadecolor}}{{rgb}}{{{rgb_str}}}"
 
 
-def create_header(linespread: float = 0.9) -> Path:
+def create_header(linespread: float = 0.85) -> Path:
     text = (
         "\\ifdefined\\Shaded\\usepackage{framed}"
-        "\\renewenvironment{Shaded}{\\begin{quotation}\\begin{snugshade}\\linespread{"
+        "\\renewenvironment{Shaded}{\\begin{quote}\\begin{snugshade}\\linespread{"
         f"{linespread}"
-        "}}{\\end{snugshade}\\end{quotation}}\\fi"
+        "}}{\\end{snugshade}\\end{quote}}\\fi"
     )
     return create_temp_file(text, suffix=".tex")

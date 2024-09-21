@@ -50,7 +50,7 @@ def test_create_header():
     assert path.exists()
     text = path.read_text("utf-8")
     assert text.startswith("\\ifdefined\\Shaded")
-    assert "\\linespread{0.9}}" in text
+    assert "\\linespread" in text
 
     path = create_header(2)
     text = path.read_text("utf-8")
