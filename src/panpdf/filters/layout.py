@@ -76,7 +76,11 @@ def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:
     n = len(images)
 
     if n == 1:
-        return create_figure_from_image(images[0])
+        figure = create_figure_from_image(images[0])
+        if "cell" in images[0].classes:
+            return figure.content[0]  # type: ignore
+
+        return figure
 
     if (caption := figure.caption) and caption.content:
         env = "subfigure"

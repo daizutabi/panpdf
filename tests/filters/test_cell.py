@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import panflute as pf
 import pytest
-from panflute import CodeBlock, Doc, Figure
+from panflute import CodeBlock, Doc, Figure, Image, Plain
 
 if TYPE_CHECKING:
     from panpdf.stores import Store
@@ -252,3 +252,21 @@ def test_action_text_pandas(store: Store):
     assert isinstance(elems, list)
     assert len(elems) == 1
     assert isinstance(elems[0], pf.Div)
+
+
+def test_figure_image():
+    text = "![caption](a.png){#fig:a}"
+    list_ = pf.convert_text(text)
+    assert isinstance(list_, list)
+    assert len(list_) == 1
+    figure = list_[0]
+    assert isinstance(figure, Figure)
+    tex = pf.convert_text(figure, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\begin{figure}" in tex
+
+    plain = figure.content[0]
+    assert isinstance(plain, Plain)
+    tex = pf.convert_text(plain, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\begin{figure}" not in tex
