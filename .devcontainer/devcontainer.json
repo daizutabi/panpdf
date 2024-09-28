@@ -1,5 +1,4 @@
 {
-  "name": "panpdf",
   "image": "texlive/texlive",
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
