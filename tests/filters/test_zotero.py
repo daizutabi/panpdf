@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import panflute as pf
 from panflute import Cite, Doc, Para
@@ -71,7 +72,13 @@ def test_invalid_env():
 
 
 def test_zotero():
-    from panpdf.filters.zotero import Zotero
+    from panpdf.filters.zotero import (
+        CACHE_PATH,
+        Zotero,
+        get_items,
+        get_items_api,
+        get_items_zotxt,
+    )
 
     doc = pf.convert_text("[@panflute;@panpdf]", standalone=True)
     assert isinstance(doc, Doc)
@@ -91,6 +98,14 @@ def test_zotero():
     assert "{[}1{]}, {[}2{]}\n\n" in tex
     assert "\\CSLLeftMargin{{[}1{]} }%" in tex
     assert "\\url{https://github.com/daizutabi/panpdf}}" in tex
+
+    assert CACHE_PATH.exists()
+
+    items = get_items_zotxt(zotero.keys) or get_items_api(zotero.keys)
+    cache = get_items(zotero.keys)
+    assert cache == items
+
+    CACHE_PATH.unlink()
 
 
 def test_zotero_nokey():

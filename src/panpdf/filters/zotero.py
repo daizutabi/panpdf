@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 import aiohttp
@@ -17,6 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from panflute import Doc
+
+CACHE_PATH = Path(".panpdf_cache")
 
 
 @dataclass(repr=False)
@@ -34,15 +37,33 @@ class Zotero(Filter):
         if not self.keys:
             return
 
-        if items := get_items_zotxt(self.keys):
+        if items := get_items(self.keys):
             doc.metadata["references"] = items
-            return
+            with CACHE_PATH.open("w", encoding="utf-8") as f:
+                json.dump(items, f)
 
-        if items is not None:
-            return
 
-        if items := get_items_api(self.keys):
-            doc.metadata["references"] = items
+def get_items(keys: list[str]) -> list[dict] | None:
+    if items := get_items_cache():
+        cache_keys = [item["id"] for item in items]
+        if all(key in cache_keys for key in keys):
+            return items
+
+    if items := get_items_zotxt(keys):
+        return items
+
+    if items := get_items_api(keys):
+        return items
+
+    return None
+
+
+def get_items_cache() -> list[dict] | None:
+    if not CACHE_PATH.exists():
+        return None
+
+    cache = CACHE_PATH.read_text(encoding="utf-8")
+    return json.loads(cache)
 
 
 def get_items_zotxt(keys: list[str]) -> list[dict] | None:
