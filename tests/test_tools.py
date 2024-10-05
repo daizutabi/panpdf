@@ -137,7 +137,8 @@ def test_progress():
 
 
 @pytest.mark.parametrize(
-    ("text", "color"), [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")],
+    ("text", "color"),
+    [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")],
 )
 def test_get_color(text: str, color):
     from panpdf.tools import get_color
@@ -190,7 +191,10 @@ def test_convert_metadata():
     doc = Doc()
     doc.metadata["a"] = ["b", "c"]
     m = pf.convert_text(
-        doc, input_format="panflute", output_format="markdown", standalone=True,
+        doc,
+        input_format="panflute",
+        output_format="markdown",
+        standalone=True,
     )
     assert m == "---\na:\n- b\n- c\n---\n"
     x = doc.metadata["a"]
@@ -302,3 +306,12 @@ def test_convert_header():
 
     assert "\\usepackage{fancyhdr}" in Path(p).read_text()
     assert "\\rhead{\\RIGHT}" in Path(p).read_text()
+
+
+def test_add_fonts():
+    from matplotlib import font_manager
+
+    from panpdf.tools import add_fonts
+
+    add_fonts("IPAMincho")
+    assert "IPAMincho" in font_manager.get_font_names()
