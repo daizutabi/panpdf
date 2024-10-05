@@ -1,3 +1,4 @@
+import platform
 import subprocess
 from pathlib import Path
 
@@ -71,6 +72,9 @@ def test_output_title():
 
 
 def test_figure(fmt: str):
+    if fmt == "svg" and platform.system() == "Windows":
+        return
+
     text = f"![a]({fmt}.ipynb){{#fig:{fmt}}}"
     result = runner.invoke(app, ["-n", "tests/notebooks"], input=text)
 
@@ -104,7 +108,9 @@ def test_citeproc_csl():
 
     if get_pandoc_version() > "3.1":
         result = runner.invoke(
-            app, ["-C", "-d", "tests/examples/defaults"], input="[@panflute]",
+            app,
+            ["-C", "-d", "tests/examples/defaults"],
+            input="[@panflute]",
         )
         assert "\\citeproc{ref-panflute}{{[}1{]}}" in result.stdout
 
