@@ -1,8 +1,17 @@
 import os
-from pathlib import Path
 
 import panflute as pf
+import pytest
 from panflute import Cite, Doc, Para
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    from panpdf.filters.zotero import CACHE_PATH
+
+    CACHE_PATH.unlink(missing_ok=True)
+    yield
+    CACHE_PATH.unlink(missing_ok=True)
 
 
 def test_keys():
@@ -71,14 +80,25 @@ def test_invalid_env():
     os.environ[name] = env
 
 
-def test_zotero():
+def test_zotero_cache():
     from panpdf.filters.zotero import (
         CACHE_PATH,
-        Zotero,
         get_items,
         get_items_api,
         get_items_zotxt,
     )
+
+    keys = ["panflute", "panpdf"]
+    get_items(keys)
+    assert CACHE_PATH.exists()
+
+    items = get_items_zotxt(keys) or get_items_api(keys)
+    cache = get_items(keys)
+    assert cache == items
+
+
+def test_zotero():
+    from panpdf.filters.zotero import Zotero
 
     doc = pf.convert_text("[@panflute;@panpdf]", standalone=True)
     assert isinstance(doc, Doc)
@@ -98,14 +118,6 @@ def test_zotero():
     assert "{[}1{]}, {[}2{]}\n\n" in tex
     assert "\\CSLLeftMargin{{[}1{]} }%" in tex
     assert "\\url{https://github.com/daizutabi/panpdf}}" in tex
-
-    assert CACHE_PATH.exists()
-
-    items = get_items_zotxt(zotero.keys) or get_items_api(zotero.keys)
-    cache = get_items(zotero.keys)
-    assert cache == items
-
-    CACHE_PATH.unlink()
 
 
 def test_zotero_nokey():

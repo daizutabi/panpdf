@@ -39,8 +39,6 @@ class Zotero(Filter):
 
         if items := get_items(self.keys):
             doc.metadata["references"] = items
-            with CACHE_PATH.open("w", encoding="utf-8") as f:
-                json.dump(items, f)
 
 
 def get_items(keys: list[str]) -> list[dict] | None:
@@ -49,13 +47,12 @@ def get_items(keys: list[str]) -> list[dict] | None:
         if all(key in cache_keys for key in keys):
             return items
 
-    if items := get_items_zotxt(keys):
-        return items
+    if not (items := get_items_zotxt(keys)) and not (items := get_items_api(keys)):
+        return None
 
-    if items := get_items_api(keys):
-        return items
-
-    return None
+    with CACHE_PATH.open("w", encoding="utf-8") as f:
+        json.dump(items, f)
+    return items
 
 
 def get_items_cache() -> list[dict] | None:
