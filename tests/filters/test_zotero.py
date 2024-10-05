@@ -1,7 +1,17 @@
 import os
 
 import panflute as pf
+import pytest
 from panflute import Cite, Doc, Para
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    from panpdf.filters.zotero import CACHE_PATH
+
+    CACHE_PATH.unlink(missing_ok=True)
+    yield
+    CACHE_PATH.unlink(missing_ok=True)
 
 
 def test_keys():
@@ -68,6 +78,23 @@ def test_invalid_env():
     assert not get_zotero_api()
     assert get_items_api([]) is None
     os.environ[name] = env
+
+
+def test_zotero_cache():
+    from panpdf.filters.zotero import (
+        CACHE_PATH,
+        get_items,
+        get_items_api,
+        get_items_zotxt,
+    )
+
+    keys = ["panflute", "panpdf"]
+    get_items(keys)
+    assert CACHE_PATH.exists()
+
+    items = get_items_zotxt(keys) or get_items_api(keys)
+    cache = get_items(keys)
+    assert cache == items
 
 
 def test_zotero():

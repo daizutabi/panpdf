@@ -15,6 +15,14 @@ def _read_write():
     path.write_text(nb, "utf-8")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def _clear_cache():
+    from panpdf.filters.zotero import CACHE_PATH
+
+    yield
+    CACHE_PATH.unlink(missing_ok=True)
+
+
 @pytest.fixture(scope="session")
 def notebook_dir() -> Path:
     return Path("tests/notebooks")
