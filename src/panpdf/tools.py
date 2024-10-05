@@ -7,8 +7,10 @@ import io
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 from asyncio.subprocess import PIPE
+from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -385,3 +387,30 @@ def convert_header(
         header = f"{HEADER}\n{header}"
         path = create_temp_file(header, suffix=".tex")
         add_metadata_list(doc, "include-in-header", path.as_posix())
+
+
+@cache
+def fc_dict() -> dict[str, str]:
+    fc = subprocess.check_output(["fc-list"], text=True, encoding="utf-8")  # noqa: S603, S607
+    fc_dict = {}
+
+    for line in fc.splitlines():
+        if ": " in line:
+            path, name = line.split(": ", 1)
+            fc_dict[path] = name
+
+    return fc_dict
+
+
+def add_fonts(names: str | list[str]) -> None:
+    from matplotlib import font_manager
+
+    if isinstance(names, str):
+        names = [names]
+
+    fc = fc_dict()
+
+    for name in names:
+        for path, value in fc.items():
+            if name in value:
+                font_manager.fontManager.addfont(path)
