@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "panpdf"
-version = "0.3.8"
+version = "0.3.9"
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 description = "A PDF generator from Markdown that embeds figures from Jupyter Notebooks."
 readme = "README.md"
