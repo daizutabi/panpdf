@@ -35,7 +35,6 @@ jobs:
           sudo apt-get install libcairo2 poppler-utils
           lualatex --version
           pdffonts -v
-          fc-list
       - name: Install Pandoc
         run: |
           [[ ${{ matrix.pandoc-version }} == "latest" ]] && url="https://github.com/jgm/pandoc/releases/latest" || url="https://github.com/jgm/pandoc/releases/tag/${{ matrix.pandoc-version }}"
