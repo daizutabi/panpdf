@@ -399,7 +399,8 @@ def get_font_dir(base_dir: str) -> Path:
 def add_fonts(name: str, base_dir: str = "opentype/public") -> None:
     from matplotlib import font_manager
 
-    for dirname, _, filenames in get_font_dir(base_dir).walk():
-        if dirname.name == name:
+    for dirname, _, filenames in os.walk(get_font_dir(base_dir)):
+        dirpath = Path(dirname)
+        if dirpath.name == name:
             for filename in filenames:
-                font_manager.fontManager.addfont(dirname / filename)
+                font_manager.fontManager.addfont(dirpath / filename)
