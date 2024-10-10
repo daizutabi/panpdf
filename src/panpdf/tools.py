@@ -390,27 +390,16 @@ def convert_header(
 
 
 @cache
-def fc_dict() -> dict[str, str]:
-    fc = subprocess.check_output(["fc-list"], text=True, encoding="utf-8")  # noqa: S603, S607
-    fc_dict = {}
-
-    for line in fc.splitlines():
-        if ": " in line:
-            path, name = line.split(": ", 1)
-            fc_dict[path] = name
-
-    return fc_dict
+def get_font_dir(base_dir: str) -> Path:
+    args = ["kpsewhich", "--var-value", "TEXMFDIST"]
+    dist = subprocess.check_output(args, text=True, encoding="utf-8").strip()  # noqa: S603
+    return Path(dist) / "fonts" / base_dir
 
 
-def add_fonts(names: str | list[str]) -> None:
+def add_fonts(name: str, base_dir: str = "opentype/public") -> None:
     from matplotlib import font_manager
 
-    if isinstance(names, str):
-        names = [names]
-
-    fc = fc_dict()
-
-    for name in names:
-        for path, value in fc.items():
-            if name in value:
-                font_manager.fontManager.addfont(path)
+    for dirname, _, filenames in get_font_dir(base_dir).walk():
+        if dirname.name == name:
+            for filename in filenames:
+                font_manager.fontManager.addfont(dirname / filename)

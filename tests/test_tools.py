@@ -313,5 +313,7 @@ def test_add_fonts():
 
     from panpdf.tools import add_fonts
 
-    add_fonts("IPAMincho")
-    assert "IPAMincho" in font_manager.get_font_names()
+    add_fonts("haranoaji")
+
+    assert "Harano Aji Gothic" in font_manager.get_font_names()
+    assert "Harano Aji Mincho" in font_manager.get_font_names()
