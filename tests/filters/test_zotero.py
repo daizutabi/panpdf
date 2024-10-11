@@ -96,6 +96,9 @@ def test_zotero_cache():
     cache = get_items(keys)
     assert cache == items
 
+    cache = CACHE_PATH.read_text(encoding="utf-8")
+    assert "generator あα" in cache
+
 
 def test_zotero():
     from panpdf.filters.zotero import Zotero

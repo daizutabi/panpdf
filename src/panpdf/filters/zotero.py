@@ -51,7 +51,8 @@ def get_items(keys: list[str]) -> list[dict] | None:
         return None
 
     with CACHE_PATH.open("w", encoding="utf-8") as f:
-        json.dump(items, f)
+        json.dump(items, f, ensure_ascii=False)
+
     return items
 
 
