@@ -35,3 +35,19 @@ def test_run():
         "{[}@abc{]}",
     ]:
         assert ref in tex  # type:ignore
+
+
+def test_set_prefix():
+    from panpdf.filters.crossref import Crossref
+
+    crossref = Crossref()
+    crossref.set_prefix("a", "A")
+    assert crossref.prefix["a"] == [pf.Str("A"), pf.RawInline("~", format="latex")]
+
+
+def test_set_suffix():
+    from panpdf.filters.crossref import Crossref
+
+    crossref = Crossref()
+    crossref.set_suffix("a", "A")
+    assert crossref.suffix["a"] == [pf.Str("A")]
