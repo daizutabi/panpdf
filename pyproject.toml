@@ -46,7 +46,6 @@ dev-dependencies = [
   "matplotlib",
   "pandas",
   "polars",
-  "pyarrow",
   "pytest-clarity",
   "pytest-cov",
   "pytest-randomly",
