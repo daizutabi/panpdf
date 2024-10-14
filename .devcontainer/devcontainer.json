@@ -6,12 +6,7 @@
       "username": "panpdf"
     },
     "ghcr.io/devcontainers-contrib/features/pandoc:1": {},
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.13",
-      "installTools": false
-    },
     "ghcr.io/devcontainers-contrib/features/starship:1": {},
-    "ghcr.io/va-h/devcontainers-features/uv:1": {},
     "./features/zotero": {},
     "./features/poppler": {}
   },
@@ -28,9 +23,11 @@
       "settings": {},
       "extensions": [
         "charliermarsh.ruff",
+        "fill-labs.dependi",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "tamasfe.even-better-toml"
       ]
     }
   },
