@@ -45,6 +45,7 @@ dev-dependencies = [
   "cairosvg",
   "hvplot",
   "matplotlib",
+  "numpy",
   "pandas",
   "polars",
   "pytest-clarity",
