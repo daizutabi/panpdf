@@ -6,12 +6,12 @@ from panflute import Cite, Doc, Para
 
 
 @pytest.fixture(autouse=True)
-def _clear_cache():
-    from panpdf.filters.zotero import CACHE_PATH
+def _clear_csl_path():
+    from panpdf.filters.zotero import CSL_PATH
 
-    CACHE_PATH.unlink(missing_ok=True)
+    CSL_PATH.unlink(missing_ok=True)
     yield
-    CACHE_PATH.unlink(missing_ok=True)
+    CSL_PATH.unlink(missing_ok=True)
 
 
 def test_keys():
@@ -80,9 +80,9 @@ def test_invalid_env():
     os.environ[name] = env
 
 
-def test_zotero_cache():
+def test_zotero_csl_path():
     from panpdf.filters.zotero import (
-        CACHE_PATH,
+        CSL_PATH,
         get_items,
         get_items_api,
         get_items_zotxt,
@@ -90,14 +90,14 @@ def test_zotero_cache():
 
     keys = ["panflute", "panpdf"]
     get_items(keys)
-    assert CACHE_PATH.exists()
+    assert CSL_PATH.exists()
 
     items = get_items_zotxt(keys) or get_items_api(keys)
-    cache = get_items(keys)
-    assert cache == items
+    csl = get_items(keys)
+    assert csl == items
 
-    cache = CACHE_PATH.read_text(encoding="utf-8")
-    assert "generator あα" in cache
+    csl = CSL_PATH.read_text(encoding="utf-8")
+    assert "generator あα" in csl
 
 
 def test_zotero():
