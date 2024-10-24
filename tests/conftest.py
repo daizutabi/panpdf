@@ -17,10 +17,10 @@ def _read_write():
 
 @pytest.fixture(scope="session", autouse=True)
 def _clear_cache():
-    from panpdf.filters.zotero import CACHE_PATH
+    from panpdf.filters.zotero import CSL_PATH
 
     yield
-    CACHE_PATH.unlink(missing_ok=True)
+    CSL_PATH.unlink(missing_ok=True)
 
 
 @pytest.fixture(scope="session")

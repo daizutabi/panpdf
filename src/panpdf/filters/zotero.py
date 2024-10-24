@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from panflute import Doc
 
-CACHE_PATH = Path(".panpdf_cache")
+CSL_PATH = Path("csl.json")
 
 
 @dataclass(repr=False)
@@ -42,7 +42,7 @@ class Zotero(Filter):
 
 
 def get_items(keys: list[str]) -> list[dict] | None:
-    if items := get_items_cache():
+    if items := get_items_path():
         cache_keys = [item["id"] for item in items]
         if all(key in cache_keys for key in keys):
             return items
@@ -50,17 +50,17 @@ def get_items(keys: list[str]) -> list[dict] | None:
     if not (items := get_items_zotxt(keys)) and not (items := get_items_api(keys)):
         return None
 
-    with CACHE_PATH.open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False)
+    with CSL_PATH.open("w", encoding="utf-8") as f:
+        json.dump(items, f, indent=2, ensure_ascii=False)
 
     return items
 
 
-def get_items_cache() -> list[dict] | None:
-    if not CACHE_PATH.exists():
+def get_items_path() -> list[dict] | None:
+    if not CSL_PATH.exists():
         return None
 
-    cache = CACHE_PATH.read_text(encoding="utf-8")
+    cache = CSL_PATH.read_text(encoding="utf-8")
     return json.loads(cache)
 
 
