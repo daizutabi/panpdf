@@ -8,7 +8,7 @@ version = "0.3.12"
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 description = "A PDF generator from Markdown that embeds figures from Jupyter Notebooks."
 readme = "README.md"
-license = "MIT"
+license = { file = "LICENSE" }
 classifiers = [
   "Development Status :: 4 - Beta",
   "Framework :: MkDocs",
