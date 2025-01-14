@@ -89,7 +89,6 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--standalone",
             "-s",
             help="Produce output with an appropriate header and footer.",
-            is_flag=True,
         ),
     ] = False,
     standalone_figure: Annotated[
@@ -98,7 +97,6 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--standalone-figure",
             "-f",
             help="Produce output with standalone figures.",
-            is_flag=True,
         ),
     ] = False,
     figure_only: Annotated[
@@ -107,7 +105,6 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--figure-only",
             "-F",
             help="Produce standalone figures and exit.",
-            is_flag=True,
             hidden=True,
         ),
     ] = False,
@@ -117,7 +114,6 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--citeproc",
             "-C",
             help="Process the citations in the file.",
-            is_flag=True,
         ),
     ] = False,
     pandoc_path: Annotated[
@@ -133,16 +129,11 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         Option(
             "--verbose",
             help="Give verbose debugging output.",
-            is_flag=True,
         ),
     ] = False,
     quiet: Annotated[
         bool,
-        Option(
-            "--quiet",
-            help="Suppress warning messages.",
-            is_flag=True,
-        ),
+        Option("--quiet", help="Suppress warning messages."),
     ] = False,
     version: Annotated[
         bool,

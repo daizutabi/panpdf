@@ -52,7 +52,6 @@ dev-dependencies = [
   "pytest-cov",
   "pytest-randomly",
   "pytest-xdist",
-  "ruff",
   "seaborn",
 ]
 
