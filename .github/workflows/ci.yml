@@ -49,7 +49,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
       - name: Install uv and ruff
-        run: pip install uv
+        run: pip install uv ruff
       - name: Install the project
         run: uv sync
       - name: Ruff check
