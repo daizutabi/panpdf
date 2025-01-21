@@ -5,8 +5,8 @@
       "installZsh": false,
       "username": "panpdf"
     },
-    "ghcr.io/devcontainers-contrib/features/pandoc:1": {},
     "ghcr.io/devcontainers-contrib/features/starship:1": {},
+    "ghcr.io/devcontainers-extra/features/pandoc:1": {},
     "./features/zotero": {},
     "./features/poppler": {}
   },
@@ -21,6 +21,7 @@
       "extensions": [
         "charliermarsh.ruff",
         "fill-labs.dependi",
+        "markis.code-coverage",
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-toolsai.jupyter",
