@@ -24,12 +24,12 @@ from panpdf.tools import add_metadata_list, create_temp_file
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from types import UnionType
+    from typing import Any
 
 
 @dataclass(repr=False)
 class Layout(Filter):
-    types: ClassVar[UnionType] = Span | Table | Figure
+    types: ClassVar[Any] = Span | Table | Figure
 
     def action(
         self,
@@ -156,6 +156,6 @@ def get_width(image: Image, name: str) -> str:
     width = image.attributes.get(name, "")
 
     if isinstance(width, str) and width.endswith("%"):
-        width = f"{int(width[:-1])/100}\\columnwidth"
+        width = f"{int(width[:-1]) / 100}\\columnwidth"
 
     return width
