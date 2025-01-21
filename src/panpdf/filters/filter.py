@@ -7,12 +7,12 @@ import panflute as pf
 from panflute import Doc, Element
 
 if TYPE_CHECKING:
-    from types import UnionType
+    from typing import Any
 
 
-@dataclass
+@dataclass(repr=False)
 class Filter:
-    types: type[Element] | UnionType
+    types: type[Element] | Any = Element
     elements: list[Element] = field(default_factory=list, init=False)
 
     def __repr__(self):

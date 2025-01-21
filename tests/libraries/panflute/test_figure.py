@@ -1,7 +1,8 @@
 import inspect
 
 import panflute as pf
-from panflute import Caption, Figure, Image, Para, Plain, RawInline, Space, Str
+import pytest
+from panflute import Caption, Div, Figure, Image, Para, Plain, RawInline, Space, Str
 
 
 def test_figure_single():
@@ -151,9 +152,18 @@ def test_figure_from_latex_minipage():
     assert fig.identifier == "b"
     assert len(fig.content) == 2
     for x in fig.content:
-        assert isinstance(x, Plain)
-        assert len(x.content) == 1
-        assert isinstance(x.content[0], Image)
+        if isinstance(x, Plain):  # pandoc <= v3.5
+            assert len(x.content) == 1
+            assert isinstance(x.content[0], Image)
+        elif isinstance(x, Div):  # pandoc v3.6
+            assert len(x.content) == 1
+            assert isinstance(x.content[0], Plain)
+            y = x.content[0]
+            assert isinstance(y, Plain)
+            assert len(y.content) == 1
+            assert isinstance(y.content[0], Image)
+        else:
+            pytest.fail(f"Unexpected element: {type(x)}")
 
 
 def test_figure_from_panflute_subfigure():

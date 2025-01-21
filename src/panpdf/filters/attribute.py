@@ -22,14 +22,14 @@ from panpdf.filters.filter import Filter
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
-    from types import UnionType
+    from typing import Any
 
     from panflute import Doc, Element
 
 
 @dataclass(repr=False)
 class Attribute(Filter):
-    types: ClassVar[UnionType] = Table | Figure | Para
+    types: ClassVar[Any] = Table | Figure | Para
 
     def action(
         self,
