@@ -62,8 +62,7 @@ exclude = ["/.github", "/docs"]
 packages = ["src/panpdf"]
 
 [tool.pytest.ini_options]
-addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf", "--doctest-modules"]
-doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf"]
 filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
 
 [tool.coverage.report]
