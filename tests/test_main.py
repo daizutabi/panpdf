@@ -63,12 +63,12 @@ def test_defaults():
     assert "\\begin{document}" in result.stdout
 
 
-def test_output_title():
+def test_output_title(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.chdir(tmp_path)
     text = "---\ntitle: Title\n---\n"
     runner.invoke(app, ["-o", ".tex"], input=text)
     path = Path("Title.tex")
     assert path.exists()
-    path.unlink()
 
 
 def test_figure(fmt: str):
@@ -145,19 +145,20 @@ def test_header():
 
 
 @pytest.mark.parametrize("quiet", [True, False])
-def test_quiet(quiet):
+def test_quiet(quiet, tmp_path: Path):
     text = "---\ntitle: Title\n---\n"
-    args = ["-o", ".pdf"]
+    args = ["-o", (tmp_path / "a.pdf").as_posix()]
     if quiet:
         args.append("--quiet")
 
     runner.invoke(app, args, input=text)
-    path = Path("Title.pdf")
+    path = tmp_path / "a.pdf"
     assert path.exists()
-    path.unlink()
 
 
-def test_command():
+def test_command(tmp_path: Path):
+    out = tmp_path / "a.pdf"
+
     args = [
         "panpdf",
         "tests/examples/src",
@@ -167,16 +168,14 @@ def test_command():
         "tests/examples/defaults.yaml",
         "-C",
         "-o",
-        "a.pdf",
+        out.as_posix(),
     ]
     subprocess.run(args, check=False)
-    assert Path("a.pdf").exists()
+    assert out.exists()
 
-    p = subprocess.run(["pdffonts", "a.pdf"], check=False, capture_output=True)
+    p = subprocess.run(["pdffonts", out.as_posix()], check=False, capture_output=True)
     stdout = p.stdout.decode("utf-8")
 
     fonts = ["Pagella", "HaranoAji", "Heros", "DejaVuSansMono", "LMRoman"]
     for font in fonts:
         assert font in stdout
-
-    Path("a.pdf").unlink()
