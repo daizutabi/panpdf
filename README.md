@@ -20,7 +20,7 @@ along with support for inserting figures and tables.
 [pypi-v-link]: https://pypi.org/project/panpdf/
 [python-v-image]: https://img.shields.io/pypi/pyversions/panpdf.svg
 [python-v-link]: https://pypi.org/project/panpdf
-[GHAction-image]: https://github.com/daizutabi/panpdf/actions/workflows/ci.yml/badge.svg?branch=main&event=push
+[GHAction-image]: https://github.com/daizutabi/panpdf/actions/workflows/ci.yaml/badge.svg?branch=main&event=push
 [GHAction-link]: https://github.com/daizutabi/panpdf/actions?query=event%3Apush+branch%3Amain
 [codecov-image]: https://codecov.io/github/daizutabi/panpdf/coverage.svg?branch=main
 [codecov-link]: https://codecov.io/github/daizutabi/panpdf?branch=main
