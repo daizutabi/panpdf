@@ -22,14 +22,14 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-  "aiohttp",
-  "ipykernel",
-  "nbformat",
+  "aiohttp>=3",
+  "ipykernel>=6",
+  "nbformat>=5",
   "panflute >= 2.3.1",
-  "pyyaml",
-  "pyzotero",
-  "rich",
-  "typer",
+  "pyyaml>=6",
+  "pyzotero>=1.6",
+  "rich>=13",
+  "typer>=0.15",
 ]
 
 [project.urls]
@@ -40,30 +40,23 @@ Issues = "https://github.com/daizutabi/panpdf/issues"
 [project.scripts]
 panpdf = "panpdf.main:app"
 
-[tool.uv]
-dev-dependencies = [
-  "cairosvg",
-  "hvplot",
-  "matplotlib",
-  "numpy",
-  "pandas",
-  "polars",
-  "pytest-clarity",
-  "pytest-cov",
-  "pytest-randomly",
-  "pytest-xdist",
-  "seaborn",
+[dependency-groups]
+dev = [
+  "cairosvg>=2.7",
+  "hvplot>=0.11",
+  "matplotlib>=3.10",
+  "numpy>=2.2",
+  "pandas>=2.2",
+  "polars>=1.22",
+  "pytest-clarity>=1",
+  "pytest-cov>=6",
+  "pytest-randomly>=3.16",
+  "pytest-xdist>=3.6",
+  "seaborn>=0.13",
 ]
-
-[tool.hatch.build.targets.sdist]
-exclude = ["/.github", "/docs"]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/panpdf"]
 
 [tool.pytest.ini_options]
 addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf"]
-filterwarnings = ['ignore:setDaemon\(\) is deprecated:DeprecationWarning']
 
 [tool.coverage.report]
 exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError"]
