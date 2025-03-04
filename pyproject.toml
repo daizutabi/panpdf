@@ -87,3 +87,6 @@ ignore = ["ARG002", "D", "PGH003"]
 ]
 "filter.py" = ["ANN"]
 "formatters.py" = ["ANN", "ARG", "SLF"]
+
+[tool.pyright]
+include = ["src", "tests"]
