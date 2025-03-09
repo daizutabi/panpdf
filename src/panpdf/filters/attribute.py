@@ -118,6 +118,9 @@ def set_attributes(elem: Element, attrs: Iterable[Element]) -> list[Element] | N
 
 
 def set_attributes_table(table: Table) -> Table:
+    if not table.caption.content:
+        return table
+
     plain = table.caption.content[0]
 
     if isinstance(plain, Plain):
@@ -132,7 +135,7 @@ def set_attributes_table(table: Table) -> Table:
 def set_attributes_figure(figure: Figure) -> Figure:
     plain = figure.content[0]
 
-    if isinstance(plain, Plain):
+    if isinstance(plain, Plain) and plain.content:
         image = plain.content[0]
 
         if isinstance(image, Image) and not image.identifier:
