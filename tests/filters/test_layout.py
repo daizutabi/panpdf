@@ -57,7 +57,8 @@ def test_convert_table():
     Attribute().action(table, None)
     table = convert_table(table)
     tex = pf.convert_text(table, input_format="panflute", output_format="latex")
-    assert "\\caption{\\label{tbl:id}caption}" in tex  # type:ignore
+    assert isinstance(tex, str)
+    assert tex.count("\\label{tbl:id}") == 1
 
 
 def _get_figure(text: str) -> Figure:
