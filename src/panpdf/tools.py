@@ -19,7 +19,13 @@ import yaml
 from panflute import Doc
 from panflute.io import dump
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
 
 if TYPE_CHECKING:
     from asyncio.streams import StreamReader
@@ -187,7 +193,8 @@ def progress(
 ) -> int | None:
     with Progress(
         SpinnerColumn(),
-        *Progress.get_default_columns(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
         TimeElapsedColumn(),
         console=console,
         transient=transient,
