@@ -241,3 +241,28 @@ def test_set_attributes_image_attr():
     assert fig.identifier == "fig:ab"
     assert fig.classes == ["c", "d"]
     assert fig.attributes == {}
+
+
+def _prepare(text: str):
+    return Attribute().run(text).content[0]  # type:ignore
+
+
+def test_convert_table():
+    text = "|a|a|\n|-|-|\n|1|2|\n: caption {#tbl:id}"
+    table = _prepare(text)
+    assert isinstance(table, Table)
+    Attribute().action(table, None)
+    tex = pf.convert_text(table, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\caption{caption}\\label{tbl:id}" in tex
+    assert tex.count("\\label{tbl:id}") == 1
+
+
+def test_convert_table_without_caption():
+    text = "|a|a|\n|-|-|\n|1|2|\n\n"
+    table = _prepare(text)
+    assert isinstance(table, Table)
+    Attribute().action(table, None)
+    tex = pf.convert_text(table, input_format="panflute", output_format="latex")
+    assert isinstance(tex, str)
+    assert "\\caption" not in tex

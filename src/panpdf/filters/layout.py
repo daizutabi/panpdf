@@ -15,7 +15,6 @@ from panflute import (
     RawInline,
     Span,
     Str,
-    Table,
 )
 
 from panpdf.filters.filter import Filter
@@ -29,18 +28,15 @@ if TYPE_CHECKING:
 
 @dataclass(repr=False)
 class Layout(Filter):
-    types: ClassVar[Any] = Span | Table | Figure
+    types: ClassVar[Any] = Span | Figure
 
     def action(
         self,
-        elem: Span | Table | Figure,
+        elem: Span | Figure,
         doc: Doc,
-    ) -> Span | RawInline | Table | Figure | Plain:
+    ) -> Span | RawInline | Figure | Plain:
         if isinstance(elem, Span):
             return convert_span(elem)
-
-        if isinstance(elem, Table):
-            return convert_table(elem)
 
         return convert_figure(elem, doc)
 
@@ -60,15 +56,6 @@ def convert_span(span: Span) -> Span | RawInline:
         return RawInline(text, format="latex")
 
     return span
-
-
-def convert_table(table: Table) -> Table:
-    if table.caption and table.identifier:
-        label = f"\\label{{{table.identifier}}}"
-        plain = table.caption.content[0]
-        plain.content.insert(0, RawInline(label, format="latex"))  # type:ignore
-
-    return table
 
 
 def convert_figure(figure: Figure, doc: Doc) -> Figure | Plain:

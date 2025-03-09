@@ -144,6 +144,7 @@ def test_figure_from_latex_minipage():
     assert "\\begin{minipage}[t]{0.45\\linewidth}" in x
     assert "\\label{a}" not in x
     assert "\\end{minipage}\n\\caption{b}\\label{b}" in x
+    assert x.count("\\label{b}") == 1
     x = pf.convert_text(tex, input_format="latex", output_format="panflute")
     assert isinstance(x, list)
     assert len(x) == 1
@@ -180,6 +181,8 @@ def test_figure_from_panflute_subfigure():
     assert isinstance(x, str)
     assert "\\includegraphics[width=3cm,height=4cm]{b.png}\n\\caption{b}\\label{b}" in x
     assert "\\end{subfigure}\n\\caption{c}\\label{c}" in x
+    assert x.count("\\label{b}") == 1
+    assert x.count("\\label{c}") == 1
 
 
 def test_figure_from_panflute_subfigure_none():
@@ -196,3 +199,5 @@ def test_figure_from_panflute_subfigure_none():
     assert isinstance(x, str)
     assert "\\includegraphics[width=3cm,height=4cm]{b.png}\n\\caption{b}\\label{b}" in x
     assert "\\end{subfigure}\n\\caption{}\\label{c}" in x
+    assert x.count("\\label{b}") == 1
+    assert x.count("\\label{c}") == 1

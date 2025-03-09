@@ -3,7 +3,7 @@ from pathlib import Path
 
 import panflute as pf
 import pytest
-from panflute import Doc, Figure, Image, Math, Para, RawInline, Span, Str, Table
+from panflute import Doc, Figure, Image, Math, Para, RawInline, Span, Str
 
 from panpdf.filters.attribute import Attribute
 from panpdf.filters.jupyter import Jupyter
@@ -46,18 +46,6 @@ def test_convert_span():
     assert isinstance(math, Math)
     s = convert_span(Span(math))
     assert isinstance(s, Span)
-
-
-def test_convert_table():
-    from panpdf.filters.layout import convert_table
-
-    text = "|a|a|\n|-|-|\n|1|2|\n: caption {#tbl:id}"
-    table = _prepare(text)
-    assert isinstance(table, Table)
-    Attribute().action(table, None)
-    table = convert_table(table)
-    tex = pf.convert_text(table, input_format="panflute", output_format="latex")
-    assert "\\caption{\\label{tbl:id}caption}" in tex  # type:ignore
 
 
 def _get_figure(text: str) -> Figure:
@@ -103,6 +91,7 @@ def test_create_figure_from_image(store, defaults, fmt):
         fmt_ = "pdf" if fmt == "svg" else fmt
         assert f".{fmt_}" in tex
     assert f"\\caption{{A}}\\label{{fig:{fmt}}}" in tex
+    assert tex.count("\\label") == 1
 
 
 def test_convert_figure_minipage():
@@ -137,6 +126,7 @@ def test_convert_figure_subfigure(fig):
     assert isinstance(tex, str)
     assert "\\hspace{1mm}%\n\\begin{subfigure}{3cm}" in tex
     assert "\\caption{x \\(m\\)}\\label{fig:X}" in tex
+    assert tex.count("\\label{fig:X}") == 1
     assert "__subcaption__" in doc.metadata
 
 
