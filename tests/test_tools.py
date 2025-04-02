@@ -249,8 +249,8 @@ def test_output_format():
     set_output_format(doc, "markdown")
     assert get_metadata_str(doc, "output-format") == "markdown"
     assert get_output_format(doc) == "markdown"
-    # delete_output_format(doc)
-    # assert get_output_format(doc) == "latex"
+    delete_output_format(doc)
+    assert get_output_format(doc) == "latex"
     m = pf.convert_text(
         doc,
         input_format="panflute",
