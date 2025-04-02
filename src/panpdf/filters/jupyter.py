@@ -13,7 +13,12 @@ from panflute import Doc, Image, Plain, RawInline
 from panpdf.filters.filter import Filter
 from panpdf.formatters import convert_pgf_text
 from panpdf.stores import Store
-from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
+from panpdf.tools import (
+    add_metadata_list,
+    convert_doc,
+    create_temp_file,
+    get_output_format,
+)
 
 PGF_PREFIX = "%% Creator: Matplotlib"
 
@@ -73,7 +78,7 @@ class Jupyter(Filter):
         return image
 
     def finalize(self, doc: Doc) -> None:
-        if not self.pgf:
+        if not self.pgf or get_output_format(doc) != "latex":
             return
 
         path = create_temp_file(f"\\usepackage{{pgf}}{self.preamble}", suffix=".tex")
