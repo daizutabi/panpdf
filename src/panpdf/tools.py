@@ -290,14 +290,6 @@ def add_metadata_list(doc: Doc, name: str, value: str) -> None:
         doc.metadata[name] = [value]
 
 
-def set_output_format(doc: Doc, output_format: str) -> None:
-    doc.metadata["output-format"] = output_format
-
-
-def get_output_format(doc: Doc) -> str:
-    return doc.metadata.get("output-format", "latex")
-
-
 def iter_extra_args_from_metadata(
     doc: Doc,
     resource_path: Iterable[Path | str] = (),
@@ -310,6 +302,18 @@ def iter_extra_args_from_metadata(
         for value in iter_metadata_list(doc, name):
             yield f"--{name}"
             yield value
+
+
+def set_output_format(doc: Doc, output_format: str) -> None:
+    doc.metadata["output-format"] = output_format
+
+
+def get_output_format(doc: Doc) -> str:
+    return get_metadata_str(doc, "output-format", "latex")
+
+
+def delete_output_format(doc: Doc) -> None:
+    doc.metadata.pop("output-format")
 
 
 def resolve_path(path: Path, value: str) -> str:

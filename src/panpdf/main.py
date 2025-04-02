@@ -163,6 +163,7 @@ def cli(  # noqa: C901, PLR0912
     from panpdf.stores import Store
     from panpdf.tools import (
         convert_doc,
+        delete_output_format,
         get_defaults_file_path,
         get_metadata_str,
         iter_extra_args_from_metadata,
@@ -194,8 +195,6 @@ def cli(  # noqa: C901, PLR0912
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
 
-    set_output_format(doc, output_format.value)
-
     filters: list[Filter] = [Attribute(), Snippet()]
 
     if notebooks_dir:
@@ -209,10 +208,14 @@ def cli(  # noqa: C901, PLR0912
     if citeproc:
         filters.append(Zotero())
 
+    set_output_format(doc, output_format.value)
+
     for filter_ in filters:
         doc = filter_.run(doc)
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
+
+    delete_output_format(doc)
 
     extra_args.extend(iter_extra_args_from_metadata(doc, defaults=defaults))
 

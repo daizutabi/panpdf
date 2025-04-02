@@ -235,6 +235,31 @@ def test_iter_extra_args_from_metadata():
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 
+def test_output_format():
+    from panpdf.tools import (
+        delete_output_format,
+        get_metadata_str,
+        get_output_format,
+        set_output_format,
+    )
+
+    text = "---\na: a\nb: b\n---\n\n# x"
+    doc = pf.convert_text(text, standalone=True)
+    assert isinstance(doc, Doc)
+    set_output_format(doc, "markdown")
+    assert get_metadata_str(doc, "output-format") == "markdown"
+    assert get_output_format(doc) == "markdown"
+    # delete_output_format(doc)
+    # assert get_output_format(doc) == "latex"
+    m = pf.convert_text(
+        doc,
+        input_format="panflute",
+        output_format="markdown",
+        standalone=True,
+    )
+    assert m == text
+
+
 def test_get_defaults():
     from panpdf.tools import get_defaults
 
