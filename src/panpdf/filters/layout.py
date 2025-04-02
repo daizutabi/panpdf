@@ -19,7 +19,7 @@ from panflute import (
 
 from panpdf.filters.filter import Filter
 from panpdf.filters.jupyter import PGF_PREFIX
-from panpdf.tools import add_metadata_list, create_temp_file
+from panpdf.tools import add_metadata_list, create_temp_file, get_output_format
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -35,6 +35,9 @@ class Layout(Filter):
         elem: Span | Figure,
         doc: Doc,
     ) -> Span | RawInline | Figure | Plain:
+        if get_output_format(doc) != "latex":
+            return elem
+
         if isinstance(elem, Span):
             return convert_span(elem)
 
