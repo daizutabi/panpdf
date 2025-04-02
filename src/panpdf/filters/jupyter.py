@@ -49,6 +49,11 @@ class Jupyter(Filter):
         if not data:
             return image
 
+        if get_output_format(doc) != "latex":
+            if url := create_image_file_image(data):
+                image.url = url
+            return image
+
         if not (url_or_text := create_image_file(data, standalone=self.standalone)):
             return image
 
@@ -118,6 +123,10 @@ def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str 
     if text_pgf:
         return text_pgf
 
+    return create_image_file_image(data)
+
+
+def create_image_file_image(data: dict[str, str]) -> str | None:
     for mime, text in data.items():
         if mime.startswith("image/"):
             ext = mime.split("/")[1]
