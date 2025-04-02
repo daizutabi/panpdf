@@ -183,7 +183,7 @@ def cli(  # noqa: C901, PLR0912
     )  # type:ignore
 
     if output and str(output).startswith("."):
-        title = get_metadata_str(doc, "title") or "a"
+        title = get_metadata_str(doc, "title", "a")
         output = Path(f"{title}{output}")
 
     if output_format == OutputFormat.auto:

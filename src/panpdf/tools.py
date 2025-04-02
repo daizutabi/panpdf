@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any
 import panflute as pf
 import yaml
 from panflute import Doc
-from panflute.io import dump
 from rich.console import Console
 from rich.progress import (
     BarColumn,
@@ -139,18 +138,18 @@ def convert_doc(
     quiet: bool = False,
     transient: bool = False,
 ) -> Any:
-    if output_format == "latex":
+    if output_format in ["latex", "markdown"]:
         return pf.convert_text(
             doc,
             input_format="panflute",
-            output_format="latex",
+            output_format=output_format,
             standalone=standalone,
             extra_args=extra_args,
             pandoc_path=pandoc_path,
         )
 
     with io.StringIO() as f:
-        dump(doc, f)
+        pf.dump(doc, f)
         text = f.getvalue()
 
     fd, filename = tempfile.mkstemp(".json", text=True)
@@ -264,7 +263,7 @@ def get_color(text: str) -> str:
     return "gray70"
 
 
-def get_metadata_str(doc: Doc, name: str, default: str | None = None) -> str | None:
+def get_metadata_str(doc: Doc, name: str, default: str = "") -> str:
     if metadata := doc.metadata.get(name):
         return pf.stringify(metadata)
 
