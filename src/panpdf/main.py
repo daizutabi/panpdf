@@ -166,6 +166,7 @@ def cli(  # noqa: C901, PLR0912
         get_defaults_file_path,
         get_metadata_str,
         iter_extra_args_from_metadata,
+        set_output_format,
     )
 
     text = get_text(files)
@@ -192,6 +193,8 @@ def cli(  # noqa: C901, PLR0912
     if output_format == OutputFormat.pdf and not output:
         typer.secho("No output file. Aborted.", fg="red")
         raise typer.Exit
+
+    set_output_format(doc, output_format.value)
 
     filters: list[Filter] = [Attribute(), Snippet()]
 
