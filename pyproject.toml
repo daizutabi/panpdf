@@ -69,7 +69,7 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["ALL"]
 unfixable = ["F401"]
-ignore = ["ANN401", "ARG002", "D", "PGH003", "PLR0913"]
+ignore = ["ANN401", "ARG002", "C901", "D", "PGH003", "PLR0912", "PLR0913"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
