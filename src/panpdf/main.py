@@ -23,9 +23,10 @@ if "--" in sys.argv:
 
 
 class OutputFormat(str, Enum):
-    latex = "latex"
-    pdf = "pdf"
     auto = "auto"
+    latex = "latex"
+    markdown = "markdown"
+    pdf = "pdf"
 
 
 app = typer.Typer(add_completion=False)
@@ -266,6 +267,9 @@ def get_output_format(output: Path | None) -> OutputFormat:
 
     if output.suffix == ".pdf":
         return OutputFormat.pdf
+
+    if output.suffix == ".md":
+        return OutputFormat.markdown
 
     typer.secho(f"Unknown output format: {output.suffix}", fg="red")
     raise typer.Exit
