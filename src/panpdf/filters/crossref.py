@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar
 from panflute import Cite, RawInline, Str
 
 from panpdf.filters.filter import Filter
-from panpdf.tools import get_metadata_str
+from panpdf.tools import get_metadata_str, get_output_format
 
 if TYPE_CHECKING:
     from panflute import Doc, Element
@@ -35,11 +35,20 @@ class Crossref(Filter):
         if elem.citations:
             identifier = elem.citations[0].id  # type:ignore
             if CROSSREF_PATTERN.match(identifier):
-                return self.create_ref(identifier)
+                return self.create_ref(identifier, get_output_format(doc))
 
         return None
 
-    def create_ref(self, identifier: str) -> list[Element]:
+    def create_ref(self, identifier: str, output_format: str) -> list[Element]:
+        if output_format == "markdown":
+            return self.create_ref_markdown(identifier)
+
+        return self.create_ref_latex(identifier)
+
+    def create_ref_markdown(self, identifier: str) -> list[Element]:
+        return [Str(identifier)]
+
+    def create_ref_latex(self, identifier: str) -> list[Element]:
         if identifier.endswith("_"):
             identifier = identifier[:-1]
             bare = True

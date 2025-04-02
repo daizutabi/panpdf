@@ -313,7 +313,7 @@ def get_output_format(doc: Doc) -> str:
 
 
 def delete_output_format(doc: Doc) -> None:
-    doc.metadata.pop("output-format")
+    doc.metadata.pop("output-format", None)
 
 
 def resolve_path(path: Path, value: str) -> str:
