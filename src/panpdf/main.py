@@ -33,7 +33,7 @@ app = typer.Typer(add_completion=False)
 
 
 @app.command(name="panpdf")
-def cli(  # noqa: C901, PLR0912, PLR0913
+def cli(  # noqa: C901, PLR0912
     files: Annotated[
         list[Path] | None,
         Argument(

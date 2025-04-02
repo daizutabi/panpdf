@@ -127,7 +127,7 @@ def get_defaults_file_path(defaults: Path | str | None) -> Path | None:
     return get_file_path(defaults, "defaults")
 
 
-def convert_doc(  # noqa: PLR0913
+def convert_doc(
     doc: Doc,
     *,
     output_format: str = "latex",
@@ -138,7 +138,7 @@ def convert_doc(  # noqa: PLR0913
     verbose: bool = False,
     quiet: bool = False,
     transient: bool = False,
-) -> Any:  # noqa: ANN401
+) -> Any:
     if output_format == "latex":
         return pf.convert_text(
             doc,
@@ -309,7 +309,7 @@ def resolve_path(path: Path, value: str) -> str:
     return value.replace("${.}", path.parent.as_posix())
 
 
-def get_defaults(path: Path | str, name: str) -> Any:  # noqa: ANN401
+def get_defaults(path: Path | str, name: str) -> Any:
     if not (default_path := get_defaults_file_path(path)):
         return None
 
