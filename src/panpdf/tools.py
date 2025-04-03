@@ -7,10 +7,8 @@ import io
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from asyncio.subprocess import PIPE
-from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -405,20 +403,3 @@ def convert_header(
         header = f"{HEADER}\n{header}"
         path = create_temp_file(header, suffix=".tex")
         add_metadata_list(doc, "include-in-header", path.as_posix())
-
-
-@cache
-def get_font_dir(base_dir: str) -> Path:
-    args = ["kpsewhich", "--var-value", "TEXMFDIST"]
-    dist = subprocess.check_output(args, text=True, encoding="utf-8").strip()  # noqa: S603
-    return Path(dist) / "fonts" / base_dir
-
-
-def add_fonts(name: str, base_dir: str = "opentype/public") -> None:
-    from matplotlib import font_manager
-
-    for dirname, _, filenames in os.walk(get_font_dir(base_dir)):
-        dirpath = Path(dirname)
-        if dirpath.name == name:
-            for filename in filenames:
-                font_manager.fontManager.addfont(dirpath / filename)

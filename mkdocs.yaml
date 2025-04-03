@@ -8,7 +8,7 @@ edit_uri: edit/main/docs/
 theme:
   name: material
   icon:
-      repo: fontawesome/brands/github
+    repo: fontawesome/brands/github
   palette:
     - scheme: default
       primary: indigo
@@ -41,6 +41,5 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-  - mkdocs-typer
 nav:
   - index.md
