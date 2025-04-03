@@ -68,7 +68,7 @@ def create_temp_file(
     *,
     suffix: str | None = None,
     prefix: str = TEMPFILE_PREFIX,
-    dir: str | Path | None = None,  # noqa: A002
+    dir: str | Path | None = None,
 ) -> Path:
     fd, filename = tempfile.mkstemp(suffix, prefix, dir, text=isinstance(text, str))
 
@@ -88,7 +88,7 @@ def create_temp_dir(
     *,
     suffix: str | None = None,
     prefix: str = TEMPFILE_PREFIX,
-    dir: str | Path | None = None,  # noqa: A002
+    dir: str | Path | None = None,
 ) -> Path:
     dirname = tempfile.mkdtemp(suffix, prefix, dir)
     path = Path(dirname)
@@ -96,7 +96,7 @@ def create_temp_dir(
     return path
 
 
-def get_file_path(name: Path | str | None, dir: str) -> Path | None:  # noqa: A002
+def get_file_path(name: Path | str | None, dir: str) -> Path | None:
     if not name:
         return None
 

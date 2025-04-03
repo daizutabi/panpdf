@@ -4,14 +4,18 @@ build-backend = "hatchling.build"
 
 [project]
 name = "panpdf"
-version = "0.4.0"
+version = "0.5.0"
 description = "A PDF generator from Markdown that embeds figures from Jupyter Notebooks."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
+keywords = ["documentation", "latex", "markdown", "pandoc", "pdf"]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Framework :: MkDocs",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -19,6 +23,8 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Topic :: Documentation",
   "Topic :: Software Development :: Documentation",
+  "Topic :: Text Processing :: Markup :: Markdown",
+  "Typing :: Typed",
 ]
 requires-python = ">=3.10"
 dependencies = [
@@ -52,6 +58,7 @@ dev = [
   "pytest-cov>=6",
   "pytest-randomly>=3.16",
   "pytest-xdist>=3.6",
+  "ruff>=0.11",
   "seaborn>=0.13",
 ]
 
@@ -70,6 +77,7 @@ target-version = "py310"
 select = ["ALL"]
 unfixable = ["F401"]
 ignore = [
+  "A002",
   "ANN401",
   "ARG002",
   "C901",
@@ -81,7 +89,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = [
+"**/{tests,notebooks}/*" = [
   "ANN",
   "ARG",
   "ERA",
