@@ -138,13 +138,23 @@ def test_progress():
 
 @pytest.mark.parametrize(
     ("text", "color"),
-    [("Error", "red"), ("Warning", "yellow"), ("INFO", "gray50")],
+    [
+        ("Error", "red"),
+        ("Warning", "yellow"),
+        ("INFO", "gray50"),
+    ],
 )
 def test_get_color(text: str, color):
     from panpdf.tools import get_color
 
     assert get_color(text) == color
     assert get_color(text.upper()) == color
+
+
+def test_get_color_latex():
+    from panpdf.tools import get_color
+
+    assert get_color("LaTeX run number 1") == "green"
 
 
 def test_get_metadata_str():
@@ -235,6 +245,31 @@ def test_iter_extra_args_from_metadata():
     assert "AAA\n\nBBB\n\n123\n\nAAA\n\nBBB" in t
 
 
+def test_output_format():
+    from panpdf.tools import (
+        delete_output_format,
+        get_metadata_str,
+        get_output_format,
+        set_output_format,
+    )
+
+    text = "---\na: a\nb: b\n---\n\n# x"
+    doc = pf.convert_text(text, standalone=True)
+    assert isinstance(doc, Doc)
+    set_output_format(doc, "markdown")
+    assert get_metadata_str(doc, "output-format") == "markdown"
+    assert get_output_format(doc) == "markdown"
+    delete_output_format(doc)
+    assert get_output_format(doc) == "latex"
+    m = pf.convert_text(
+        doc,
+        input_format="panflute",
+        output_format="markdown",
+        standalone=True,
+    )
+    assert m == text
+
+
 def test_get_defaults():
     from panpdf.tools import get_defaults
 
@@ -308,12 +343,16 @@ def test_convert_header():
     assert "\\rhead{\\RIGHT}" in Path(p).read_text()
 
 
-def test_add_fonts():
-    from matplotlib import font_manager
+def test_convert_header_include_graphics():
+    from panpdf.tools import convert_header
 
-    from panpdf.tools import add_fonts
+    text = "---\nrhead: \\includegraphics[width=1cm]{header.pdf}\n---\n# section"
+    doc = pf.convert_text(text, output_format="panflute", standalone=True)
+    assert isinstance(doc, Doc)
+    assert "rhead" in doc.metadata
 
-    add_fonts("haranoaji")
-
-    assert "Harano Aji Gothic" in font_manager.get_font_names()
-    assert "Harano Aji Mincho" in font_manager.get_font_names()
+    convert_header(doc)
+    assert "rhead" not in doc.metadata
+    assert "include-in-header" in doc.metadata
+    p = pf.stringify(doc.metadata["include-in-header"][0])  # type:ignore
+    assert Path(p).read_text() == "\\usepackage{graphicx}"

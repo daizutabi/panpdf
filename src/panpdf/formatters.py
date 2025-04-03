@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import base64
 import io
-import os
 import tempfile
 import uuid
 from pathlib import Path
@@ -30,7 +29,7 @@ def matplotlib_figure_to_pgf(fig: Figure, rp: RepresentationPrinter, cycle) -> N
         fig.savefig(path, format="pgf", bbox_inches="tight")
         text = path.read_text(encoding="utf-8")
 
-        imagenames = [x for x in os.listdir(directory) if x != filename]
+        imagenames = [x.name for x in directory.iterdir() if x.name != filename]
         if not imagenames:
             return rp.text(text)
 
@@ -134,7 +133,7 @@ try:
         """Used to render elements to PGF if requested in the display formats."""
         return image_display(element, max_frames, fmt="pgf")
 
-except ModuleNotFoundError:  # pragma: no cover
+except ModuleNotFoundError:  # no cov
     pgf_display = None  # type: ignore
 
 

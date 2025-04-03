@@ -15,7 +15,7 @@ class Cell(Filter):
     types: ClassVar[type[Figure]] = Figure
     store: Store = field(default_factory=Store)
 
-    def action(self, figure: Figure, doc: Doc) -> Figure | list[Element]:  # noqa: C901, PLR0911
+    def action(self, figure: Figure, doc: Doc) -> Figure | list[Element]:
         if not figure.content:
             return figure
 

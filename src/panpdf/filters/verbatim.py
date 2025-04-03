@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar
 from panflute import CodeBlock, RawBlock
 
 from panpdf.filters.filter import Filter
-from panpdf.tools import add_metadata_list, create_temp_file
+from panpdf.tools import add_metadata_list, create_temp_file, get_output_format
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -25,6 +25,9 @@ class Verbatim(Filter):
         self.shaded = False
 
     def action(self, elem: CodeBlock, doc: Doc) -> CodeBlock | list[Element]:
+        if get_output_format(doc) != "latex":
+            return elem
+
         self.shaded = True
 
         if "title" in elem.attributes:

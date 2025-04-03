@@ -23,16 +23,17 @@ if "--" in sys.argv:
 
 
 class OutputFormat(str, Enum):
-    latex = "latex"
-    pdf = "pdf"
     auto = "auto"
+    latex = "latex"
+    markdown = "markdown"
+    pdf = "pdf"
 
 
 app = typer.Typer(add_completion=False)
 
 
 @app.command(name="panpdf")
-def cli(  # noqa: C901, PLR0912, PLR0913
+def cli(
     files: Annotated[
         list[Path] | None,
         Argument(
@@ -162,9 +163,11 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     from panpdf.stores import Store
     from panpdf.tools import (
         convert_doc,
+        delete_output_format,
         get_defaults_file_path,
         get_metadata_str,
         iter_extra_args_from_metadata,
+        set_output_format,
     )
 
     text = get_text(files)
@@ -182,7 +185,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     )  # type:ignore
 
     if output and str(output).startswith("."):
-        title = get_metadata_str(doc, "title") or "a"
+        title = get_metadata_str(doc, "title", "a")
         output = Path(f"{title}{output}")
 
     if output_format == OutputFormat.auto:
@@ -205,10 +208,14 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     if citeproc:
         filters.append(Zotero())
 
+    set_output_format(doc, output_format.value)
+
     for filter_ in filters:
         doc = filter_.run(doc)
         if figure_only and isinstance(filter_, Jupyter):
             raise typer.Exit
+
+    delete_output_format(doc)
 
     extra_args.extend(iter_extra_args_from_metadata(doc, defaults=defaults))
 
@@ -266,6 +273,9 @@ def get_output_format(output: Path | None) -> OutputFormat:
 
     if output.suffix == ".pdf":
         return OutputFormat.pdf
+
+    if output.suffix == ".md":
+        return OutputFormat.markdown
 
     typer.secho(f"Unknown output format: {output.suffix}", fg="red")
     raise typer.Exit

@@ -7,17 +7,14 @@ import io
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from asyncio.subprocess import PIPE
-from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import panflute as pf
 import yaml
 from panflute import Doc
-from panflute.io import dump
 from rich.console import Console
 from rich.progress import (
     BarColumn,
@@ -127,7 +124,7 @@ def get_defaults_file_path(defaults: Path | str | None) -> Path | None:
     return get_file_path(defaults, "defaults")
 
 
-def convert_doc(  # noqa: PLR0913
+def convert_doc(
     doc: Doc,
     *,
     output_format: str = "latex",
@@ -138,19 +135,19 @@ def convert_doc(  # noqa: PLR0913
     verbose: bool = False,
     quiet: bool = False,
     transient: bool = False,
-) -> Any:  # noqa: ANN401
-    if output_format == "latex":
+) -> Any:
+    if output_format in ["latex", "markdown"]:
         return pf.convert_text(
             doc,
             input_format="panflute",
-            output_format="latex",
+            output_format=output_format,
             standalone=standalone,
             extra_args=extra_args,
             pandoc_path=pandoc_path,
         )
 
     with io.StringIO() as f:
-        dump(doc, f)
+        pf.dump(doc, f)
         text = f.getvalue()
 
     fd, filename = tempfile.mkstemp(".json", text=True)
@@ -264,7 +261,7 @@ def get_color(text: str) -> str:
     return "gray70"
 
 
-def get_metadata_str(doc: Doc, name: str, default: str | None = None) -> str | None:
+def get_metadata_str(doc: Doc, name: str, default: str = "") -> str:
     if metadata := doc.metadata.get(name):
         return pf.stringify(metadata)
 
@@ -305,11 +302,23 @@ def iter_extra_args_from_metadata(
             yield value
 
 
+def set_output_format(doc: Doc, output_format: str) -> None:
+    doc.metadata["output-format"] = output_format
+
+
+def get_output_format(doc: Doc) -> str:
+    return get_metadata_str(doc, "output-format", "latex")
+
+
+def delete_output_format(doc: Doc) -> None:
+    doc.metadata.pop("output-format", None)
+
+
 def resolve_path(path: Path, value: str) -> str:
     return value.replace("${.}", path.parent.as_posix())
 
 
-def get_defaults(path: Path | str, name: str) -> Any:  # noqa: ANN401
+def get_defaults(path: Path | str, name: str) -> Any:
     if not (default_path := get_defaults_file_path(path)):
         return None
 
@@ -394,20 +403,3 @@ def convert_header(
         header = f"{HEADER}\n{header}"
         path = create_temp_file(header, suffix=".tex")
         add_metadata_list(doc, "include-in-header", path.as_posix())
-
-
-@cache
-def get_font_dir(base_dir: str) -> Path:
-    args = ["kpsewhich", "--var-value", "TEXMFDIST"]
-    dist = subprocess.check_output(args, text=True, encoding="utf-8").strip()  # noqa: S603
-    return Path(dist) / "fonts" / base_dir
-
-
-def add_fonts(name: str, base_dir: str = "opentype/public") -> None:
-    from matplotlib import font_manager
-
-    for dirname, _, filenames in os.walk(get_font_dir(base_dir)):
-        dirpath = Path(dirname)
-        if dirpath.name == name:
-            for filename in filenames:
-                font_manager.fontManager.addfont(dirpath / filename)

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, ClassVar
 from panflute import Cite, RawInline, Str
 
 from panpdf.filters.filter import Filter
-from panpdf.tools import get_metadata_str
+from panpdf.tools import get_metadata_str, get_output_format
 
 if TYPE_CHECKING:
     from panflute import Doc, Element
@@ -22,24 +22,33 @@ class Crossref(Filter):
     suffix: dict[str, list[Element]] = field(default_factory=dict)
 
     def prepare(self, doc: Doc) -> None:
-        name = get_metadata_str(doc, "reference-figure-name") or "Fig."
+        name = get_metadata_str(doc, "reference-figure-name", "Fig.")
         self.set_prefix("fig", name)
 
-        name = get_metadata_str(doc, "reference-table-name") or "Table"
+        name = get_metadata_str(doc, "reference-table-name", "Table")
         self.set_prefix("tbl", name)
 
-        name = get_metadata_str(doc, "reference-equation-name") or "Eq."
+        name = get_metadata_str(doc, "reference-equation-name", "Eq.")
         self.set_prefix("eq", name)
 
     def action(self, elem: Cite, doc: Doc) -> list[Element] | None:
         if elem.citations:
             identifier = elem.citations[0].id  # type:ignore
             if CROSSREF_PATTERN.match(identifier):
-                return self.create_ref(identifier)
+                return self.create_ref(identifier, get_output_format(doc))
 
         return None
 
-    def create_ref(self, identifier: str) -> list[Element]:
+    def create_ref(self, identifier: str, output_format: str) -> list[Element]:
+        if output_format == "markdown":
+            return self.create_ref_markdown(identifier)
+
+        return self.create_ref_latex(identifier)
+
+    def create_ref_markdown(self, identifier: str) -> list[Element]:
+        return [Str(identifier)]
+
+    def create_ref_latex(self, identifier: str) -> list[Element]:
         if identifier.endswith("_"):
             identifier = identifier[:-1]
             bare = True

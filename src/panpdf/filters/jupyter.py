@@ -13,7 +13,12 @@ from panflute import Doc, Image, Plain, RawInline
 from panpdf.filters.filter import Filter
 from panpdf.formatters import convert_pgf_text
 from panpdf.stores import Store
-from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
+from panpdf.tools import (
+    add_metadata_list,
+    convert_doc,
+    create_temp_file,
+    get_output_format,
+)
 
 PGF_PREFIX = "%% Creator: Matplotlib"
 
@@ -42,6 +47,11 @@ class Jupyter(Filter):
             raise ValueError(msg) from None
 
         if not data:
+            return image
+
+        if get_output_format(doc) != "latex":
+            if url := create_image_file_image(data):
+                image.url = url
             return image
 
         if not (url_or_text := create_image_file(data, standalone=self.standalone)):
@@ -73,7 +83,7 @@ class Jupyter(Filter):
         return image
 
     def finalize(self, doc: Doc) -> None:
-        if not self.pgf:
+        if not self.pgf or get_output_format(doc) != "latex":
             return
 
         path = create_temp_file(f"\\usepackage{{pgf}}{self.preamble}", suffix=".tex")
@@ -113,6 +123,10 @@ def create_image_file(data: dict[str, str], *, standalone: bool = False) -> str 
     if text_pgf:
         return text_pgf
 
+    return create_image_file_image(data)
+
+
+def create_image_file_image(data: dict[str, str]) -> str | None:
     for mime, text in data.items():
         if mime.startswith("image/"):
             ext = mime.split("/")[1]

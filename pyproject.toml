@@ -59,7 +59,7 @@ dev = [
 addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf"]
 
 [tool.coverage.report]
-exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError"]
+exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError", "no cov"]
 skip_covered = true
 
 [tool.ruff]
@@ -69,7 +69,16 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["ALL"]
 unfixable = ["F401"]
-ignore = ["ARG002", "D", "PGH003"]
+ignore = [
+  "ANN401",
+  "ARG002",
+  "C901",
+  "D",
+  "PGH003",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [

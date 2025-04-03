@@ -266,3 +266,11 @@ def test_convert_table_without_caption():
     tex = pf.convert_text(table, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
     assert "\\caption" not in tex
+
+
+def test_convert_figure():
+    text = "![caption](a.png){#fig:id .cls k=v}"
+    figure = _prepare(text)
+    assert isinstance(figure, Figure)
+    figure = Attribute().action(figure, None)
+    assert isinstance(figure, Figure)
