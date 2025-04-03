@@ -7,6 +7,9 @@ repo_name: daizutabi/panpdf
 edit_uri: edit/main/docs/
 theme:
   name: material
+  font:
+    text: Fira Sans
+    code: Fira Code
   icon:
     repo: fontawesome/brands/github
   palette:
@@ -26,8 +29,9 @@ theme:
     - content.tooltips
     - content.code.annotate
     - navigation.expand
+    - navigation.footer
     - navigation.indexes
-    - navigation.sections
+    # - navigation.sections
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.top
