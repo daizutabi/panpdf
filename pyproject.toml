@@ -59,7 +59,7 @@ dev = [
 addopts = ["--cov-report=lcov:lcov.info", "--cov=panpdf"]
 
 [tool.coverage.report]
-exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError"]
+exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError", "no cov"]
 skip_covered = true
 
 [tool.ruff]

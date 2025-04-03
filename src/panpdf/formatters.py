@@ -133,7 +133,7 @@ try:
         """Used to render elements to PGF if requested in the display formats."""
         return image_display(element, max_frames, fmt="pgf")
 
-except ModuleNotFoundError:  # pragma: no cover
+except ModuleNotFoundError:  # no cov
     pgf_display = None  # type: ignore
 
 
