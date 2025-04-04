@@ -85,10 +85,19 @@ PREAMBLE_PATTERN = re.compile(
     re.MULTILINE | re.DOTALL,
 )
 
+PREAMBLE = r"""
+\def\mathdefault#1{#1}
+\everymath=\expandafter{\the\everymath\displaystyle}
+\makeatletter\@ifpackageloaded{underscore}{}{\usepackage[strings]{underscore}}\makeatother
+"""
+
 
 def get_preamble(text: str) -> str:
     if m := PREAMBLE_PATTERN.search(text):
-        return re.sub(r"^%%\s+", "", m.group(1), flags=re.MULTILINE)
+        preamble = re.sub(r"^%%\s+", "", m.group(1), flags=re.MULTILINE)
+        if "scrextend.sty" in preamble:  # for matplotlib 3.10.0
+            return PREAMBLE
+        return preamble
 
     return ""
 
@@ -171,7 +180,7 @@ def create_defaults_for_standalone(
     preamble: str = "",
 ) -> Path:
     if path:
-        with path.open(encoding="utf8") as f:
+        with path.open("r", encoding="utf8") as f:
             defaults: dict[str, Any] = yaml.safe_load(f)
     else:
         path = Path()
