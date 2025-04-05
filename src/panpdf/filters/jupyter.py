@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
-import nbstore.pgf
 import yaml
 from panflute import Doc, Image, Plain, RawInline
 
@@ -53,7 +52,7 @@ class Jupyter(Filter):
             image.url = url_or_text
             return image
 
-        text = nbstore.pgf.convert(url_or_text)
+        text = url_or_text
 
         if not self.preamble:
             self.preamble = get_preamble(text)
