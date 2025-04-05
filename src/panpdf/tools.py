@@ -7,10 +7,8 @@ import io
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from asyncio.subprocess import PIPE
-from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
