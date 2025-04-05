@@ -1,19 +1,21 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import ClassVar
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, ClassVar
 
 import panflute as pf
 from panflute import CodeBlock, Doc, Element, Figure, Image, Plain
 
 from panpdf.filters.filter import Filter
-from panpdf.stores import Store
+
+if TYPE_CHECKING:
+    from nbstore import Store
 
 
 @dataclass(repr=False)
 class Cell(Filter):
     types: ClassVar[type[Figure]] = Figure
-    store: Store = field(default_factory=Store)
+    store: Store
 
     def action(self, figure: Figure, doc: Doc) -> Figure | list[Element]:  # noqa: C901, PLR0911
         if not figure.content:

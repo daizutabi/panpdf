@@ -11,7 +11,7 @@ from panflute import Doc, Image, Str
 from panpdf.filters.jupyter import Jupyter
 
 if TYPE_CHECKING:
-    from panpdf.stores import Store
+    from nbstore import Store
 
 
 def test_create_image_file_base64(store: Store):
@@ -127,7 +127,7 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
         assert "text/plain" in data
         assert "application/pdf" not in data
 
-    jupyter = Jupyter(defaults, standalone=standalone, store=store)
+    jupyter = Jupyter(store, defaults, standalone=standalone)
 
     doc = Doc()
     image = image_factory(f"{fmt}.ipynb", f"fig:{fmt}")
@@ -166,31 +166,31 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
         assert "application/pdf" not in data
 
 
-def test_jupyter_action():
+def test_jupyter_action(store: Store):
     from panpdf.filters.jupyter import Jupyter
 
     doc = Doc()
-    jupyter = Jupyter()
+    jupyter = Jupyter(store)
     image = Image(Str("a"), url="a.png")
     assert jupyter.action(image, doc) is image
 
 
-def test_jupyter_action_error():
+def test_jupyter_action_error(store: Store):
     from panpdf.filters.jupyter import Jupyter
 
     doc = Doc()
-    jupyter = Jupyter()
+    jupyter = Jupyter(store)
     image = Image(Str("a"), url="a.ipynb", identifier="a")
     with pytest.raises(ValueError, match=r"\[panpdf\] Unknown"):
         jupyter.action(image, doc)
 
 
 @pytest.mark.parametrize("pgf", [True, False])
-def test_jupyter_finalize(pgf):
+def test_jupyter_finalize(store: Store, pgf):
     from panpdf.filters.jupyter import Jupyter
 
     doc = Doc()
-    jupyter = Jupyter()
+    jupyter = Jupyter(store)
     jupyter.pgf = pgf
     jupyter.finalize(doc)
     x = doc.metadata.get("include-in-header")

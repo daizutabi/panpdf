@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from panflute import CodeBlock, Doc, Figure, Image, Plain, Str
 
 if TYPE_CHECKING:
-    from panpdf.stores import Store
+    from nbstore import Store
 
 
 def test_action_none(store: Store):
