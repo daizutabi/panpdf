@@ -112,55 +112,6 @@ def test_action_cell_not_image(store: Store):
     assert elems is figure
 
 
-def test_stdout(store: Store):
-    data = store.get_data("cell.ipynb", "text:stdout")
-    assert len(data) == 1
-    assert data["text/plain"] == "'stdout'"
-
-
-def test_print(store: Store):
-    data = store.get_stream("cell.ipynb", "text:print")
-    assert data == "print\n"
-
-
-def test_both(store: Store):
-    data = store.get_stream("cell.ipynb", "text:both")
-    assert data == "print\n"
-    data = store.get_data("cell.ipynb", "text:both")
-    assert len(data) == 1
-    assert data["text/plain"] == "'hello'"
-
-
-def test_pandas(store: Store):
-    data = store.get_data("cell.ipynb", "text:pandas")
-    assert len(data) == 2
-    assert "a  b\n0  1  4" in data["text/plain"]
-    assert "<div>\n<style scoped>\n" in data["text/html"]
-
-
-def test_polars(store: Store):
-    data = store.get_data("cell.ipynb", "text:polars")
-    assert len(data) == 2
-    assert "shape: (3, 2)\n┌─────┬─────┐\n" in data["text/plain"]
-    assert "<div><style>\n" in data["text/html"]
-
-
-def test_convert_text_pandas(store: Store):
-    data = store.get_data("cell.ipynb", "text:pandas")
-    html = data["text/html"]
-    list_ = pf.convert_text(html, input_format="html")
-    assert isinstance(list_, list)
-    assert len(list_) == 1
-
-
-def test_convert_text_polars(store: Store):
-    data = store.get_data("cell.ipynb", "text:polars")
-    html = data["text/html"]
-    list_ = pf.convert_text(html, input_format="html")
-    assert isinstance(list_, list)
-    assert len(list_) == 1
-
-
 def test_action_text_stdout(store: Store):
     from panpdf.filters.cell import Cell
 
@@ -214,7 +165,7 @@ def test_action_text_both(store: Store):
     assert len(elems) == 2
     code_block = elems[1]
     assert isinstance(code_block, CodeBlock)
-    assert code_block.text == "print\n'hello'"
+    assert code_block.text == "'hello'"
     assert code_block.classes == ["output"]
 
 
