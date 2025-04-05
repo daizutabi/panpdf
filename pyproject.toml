@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "panpdf"
-version = "0.5.1"
+version = "0.6.0"
 description = "Transform Jupyter Notebooks and Markdown into publication-quality PDF documents with high-fidelity visualizations."
 readme = "README.md"
 license = { file = "LICENSE" }
