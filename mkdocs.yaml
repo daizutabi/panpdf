@@ -1,6 +1,6 @@
 site_name: panpdf
 site_url: https://daizutabi.github.io/panpdf/
-site_description: PDF documentation generator
+site_description: Transform Jupyter Notebooks and Markdown into publication-quality PDF documents with high-fidelity visualizations.
 site_author: daizutabi
 repo_url: https://github.com/daizutabi/panpdf/
 repo_name: daizutabi/panpdf
@@ -8,7 +8,7 @@ edit_uri: edit/main/docs/
 theme:
   name: material
   icon:
-      repo: fontawesome/brands/github
+    repo: fontawesome/brands/github
   palette:
     - scheme: default
       primary: indigo
@@ -41,6 +41,5 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-  - mkdocs-typer
 nav:
   - index.md
