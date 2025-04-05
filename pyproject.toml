@@ -11,16 +11,36 @@ license = { file = "LICENSE" }
 authors = [{ name = "daizutabi", email = "daizutabi@gmail.com" }]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Framework :: MkDocs",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Education",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Documentation",
+  "Topic :: Scientific/Engineering",
   "Topic :: Software Development :: Documentation",
+  "Topic :: Text Processing :: Markup",
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: MIT License",
 ]
 requires-python = ">=3.10"
+keywords = [
+  "jupyter",
+  "notebook",
+  "pdf",
+  "pandoc",
+  "markdown",
+  "latex",
+  "pgf",
+  "publication",
+  "academic",
+  "visualization",
+  "scientific",
+  "research",
+  "document",
+]
 dependencies = [
   "aiohttp>=3",
   "nbstore>=0.1",
