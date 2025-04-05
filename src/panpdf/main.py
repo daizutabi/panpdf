@@ -151,6 +151,8 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     if version:
         show_version(pandoc_path)
 
+    from nbstore import Store
+
     from panpdf.filters.attribute import Attribute
     from panpdf.filters.cell import Cell
     from panpdf.filters.crossref import Crossref
@@ -159,7 +161,6 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     from panpdf.filters.snippet import Snippet
     from panpdf.filters.verbatim import Verbatim
     from panpdf.filters.zotero import Zotero
-    from panpdf.stores import Store
     from panpdf.tools import (
         convert_doc,
         get_defaults_file_path,
@@ -195,9 +196,9 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     filters: list[Filter] = [Attribute(), Snippet()]
 
     if notebooks_dir:
-        store = Store([notebooks_dir.absolute()])
+        store = Store(notebooks_dir.absolute())
         cell = Cell(store)
-        jupyter = Jupyter(defaults_path, standalone_figure, pandoc_path, store)
+        jupyter = Jupyter(store, defaults_path, standalone_figure, pandoc_path)
         filters.extend([cell, jupyter])
 
     filters.extend([Verbatim(), Layout(), Crossref()])

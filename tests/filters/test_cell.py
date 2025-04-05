@@ -7,7 +7,7 @@ import pytest
 from panflute import CodeBlock, Doc, Figure, Plain
 
 if TYPE_CHECKING:
-    from panpdf.stores import Store
+    from nbstore import Store
 
 
 def test_source(store: Store):

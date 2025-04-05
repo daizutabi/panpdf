@@ -4,6 +4,7 @@ from pathlib import Path
 
 import panflute as pf
 import pytest
+from nbstore import Store
 from panflute import Figure, Image
 
 
@@ -29,10 +30,8 @@ def notebook_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
-def store(notebook_dir):
-    from panpdf.stores import Store
-
-    return Store([notebook_dir])
+def store(notebook_dir: Path):
+    return Store(notebook_dir)
 
 
 @pytest.fixture(scope="session")

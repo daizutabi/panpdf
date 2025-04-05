@@ -306,14 +306,3 @@ def test_convert_header():
 
     assert "\\usepackage{fancyhdr}" in Path(p).read_text()
     assert "\\rhead{\\RIGHT}" in Path(p).read_text()
-
-
-def test_add_fonts():
-    from matplotlib import font_manager
-
-    from panpdf.tools import add_fonts
-
-    add_fonts("haranoaji")
-
-    assert "Harano Aji Gothic" in font_manager.get_font_names()
-    assert "Harano Aji Mincho" in font_manager.get_font_names()

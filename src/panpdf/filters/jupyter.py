@@ -5,15 +5,17 @@ import io
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
+import nbstore.pgf
 import yaml
 from panflute import Doc, Image, Plain, RawInline
 
 from panpdf.filters.filter import Filter
-from panpdf.formatters import convert_pgf_text
-from panpdf.stores import Store
 from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
+
+if TYPE_CHECKING:
+    from nbstore import Store
 
 PGF_PREFIX = "%% Creator: Matplotlib"
 
@@ -21,10 +23,10 @@ PGF_PREFIX = "%% Creator: Matplotlib"
 @dataclass(repr=False)
 class Jupyter(Filter):
     types: ClassVar[type[Image]] = Image
+    store: Store
     defaults: Path | None = None
     standalone: bool = False
     pandoc_path: Path | None = None
-    store: Store = field(default_factory=Store)
     pgf: bool = field(default=False, init=False)
     preamble: str = field(default="", init=False)
 
@@ -51,7 +53,7 @@ class Jupyter(Filter):
             image.url = url_or_text
             return image
 
-        text = convert_pgf_text(url_or_text)
+        text = nbstore.pgf.convert(url_or_text)
 
         if not self.preamble:
             self.preamble = get_preamble(text)
