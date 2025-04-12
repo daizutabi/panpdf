@@ -11,12 +11,14 @@ if TYPE_CHECKING:
 
 
 def test_source(store: Store):
-    source = store.get_source("cell.ipynb", "fig:source")
+    nb = store.get_notebook("cell.ipynb")
+    source = nb.get_source("fig:source")
     assert source.startswith("fig, ax = plt.subplots")
 
 
 def test_language(store: Store):
-    lang = store.get_language("cell.ipynb")
+    nb = store.get_notebook("cell.ipynb")
+    lang = nb.get_language()
     assert lang == "python"
 
 
