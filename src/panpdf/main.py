@@ -63,13 +63,13 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             hidden=True,
         ),
     ] = None,
-    notebooks_dir: Annotated[
+    notebook_dir: Annotated[
         Path | None,
         Option(
-            "--notebooks-dir",
+            "--notebook-dir",
             "-n",
             metavar="DIRECTORY",
-            help="Specify the notebooks directory to search for figures.",
+            help="Specify the notebook directory to search for figures.",
             show_default=False,
         ),
     ] = None,
@@ -195,8 +195,8 @@ def cli(  # noqa: C901, PLR0912, PLR0913
 
     filters: list[Filter] = [Attribute(), Snippet()]
 
-    if notebooks_dir:
-        store = Store(notebooks_dir.absolute())
+    if notebook_dir:
+        store = Store(notebook_dir.absolute())
         cell = Cell(store)
         jupyter = Jupyter(store, defaults_path, standalone_figure, pandoc_path)
         filters.extend([cell, jupyter])
