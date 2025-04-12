@@ -65,12 +65,13 @@ class Cell(Filter):
 
     def get_code_block(self, url: str, identifier: str) -> CodeBlock:
         try:
-            source = self.store.get_source(url, identifier)
+            nb = self.store.get_notebook(url)
+            source = nb.get_source(identifier)
         except ValueError:
             msg = f"[panpdf] Unknown url or id: url='{url}' id='{identifier}'"
             raise ValueError(msg) from None
 
-        lang = self.store.get_language(url)
+        lang = nb.get_language()
         return CodeBlock(source.strip(), classes=[lang])
 
     def get_output(
@@ -81,7 +82,8 @@ class Cell(Filter):
         html: bool = False,
     ) -> list[Element] | None:
         try:
-            data = self.store.get_data(url, identifier)
+            nb = self.store.get_notebook(url)
+            data = nb.get_data(identifier)
         except ValueError:
             return None
 

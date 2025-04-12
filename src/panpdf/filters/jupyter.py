@@ -37,7 +37,8 @@ class Jupyter(Filter):
             return image
 
         try:
-            data = self.store.get_data(url, identifier)
+            nb = self.store.get_notebook(url)
+            data = nb.get_data(identifier)
         except ValueError:
             msg = f"[panpdf] Unknown url or id: url='{url}' id='{identifier}'"
             raise ValueError(msg) from None
@@ -69,8 +70,8 @@ class Jupyter(Filter):
             pandoc_path=self.pandoc_path,
             description=f"Creating an image for {url}#{identifier}",
         )
-        self.store.add_data(url, identifier, "application/pdf", text)
-        self.store.save_notebook(url)
+        nb.add_data(identifier, "application/pdf", text)
+        nb.write()
         return image
 
     def finalize(self, doc: Doc) -> None:
