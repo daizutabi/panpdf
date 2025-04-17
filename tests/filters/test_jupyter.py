@@ -128,8 +128,11 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
     if fmt == "pgf":
         nb = store.read("pgf.ipynb")
         data = nbstore.notebook.get_data(nb, "fig:pgf")
+        if "application/pdf" in data:
+            del data["application/pdf"]
         assert "image/png" in data
         assert "text/plain" in data
+        assert "application/pdf" not in data
 
     jupyter = Jupyter(store, defaults, standalone=standalone)
 
