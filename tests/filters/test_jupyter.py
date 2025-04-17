@@ -4,6 +4,7 @@ import platform
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import nbstore.notebook
 import pytest
 import yaml
 from panflute import Doc, Image, Str
@@ -17,8 +18,8 @@ if TYPE_CHECKING:
 def test_create_image_file_base64(store: Store):
     from panpdf.filters.jupyter import create_image_file_base64
 
-    nb = store.get_notebook("png.ipynb")
-    data = nb.get_data("fig:png")
+    nb = store.read("png.ipynb")
+    data = nbstore.notebook.get_data(nb, "fig:png")
     text = data["image/png"]
     file = create_image_file_base64(text, ".png")
     path = Path(file)
@@ -29,8 +30,8 @@ def test_create_image_file_base64(store: Store):
 def test_create_image_file_svg(store: Store):
     from panpdf.filters.jupyter import create_image_file_svg
 
-    nb = store.get_notebook("svg.ipynb")
-    data = nb.get_data("fig:svg")
+    nb = store.read("svg.ipynb")
+    data = nbstore.notebook.get_data(nb, "fig:svg")
     xml = data["image/svg+xml"]
     try:
         url, text = create_image_file_svg(xml)
@@ -90,8 +91,8 @@ def test_create_defaults_for_standalone_none():
 def test_get_preamble(store: Store):
     from panpdf.filters.jupyter import get_preamble
 
-    nb = store.get_notebook("pgf.ipynb")
-    data = nb.get_data("fig:pgf")
+    nb = store.read("pgf.ipynb")
+    data = nbstore.notebook.get_data(nb, "fig:pgf")
     text = data["text/plain"]
     preamble = get_preamble(text)
     assert r"\def\mathdefault#1{#1}" in preamble
@@ -109,8 +110,8 @@ def test_get_preamble_none():
 def test_create_image_file_pgf(store: Store, defaults, use_defaults):
     from panpdf.filters.jupyter import create_image_file_pgf, get_preamble
 
-    nb = store.get_notebook("pgf.ipynb")
-    data = nb.get_data("fig:pgf")
+    nb = store.read("pgf.ipynb")
+    data = nbstore.notebook.get_data(nb, "fig:pgf")
     text = data["text/plain"]
     defaults = defaults if use_defaults else None
     preamble = get_preamble(text)
@@ -125,12 +126,10 @@ def test_create_image_file_pgf(store: Store, defaults, use_defaults):
 @pytest.mark.parametrize("standalone", [False, True])
 def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
     if fmt == "pgf":
-        nb = store.get_notebook("pgf.ipynb")
-        nb.delete_data("fig:pgf", "application/pdf")
-        data = nb.get_data("fig:pgf")
+        nb = store.read("pgf.ipynb")
+        data = nbstore.notebook.get_data(nb, "fig:pgf")
         assert "image/png" in data
         assert "text/plain" in data
-        assert "application/pdf" not in data
 
     jupyter = Jupyter(store, defaults, standalone=standalone)
 
@@ -155,20 +154,14 @@ def test_jupyter(store: Store, image_factory, defaults, fmt, standalone):
         assert Path(image.url).stat().st_size
 
     if fmt == "pgf":
-        nb = store.get_notebook("pgf.ipynb")
-        data = nb.get_data("fig:pgf")
+        nb = store.read("pgf.ipynb")
+        data = nbstore.notebook.get_data(nb, "fig:pgf")
         assert "image/png" in data
         assert "text/plain" in data
         if standalone:
             assert "application/pdf" in data
         else:
             assert "application/pdf" not in data
-
-        nb.delete_data("fig:pgf", "application/pdf")
-        data = nb.get_data("fig:pgf")
-        assert "image/png" in data
-        assert "text/plain" in data
-        assert "application/pdf" not in data
 
 
 def test_jupyter_action(store: Store):

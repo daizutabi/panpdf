@@ -43,7 +43,7 @@ keywords = [
 ]
 dependencies = [
   "aiohttp>=3",
-  "nbstore>=0.3.1",
+  "nbstore>=0.4.1",
   "panflute >= 2.3.1",
   "pyyaml>=6",
   "pyzotero>=1.6",

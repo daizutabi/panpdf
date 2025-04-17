@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
+import nbstore.notebook
 import yaml
 from panflute import Doc, Image, Plain, RawInline
 
@@ -37,8 +38,8 @@ class Jupyter(Filter):
             return image
 
         try:
-            nb = self.store.get_notebook(url)
-            data = nb.get_data(identifier)
+            nb = self.store.read(url)
+            data = nbstore.notebook.get_data(nb, identifier)
         except ValueError:
             msg = f"[panpdf] Unknown url or id: url='{url}' id='{identifier}'"
             raise ValueError(msg) from None
@@ -70,8 +71,8 @@ class Jupyter(Filter):
             pandoc_path=self.pandoc_path,
             description=f"Creating an image for {url}#{identifier}",
         )
-        nb.add_data(identifier, "application/pdf", text)
-        nb.write()
+        nbstore.notebook.add_data(nb, identifier, "application/pdf", text)
+        self.store.write(url, nb)
         return image
 
     def finalize(self, doc: Doc) -> None:
