@@ -36,14 +36,19 @@ def cli(  # noqa: C901, PLR0912, PLR0913
     files: Annotated[
         list[Path] | None,
         Argument(
-            help="Input files or directories.",
+            help="Markdown files or directories to process.",
             show_default=False,
         ),
     ] = None,
     *,
     output_format: Annotated[
         OutputFormat,
-        Option("--to", "-t", help="Output format.", show_default="auto"),  # type: ignore
+        Option(
+            "--to",
+            "-t",
+            help="Specify output format (latex or pdf).",
+            show_default="auto",
+        ),  # type: ignore
     ] = OutputFormat.auto,
     output: Annotated[
         Path | None,
@@ -51,7 +56,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--output",
             "-o",
             metavar="FILE",
-            help="Write output to FILE instead of stdout.",
+            help="Write output to FILE. Use .tex or .pdf extension to control format.",
             show_default=False,
         ),
     ] = None,
@@ -69,7 +74,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--notebook-dir",
             "-n",
             metavar="DIRECTORY",
-            help="Specify the notebook directory to search for figures.",
+            help="Path to Jupyter notebooks containing figures to embed.",
             show_default=False,
         ),
     ] = None,
@@ -79,7 +84,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
             "--defaults",
             "-d",
             metavar="FILE",
-            help="Specify a set of default option settings.",
+            help="Path to YAML file with pandoc default settings.",
             show_default=False,
         ),
     ] = None,
@@ -88,7 +93,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         Option(
             "--standalone",
             "-s",
-            help="Produce output with an appropriate header and footer.",
+            help="Generate complete document with header and footer.",
         ),
     ] = False,
     standalone_figure: Annotated[
@@ -96,7 +101,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         Option(
             "--standalone-figure",
             "-f",
-            help="Produce output with standalone figures.",
+            help="Create self-contained figures with required packages.",
         ),
     ] = False,
     figure_only: Annotated[
@@ -104,7 +109,7 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         Option(
             "--figure-only",
             "-F",
-            help="Produce standalone figures and exit.",
+            help="Process figures only and exit.",
             hidden=True,
         ),
     ] = False,
@@ -113,14 +118,14 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         Option(
             "--citeproc",
             "-C",
-            help="Process the citations in the file.",
+            help="Process citations using Zotero integration.",
         ),
     ] = False,
     pandoc_path: Annotated[
         Path | None,
         Option(
             metavar="FILE",
-            help="If specified, use the Pandoc at this path.",
+            help="Path to custom pandoc executable.",
             show_default=False,
         ),
     ] = None,
@@ -128,25 +133,27 @@ def cli(  # noqa: C901, PLR0912, PLR0913
         bool,
         Option(
             "--verbose",
-            help="Give verbose debugging output.",
+            help="Display detailed processing information.",
         ),
     ] = False,
     quiet: Annotated[
         bool,
-        Option("--quiet", help="Suppress warning messages."),
+        Option("--quiet", help="Hide warning messages during processing."),
     ] = False,
     version: Annotated[
         bool,
         Option(
             "--version",
             "-v",
-            help="Show version and exit.",
+            help="Display version information and exit.",
         ),
     ] = False,
 ) -> None:
-    """Optionally, you can add extra pandoc options after --.
+    """Convert Markdown to PDF with embedded figures from Jupyter notebooks.
 
-    Example usage: panpdf -o dest.pdf src.md -- --pdf-engine lualatex
+    Advanced usage: Pass additional pandoc options after a double dash (--).
+
+    Example: panpdf -o paper.pdf source.md -n notebooks -C -- --pdf-engine=xelatex
     """
     if version:
         show_version(pandoc_path)

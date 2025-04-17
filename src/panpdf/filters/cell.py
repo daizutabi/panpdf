@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
 
+import nbstore.notebook
 import panflute as pf
 from panflute import CodeBlock, Doc, Element, Figure, Image, Plain
 
@@ -65,13 +66,13 @@ class Cell(Filter):
 
     def get_code_block(self, url: str, identifier: str) -> CodeBlock:
         try:
-            nb = self.store.get_notebook(url)
-            source = nb.get_source(identifier)
+            nb = self.store.read(url)
+            source = nbstore.notebook.get_source(nb, identifier)
         except ValueError:
             msg = f"[panpdf] Unknown url or id: url='{url}' id='{identifier}'"
             raise ValueError(msg) from None
 
-        lang = nb.get_language()
+        lang = nbstore.notebook.get_language(nb)
         return CodeBlock(source.strip(), classes=[lang])
 
     def get_output(
@@ -82,8 +83,8 @@ class Cell(Filter):
         html: bool = False,
     ) -> list[Element] | None:
         try:
-            nb = self.store.get_notebook(url)
-            data = nb.get_data(identifier)
+            nb = self.store.read(url)
+            data = nbstore.notebook.get_data(nb, identifier)
         except ValueError:
             return None
 

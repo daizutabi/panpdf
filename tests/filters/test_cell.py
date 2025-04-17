@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import nbstore.notebook
 import panflute as pf
 import pytest
 from panflute import CodeBlock, Doc, Figure, Plain
@@ -11,14 +12,14 @@ if TYPE_CHECKING:
 
 
 def test_source(store: Store):
-    nb = store.get_notebook("cell.ipynb")
-    source = nb.get_source("fig:source")
+    nb = store.read("cell.ipynb")
+    source = nbstore.notebook.get_source(nb, "fig:source")
     assert source.startswith("fig, ax = plt.subplots")
 
 
 def test_language(store: Store):
-    nb = store.get_notebook("cell.ipynb")
-    lang = nb.get_language()
+    nb = store.read("cell.ipynb")
+    lang = nbstore.notebook.get_language(nb)
     assert lang == "python"
 
 
