@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 import nbstore.notebook
 import yaml
-from panflute import Doc, Image, Plain, RawInline
+from panflute import Doc, Element, Image, Plain, RawInline
 
 from panpdf.filters.filter import Filter
 from panpdf.tools import add_metadata_list, convert_doc, create_temp_file
@@ -30,12 +30,16 @@ class Jupyter(Filter):
     pgf: bool = field(default=False, init=False)
     preamble: str = field(default="", init=False)
 
-    def action(self, image: Image, doc: Doc) -> Image:
+    def action(self, image: Image, doc: Doc) -> Image | list[Element]:  # noqa: PLR0911
         url = image.url
         identifier = image.identifier
 
         if not identifier or (url and not url.endswith(".ipynb")):
             return image
+
+        if url and identifier == ".":
+            self.store.url = url
+            return []
 
         try:
             nb = self.store.read(url)

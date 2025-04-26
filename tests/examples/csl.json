@@ -1,0 +1,66 @@
+[
+  {
+    "id": "panflute",
+    "type": "book",
+    "title": "sergiocorreia/panflute",
+    "abstract": "An Pythonic alternative to John MacFarlane's pandocfilters, with extra helper functions",
+    "URL": "https://github.com/sergiocorreia/panflute",
+    "author": [
+      {
+        "family": "Correia",
+        "given": "Sergio"
+      }
+    ],
+    "issued": {
+      "date-parts": [
+        [
+          2024,
+          3,
+          22
+        ]
+      ]
+    },
+    "accessed": {
+      "date-parts": [
+        [
+          2024,
+          3,
+          24
+        ]
+      ]
+    },
+    "original-date": "2016-03-30T02:07:47Z"
+  },
+  {
+    "id": "panpdf",
+    "type": "book",
+    "title": "daizutabi/panpdf",
+    "abstract": "PDF documentation generator あα",
+    "URL": "https://github.com/daizutabi/panpdf",
+    "author": [
+      {
+        "family": "Daizu",
+        "given": ""
+      }
+    ],
+    "issued": {
+      "date-parts": [
+        [
+          2024,
+          3,
+          19
+        ]
+      ]
+    },
+    "accessed": {
+      "date-parts": [
+        [
+          2024,
+          3,
+          23
+        ]
+      ]
+    },
+    "original-date": "2024-03-14T22:36:10Z"
+  }
+]

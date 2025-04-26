@@ -37,6 +37,10 @@ class Cell(Filter):
         if not identifier or (url and not url.endswith(".ipynb")):
             return figure
 
+        if url and identifier == ".":
+            self.store.url = url
+            return figure
+
         code_block = None
         if "source" in image.classes or "cell" in image.classes:
             code_block = self.get_code_block(url, identifier)
