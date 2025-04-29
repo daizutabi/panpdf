@@ -82,6 +82,7 @@ def test_create_figure_from_image(store, defaults, fmt):
 
         raise
 
+    assert isinstance(image, Image)
     fig = create_figure_from_image(image)
     tex = pf.convert_text(fig, input_format="panflute", output_format="latex")
     assert isinstance(tex, str)
